@@ -18,17 +18,17 @@ export function AboutPage() {
     <div className="about-page help-doc-page">
       <section className="help-hero">
         <div className="help-eyebrow">ABOUT THE APPLICATION</div>
-        <h1>About CFIHOS Explorer</h1>
-        <p className="help-lead">CFIHOS Explorer is a browser, validation, contract-authoring and AI-assisted workspace for the CFIHOS 2.0 reference model. It is designed to make the standard easier to navigate, understand, verify and apply to project information requirements.</p>
+        <h1>About RDL Explorer</h1>
+        <p className="help-lead">RDL Explorer is the multi-RDL platform that starts with the proven CFIHOS 2.0 Explorer experience. In this bootstrap release, CFIHOS remains the only active RDL source while the product boundary is prepared for future RDL packages, provenance, versioning and database-backed services.</p>
         <div className="about-flow" aria-label="Explorer workflow"><span>Explore</span><ArrowRight size={16} /><span>Understand</span><ArrowRight size={16} /><span>Validate</span><ArrowRight size={16} /><span>Build CIS</span><ArrowRight size={16} /><span>Ask AI</span></div>
       </section>
 
       <section className="pilot-notice" aria-labelledby="pilot-status-heading">
         <div><div className="help-eyebrow">PILOT STATUS</div><h2 id="pilot-status-heading">Built for controlled evaluation</h2></div>
         <div className="pilot-notice-copy">
-          <p>This deployment is a pilot of CFIHOS Explorer. It is intended for demonstration, evaluation and structured user feedback rather than production or contractual reliance.</p>
+          <p>This deployment is the RDL Explorer bootstrap pilot, using CFIHOS 2.0 as its initial reference RDL. It is intended for demonstration, evaluation and structured user feedback rather than production or contractual reliance.</p>
           <p>The application uses a reviewed CFIHOS 2.0 workbook snapshot committed with the application. CFIHOS identifiers and provenance are retained so users can trace results back to the reference data.</p>
-          <a href={`mailto:${PILOT_FEEDBACK_EMAIL}?subject=CFIHOS%20Explorer%20pilot%20feedback`}><Mail size={16} />Send pilot feedback</a>
+          <a href={`mailto:${PILOT_FEEDBACK_EMAIL}?subject=RDL%20Explorer%20pilot%20feedback`}><Mail size={16} />Send pilot feedback</a>
         </div>
       </section>
 

@@ -33,7 +33,7 @@ const navigation = [
   { label: "Intelligence", items: [{ label: "AI Assistant", to: "/assistant", icon: Sparkles }] },
   { label: "Contract", items: [{ label: "CIS Builder", to: "/cis", icon: ClipboardList }] },
   { label: "Quality", items: [{ label: "Validation", to: "/validation", icon: ShieldCheck }] },
-  { label: "Help", items: [{ label: "About CFIHOS Explorer", to: "/about", icon: Info }, { label: "User Guide", to: "/help", icon: CircleHelp }] },
+  { label: "Help", items: [{ label: "About RDL Explorer", to: "/about", icon: Info }, { label: "User Guide", to: "/help", icon: CircleHelp }] },
 ];
 
 export function AppShell() {
@@ -44,7 +44,7 @@ export function AppShell() {
       <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
         <div className="brand">
           <div className="brand-mark"><GitBranch size={20} strokeWidth={2.25} /></div>
-          <div><div className="brand-name">CFIHOS</div><div className="brand-subtitle">Explorer</div></div>
+          <div><div className="brand-name">RDL</div><div className="brand-subtitle">Explorer</div></div>
           <span className="pilot-badge">Pilot</span>
           <button className="sidebar-close" type="button" aria-label="Close navigation" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
         </div>
@@ -70,7 +70,7 @@ export function AppShell() {
         <div className="sidebar-footer">
           <div className="sidebar-footer-label">Pilot data source</div>
           <div className="sidebar-version">CFIHOS 2.0 reviewed snapshot</div>
-          <a className="pilot-feedback-link" href={`mailto:${PILOT_FEEDBACK_EMAIL}?subject=CFIHOS%20Explorer%20pilot%20feedback`}><Mail size={14} />Send pilot feedback</a>
+          <a className="pilot-feedback-link" href={`mailto:${PILOT_FEEDBACK_EMAIL}?subject=RDL%20Explorer%20pilot%20feedback`}><Mail size={14} />Send pilot feedback</a>
         </div>
       </aside>
 
@@ -82,7 +82,7 @@ export function AppShell() {
 
           <div className="global-search global-search-disabled" aria-label="Global search is planned for a future release">
             <Search size={18} />
-            <input type="search" placeholder="Global search coming soon" aria-label="Global CFIHOS search coming soon" disabled />
+            <input type="search" placeholder="Global search coming soon" aria-label="Global RDL search coming soon" disabled />
             <span className="coming-soon-label">Coming soon</span>
           </div>
 

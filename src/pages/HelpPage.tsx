@@ -12,7 +12,7 @@ export function HelpPage() {
     <div className="guide-page">
       <aside className="guide-toc"><div className="guide-toc-title"><CircleHelp size={17}/> User Guide</div>{sections.map(([id,label]) => <a key={id} href={`#${id}`}>{label}</a>)}</aside>
       <article className="guide-content">
-        <header className="guide-header"><div className="help-eyebrow">HOW TO USE THE APPLICATION</div><h1>CFIHOS Explorer User Guide</h1><p>Use this guide to understand the navigation, major capabilities, pilot limitations and recommended workflows in CFIHOS Explorer.</p></header>
+        <header className="guide-header"><div className="help-eyebrow">HOW TO USE THE APPLICATION</div><h1>RDL Explorer User Guide</h1><p>Use this guide to understand the navigation, major capabilities, pilot limitations and recommended workflows in RDL Explorer. CFIHOS 2.0 is the initial active RDL in this bootstrap release.</p></header>
 
         <GuideSection id="getting-started" title="Getting started"><p>The Explorer is organized around the CFIHOS reference model and the workflows built on top of it. A useful starting pattern is <strong>Explore → Understand → Validate → Build CIS → Ask AI</strong>.</p><div className="guide-callout"><strong>Tip</strong><span>If you are unsure where to begin, ask the <Link to="/assistant">AI Assistant</Link> what you want to accomplish. It can explain relevant Explorer capabilities and provide safe navigation actions.</span></div></GuideSection>
 
@@ -36,9 +36,9 @@ export function HelpPage() {
 
         <GuideSection id="workflows" title="Common workflows"><div className="workflow-list"><div><strong>Understand an asset class</strong><span>Search Tag/Equipment Classes → inspect properties and documents → follow standards/provenance.</span></div><div><strong>Review document expectations</strong><span>Open a class → review Required Documents → inspect Lifecycle Requirements for phase/status expectations.</span></div><div><strong>Create a project CIS</strong><span>Open CIS Builder → define scope → generate baseline → review → record overrides → save JSON → export CSV when required.</span></div><div><strong>Investigate a question</strong><span>Ask AI Assistant → read the answer → verify evidence cards → follow the suggested Explorer action.</span></div></div></GuideSection>
 
-        <GuideSection id="feedback" title="Pilot feedback"><p>Feedback from pilot users is part of the evaluation. Please include the page or workflow you were using, what you expected, what happened, and—where appropriate—the CFIHOS identifier involved. Do not include confidential project information, credentials or API keys in feedback emails.</p><a className="guide-feedback-link" href={`mailto:${PILOT_FEEDBACK_EMAIL}?subject=CFIHOS%20Explorer%20pilot%20feedback`}><Mail size={16}/>Email pilot feedback</a></GuideSection>
+        <GuideSection id="feedback" title="Pilot feedback"><p>Feedback from pilot users is part of the evaluation. Please include the page or workflow you were using, what you expected, what happened, and—where appropriate—the CFIHOS identifier involved. Do not include confidential project information, credentials or API keys in feedback emails.</p><a className="guide-feedback-link" href={`mailto:${PILOT_FEEDBACK_EMAIL}?subject=RDL%20Explorer%20pilot%20feedback`}><Mail size={16}/>Email pilot feedback</a></GuideSection>
 
-        <footer className="guide-footer"><span>Need context on the application itself?</span><Link to="/about">About CFIHOS Explorer <ArrowRight size={15}/></Link></footer>
+        <footer className="guide-footer"><span>Need context on the application itself?</span><Link to="/about">About RDL Explorer <ArrowRight size={15}/></Link></footer>
       </article>
     </div>
   );

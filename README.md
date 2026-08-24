@@ -1,12 +1,21 @@
-# CFIHOS Explorer
+# RDL Explorer®
 
-CFIHOS Explorer is a React + TypeScript application for browsing, validating and understanding the CFIHOS 2.0 CORE Reference Data Library, building project-specific Contract Information Specifications (CIS), and providing evidence-grounded AI assistance.
+RDL Explorer is a React + TypeScript platform for exploring, understanding and applying engineering Reference Data Libraries (RDLs). The product is bootstrapped from the proven CFIHOS Explorer codebase, with **CFIHOS 2.0 remaining the initial and only active RDL in RDL-001**.
 
-## Current status
+RDL-001 intentionally preserves the current CFIHOS functionality while establishing a separate product boundary and architecture for future multi-RDL, PostgreSQL, provenance, versioning, governance, API and DataGate capabilities.
 
-The application is currently in pre-production / UAT development.
+## Product boundary
 
-A detailed CFIHOS 2.0 CORE model-validation audit has been completed. The application now includes:
+- **CFIHOS Explorer** remains a lightweight, free/reference utility focused on CFIHOS.
+- **RDL Explorer®** is the evolving multi-RDL platform and future commercial product.
+- RDL Explorer starts from the CFIHOS Explorer UX and regression baseline rather than rewriting it.
+- CFIHOS is treated as the first reference RDL, not as the identity of the application.
+
+See [Product Boundary](docs/PRODUCT_BOUNDARY.md) for the full separation.
+
+## Current status — RDL-001
+
+This bootstrap release preserves the existing CFIHOS 2.0 capabilities:
 
 - Tag Class and Equipment Class exploration
 - document, property, discipline, source-standard and lifecycle views
@@ -16,12 +25,10 @@ A detailed CFIHOS 2.0 CORE model-validation audit has been completed. The applic
 - JSON save/open and downstream CSV export for CIS workflows
 - grounded CFIHOS AI Assistant with active-CIS context
 - About and User Guide pages
-- route-level code splitting and regression checks
+- route-level code splitting, progressive disclosure and regression checks
 - scheduled upstream CFIHOS change monitoring
 
-The completed audit baseline is tagged:
-
-`v0.9.0-audit-complete`
+No PostgreSQL runtime, additional RDL or multi-RDL selector is introduced in RDL-001.
 
 ## Technology
 
@@ -32,6 +39,7 @@ The completed audit baseline is tagged:
 - GitHub Actions
 - Vercel
 - OpenAI Responses API for optional server-side generative synthesis
+- PostgreSQL is the target normalized RDL repository from RDL-002 onward, not part of this bootstrap runtime.
 
 ## Quick start
 
@@ -44,51 +52,21 @@ npm run build
 npm run dev
 ```
 
-The browser consumes the committed `public/cfihos-workbook.json` snapshot. It does not parse the upstream XLSX at runtime.
-
-## Common maintenance commands
-
-```bash
-# Full deterministic regression suite
-npm run test:regression
-
-# Production build
-npm run build
-
-# Regenerate published validation evidence
-npm run validate:cfihos
-
-# Check whether the official CFIHOS workbook changed
-npm run check:cfihos-update
-
-# Regenerate the browser runtime workbook snapshot
-npx tsx scripts/generate-workbook-snapshot.ts
-```
-
-## AI configuration
-
-The Vercel server function uses:
-
-```text
-OPENAI_API_KEY
-OPENAI_MODEL
-```
-
-`OPENAI_API_KEY` must remain server-side and must never be committed to the repository. If GenAI is unavailable, the Assistant can continue to expose deterministic retrieved evidence.
+The browser currently consumes the committed `public/cfihos-workbook.json` snapshot. It does not parse the upstream XLSX at runtime. This remains the RDL-001 compatibility path.
 
 ## Documentation
 
-Operational and technical documentation is versioned with the application:
+- [Product Boundary](docs/PRODUCT_BOUNDARY.md)
+- [RDL Explorer Architecture](docs/ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Requirements](docs/REQUIREMENTS.md)
+- [Operations & Maintenance Guide](docs/OPERATIONS_AND_MAINTENANCE.md)
+- [Existing Technical Architecture](docs/TECHNICAL_ARCHITECTURE.md) — describes the inherited CFIHOS implementation and remains useful until superseded incrementally.
+- [Roles & Responsibilities](docs/ROLES_AND_RESPONSIBILITIES.md)
 
-- [Operations & Maintenance Guide](docs/OPERATIONS_AND_MAINTENANCE.md) — installation, configuration, deployment, CFIHOS refresh, testing, rollback and troubleshooting.
-- [Technical Architecture](docs/TECHNICAL_ARCHITECTURE.md) — runtime data architecture, validation, CIS, AI, deployment and key design decisions.
-- [Roles & Responsibilities](docs/ROLES_AND_RESPONSIBILITIES.md) — ownership model and RACI for operating and maintaining the Explorer.
-
-For end-user navigation and feature guidance, use the in-application **User Guide** and **About CFIHOS Explorer** pages.
+For end-user navigation and feature guidance, use the in-application **RDL Explorer User Guide** and **About RDL Explorer** pages.
 
 ## Release workflow
-
-Normal changes follow:
 
 ```text
 feature/fix branch
@@ -97,16 +75,16 @@ feature/fix branch
   -> automated checks + Vercel Preview
   -> review/acceptance
   -> squash merge to main
-  -> Vercel Production deployment
 ```
 
-Upstream CFIHOS changes are detected by the scheduled **CFIHOS Upstream Monitor**. Detection does not automatically modify or deploy reference data; refreshes require human review.
+## Architecture guardrails
 
-## Important design constraints
-
-- Do not reintroduce XLSX parsing into browser or API runtime code.
-- Do not expose the OpenAI API key to browser code.
-- Do not mutate the locked CFIHOS baseline to represent contract overrides.
-- Keep AI synthesis grounded in retrieved evidence and explicit CIS context.
-- Review upstream CFIHOS changes before regenerating and releasing snapshots.
-
+- Preserve authoritative RDL source packages separately from PostgreSQL.
+- PostgreSQL will be a normalized operational repository, not the standards authority.
+- Every normalized entity must eventually retain source, release, native identifier, entity type and provenance.
+- Do not assume a native identifier is globally unique across RDLs or entity domains.
+- DataGate must consume immutable packages or APIs; it must not depend on RDL Explorer internal SQL tables.
+- Industry, Company, Asset and Project RDL layers must remain explicit and provenance-aware.
+- Do not mutate authoritative baselines to represent local or contractual overrides.
+- Keep AI synthesis grounded in retrieved evidence and explicit context.
+- Keep the CFIHOS compatibility/regression path available while the generic architecture is introduced.
