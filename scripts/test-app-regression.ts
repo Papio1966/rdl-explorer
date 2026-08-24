@@ -19,6 +19,13 @@ const dataDictionary = read("src/pages/DataDictionaryPage.tsx");
 const sourceStandards = read("src/pages/SourceStandardsPage.tsx");
 const disciplines = read("src/pages/DisciplinesPage.tsx");
 
+const productBoundary = read("docs/PRODUCT_BOUNDARY.md");
+const architecture = read("docs/ARCHITECTURE.md");
+const roadmap = read("docs/ROADMAP.md");
+const requirements = read("docs/REQUIREMENTS.md");
+const indexHtml = read("index.html");
+const packageJson = read("package.json");
+
 const routes = [
   "/classes/tag",
   "/classes/equipment",
@@ -48,7 +55,7 @@ for (const label of [
   "AI Assistant",
   "CIS Builder",
   "Validation",
-  "About CFIHOS Explorer",
+  "About RDL Explorer",
   "User Guide",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
@@ -66,6 +73,15 @@ assert.ok(assistantApi.includes("OPENAI_API_KEY"), "Assistant API key must remai
 assert.ok(assistantApi.includes("OPENAI_MODEL"), "Assistant model configuration is missing");
 assert.ok(assistantApi.includes("store: false"), "OpenAI request must continue to disable response storage");
 assert.ok(assistantApi.includes("method") && assistantApi.includes("POST"), "Assistant endpoint must validate POST requests");
+
+
+assert.ok(shell.includes('brand-name">RDL<'), "Application shell must identify the product as RDL Explorer");
+assert.ok(indexHtml.includes("<title>RDL Explorer</title>"), "Browser title must identify RDL Explorer");
+assert.ok(packageJson.includes('"name": "rdl-explorer"'), "Package identity must be rdl-explorer");
+assert.ok(productBoundary.includes("CFIHOS Explorer") && productBoundary.includes("RDL Explorer"), "Product boundary must document the separation from CFIHOS Explorer");
+assert.ok(architecture.includes("PostgreSQL") && architecture.includes("DataGate"), "Architecture must document the PostgreSQL target and DataGate boundary");
+assert.ok(roadmap.includes("RDL-002") && roadmap.includes("RDL-008"), "Roadmap must capture the staged RDL platform programme");
+assert.ok(requirements.includes("RDL-MODEL-001") && requirements.includes("RDL-DG-001"), "Requirements must capture RDL identity and DataGate integration constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 reviewed snapshot"), "Pilot data-source provenance is missing from the shell");
@@ -115,6 +131,7 @@ console.log(`PASS routes: ${routes.length} critical application routes registere
 console.log("PASS navigation: critical Explorer capabilities remain discoverable.");
 console.log("PASS performance contract: route-level lazy loading and accessible fallback are present.");
 console.log("PASS CIS/Assistant contract: persistence, active CIS context and server-side AI boundary are present.");
+console.log("PASS RDL-001 bootstrap: product identity, architecture, roadmap and requirements are present.");
 console.log("PASS pilot readiness: status, provenance, honest search state and feedback route are present.");
 console.log("PASS class detail UX: anchored contents navigation and accessible progressive disclosure are present.");
 console.log("PASS document detail UX: anchored contents navigation and accessible progressive disclosure are present.");

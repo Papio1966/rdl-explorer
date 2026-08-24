@@ -9,7 +9,7 @@ test("core Explorer navigation is available", async ({ page }) => {
   await page.getByRole("link", { name: "Document Types", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Document Types", level: 1 })).toBeVisible();
 
-  await page.getByRole("link", { name: "About CFIHOS Explorer" }).click();
+  await page.getByRole("link", { name: "About RDL Explorer" }).click();
   await expect(page).toHaveURL(/\/about$/);
 
   await page.getByRole("link", { name: "User Guide" }).click();
@@ -42,7 +42,7 @@ test("pilot status, provenance and feedback route are visible", async ({ page })
     "href",
     /mailto:alessandro@papioconsulting\.eu/,
   );
-  await expect(page.getByLabel("Global CFIHOS search coming soon")).toBeDisabled();
+  await expect(page.getByLabel("Global RDL search coming soon")).toBeDisabled();
 });
 
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
