@@ -1,0 +1,207 @@
+.document-relationship-drawer-layer {
+  position: fixed;
+  z-index: 120;
+  inset: var(--topbar-height) 0 0 0;
+  background: rgba(20, 34, 30, 0.2);
+  backdrop-filter: blur(1px);
+}
+
+.document-relationship-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  width: min(500px, calc(100vw - 48px));
+  min-width: 0;
+  flex-direction: column;
+  border-left: 1px solid var(--line);
+  background: #ffffff;
+  box-shadow: -18px 0 45px rgba(28, 50, 44, 0.12);
+  animation: document-drawer-in 160ms ease-out;
+}
+
+@keyframes document-drawer-in {
+  from {
+    transform: translateX(28px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.document-relationship-drawer-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 26px 26px 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.document-relationship-eyebrow {
+  margin-bottom: 5px;
+  color: var(--brand);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.document-relationship-drawer-header h2 {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.document-relationship-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  color: #87928f;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+}
+
+.document-relationship-drawer-close {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #66736f;
+  cursor: pointer;
+}
+
+.document-relationship-drawer-close:hover {
+  background: #f5f8f7;
+  color: var(--ink);
+}
+
+.document-relationship-drawer-body {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 24px 26px 42px;
+}
+
+.document-relationship-description {
+  margin: 0 0 26px;
+  color: #5f6e6a;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.document-relationship-section {
+  padding: 22px 0;
+  border-top: 1px solid #edf1f0;
+}
+
+.document-relationship-section:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.document-relationship-section h3 {
+  margin: 0 0 13px;
+  color: #293733;
+  font-family: "Manrope", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.document-relationship-row {
+  display: grid;
+  grid-template-columns: 145px minmax(0, 1fr);
+  gap: 14px;
+  padding: 9px 0;
+  border-top: 1px solid #f0f3f2;
+  font-size: 11.5px;
+}
+
+.document-relationship-row:first-of-type {
+  border-top: 0;
+}
+
+.document-relationship-row-label {
+  color: #899490;
+}
+
+.document-relationship-row-value {
+  min-width: 0;
+  color: #3f4c49;
+  font-weight: 500;
+}
+
+.document-relationship-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--brand);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+}
+
+.document-relationship-link:hover {
+  color: var(--brand-dark);
+  text-decoration: underline;
+}
+
+.document-relationship-multiline {
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+.document-lifecycle-status {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: #f0f2f1;
+  color: #697572;
+  font-size: 9.5px;
+  font-weight: 700;
+}
+
+.document-lifecycle-status-active {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+}
+
+@media (max-width: 760px) {
+  .document-relationship-drawer {
+    width: min(100%, 500px);
+  }
+
+  .document-relationship-drawer-header {
+    padding: 22px 20px 18px;
+  }
+
+  .document-relationship-drawer-body {
+    padding: 20px 20px 36px;
+  }
+
+  .document-relationship-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

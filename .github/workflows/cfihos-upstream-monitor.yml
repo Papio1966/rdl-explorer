@@ -1,0 +1,49 @@
+name: CFIHOS Upstream Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  check-cfihos-upstream:
+    name: Check CFIHOS upstream workbook
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check upstream CFIHOS workbook
+        id: upstream-check
+        continue-on-error: true
+        run: npm run check:cfihos-update -- --fail-on-change
+
+      - name: Upload change report
+        if: steps.upstream-check.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cfihos-upstream-change-report
+          path: reports/cfihos-upstream-change-report.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Fail when upstream change is detected
+        if: steps.upstream-check.outcome == 'failure'
+        run: |
+          echo "The official CFIHOS workbook has changed."
+          echo "Review the uploaded change-report artifact before refreshing the Explorer."
+          exit 1

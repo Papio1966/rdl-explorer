@@ -1,0 +1,40 @@
+{
+  "name": "cfihos-explorer",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "validate:cfihos": "tsx scripts/generate-validation-snapshot.ts",
+    "test:app": "tsx scripts/test-app-regression.ts",
+    "test:regression": "tsx scripts/test-workbook-runtime-isolation.ts && tsx scripts/test-assistant-api-hardening.ts && tsx scripts/test-app-regression.ts && tsx scripts/test-cis-derivation.ts",
+    "check:cfihos-update": "tsx scripts/check-cfihos-update.ts",
+    "test:assistant-api": "tsx scripts/test-assistant-api-hardening.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:a11y": "playwright test tests/e2e/accessibility.spec.ts"
+  },
+  "dependencies": {
+    "lucide-react": "^1.31.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.2"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "oxlint": "^1.75.0",
+    "tsx": "^4.20.6",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0",
+    "xlsx": "^0.18.5"
+  }
+}

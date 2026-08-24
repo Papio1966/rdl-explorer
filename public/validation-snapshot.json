@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "standard": "CFIHOS 2.0 CORE",
+    "workbook": "CORE-CFIHOS-V2.0-excel-FINAL.xlsx",
+    "workbookUrl": "https://www.jip36-cfihos.org/wp-content/uploads/2024/10/CORE-CFIHOS-V2.0-excel-FINAL.xlsx",
+    "sourceMode": "curl",
+    "sourceLabel": "https://www.jip36-cfihos.org/wp-content/uploads/2024/10/CORE-CFIHOS-V2.0-excel-FINAL.xlsx",
+    "workbookSha256": "b5a2a09e9e0ecd3762b9f7a6c8b30001d832484f4ed606da9f8d59ecb0af26d1",
+    "validatedAt": "2026-08-17",
+    "generatedAt": "2026-08-17T10:50:36.838Z",
+    "worksheetCount": 23
+  },
+  "summary": [
+    {
+      "value": "21/21",
+      "label": "RDL object families classified",
+      "tone": "normal"
+    },
+    {
+      "value": "179/179",
+      "label": "Measurement dimensions reconciled",
+      "tone": "normal"
+    },
+    {
+      "value": "0",
+      "label": "Hierarchy integrity failures",
+      "tone": "normal"
+    },
+    {
+      "value": "3",
+      "label": "Items for upstream review",
+      "tone": "attention"
+    }
+  ],
+  "sections": [
+    {
+      "id": "validated",
+      "eyebrow": "Assurance",
+      "title": "Validated model areas",
+      "description": "Core relationships and reference domains that reconcile cleanly in the Explorer.",
+      "tone": "normal",
+      "items": [
+        {
+          "title": "Class hierarchy integrity",
+          "status": "validated",
+          "summary": "Tag and Equipment Class hierarchies resolve without unresolved parent references.",
+          "evidence": [
+            "848 Tag Classes; 0 unresolved parent references.",
+            "832 Equipment Classes; 0 unresolved parent references.",
+            "Property inheritance is evaluated across both class domains by the Explorer repositories."
+          ]
+        },
+        {
+          "title": "RDL object-family coverage",
+          "status": "validated",
+          "summary": "All 21 definition-file families in the CORE RDL are classified by the Explorer model.",
+          "evidence": [
+            "11,890 master objects across 21 definition-file families.",
+            "The validation snapshot is regenerated from the current workbook rather than browser-local diagnostic state."
+          ]
+        },
+        {
+          "title": "Property and controlled-value model",
+          "status": "validated",
+          "summary": "Property, Property Picklist and Picklist Value relationships reconcile consistently.",
+          "evidence": [
+            "1,388 Property rows.",
+            "368 master Property Picklists and 3,027 Picklist Value rows.",
+            "368 master-only picklist(s); 1 picklist(s) without values."
+          ]
+        },
+        {
+          "title": "Measurement dimensions",
+          "status": "validated",
+          "summary": "Atomic and compound Unit-of-Measure dimension expressions reconcile to the canonical dimension catalogue.",
+          "evidence": [
+            "179 canonical master dimensions.",
+            "179 distinct dimension components found in Property/Unit references; 0 unresolved.",
+            "20 compound Unit dimension expressions parsed component-by-component."
+          ]
+        },
+        {
+          "title": "Property grouping semantics",
+          "status": "validated",
+          "summary": "Property Grouping purpose references can be reconciled against the RDL purpose family.",
+          "evidence": [
+            "1140 Property Grouping rows inspected."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "findings",
+      "eyebrow": "Upstream review",
+      "title": "Data-quality findings",
+      "description": "Specific source-data inconsistencies supported by workbook-level evidence.",
+      "tone": "attention",
+      "items": [
+        {
+          "title": "POSC CAESAR equivalence mappings reference absent RDL objects",
+          "status": "finding",
+          "summary": "37 external-equivalence mappings reference CFIHOS object IDs absent from the master catalogue.",
+          "evidence": [
+            "3,091 equivalence mappings inspected; 3,054 resolve and 37 do not.",
+            "37 distinct unresolved object IDs.",
+            "35 unresolved IDs sit numerically between surviving objects from the same RDL family."
+          ]
+        },
+        {
+          "title": "Equipment requirements reference Tag-only classes",
+          "status": "finding",
+          "summary": "10 CORE class-document requirement rows are typed as Equipment while referencing 2 Tag-only class identifiers.",
+          "evidence": [
+            "Affected IDs: cfihos-30000880, cfihos-30000912.",
+            "The generator does not silently substitute an Equipment counterpart."
+          ]
+        },
+        {
+          "title": "Master Source Standard requirements have no requirement-layer usage",
+          "status": "finding",
+          "summary": "4 master requirement objects are referenced by neither CORE class-document requirements nor the JIP33 overlay.",
+          "evidence": [
+            "CFIHOS-68001699 — CFIHOS-30000922-IR-CFIHOS-70000333",
+            "CFIHOS-68001704 — CFIHOS-30000933-IR-CFIHOS-70000399",
+            "CFIHOS-68001705 — CFIHOS-30000933-IR-CFIHOS-70000206",
+            "CFIHOS-68001707 — CFIHOS-30000933-IR-CFIHOS-70000228"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observations",
+      "eyebrow": "Clarification",
+      "title": "Observations",
+      "description": "Model content that appears internally coherent but whose intended use may warrant clarification.",
+      "tone": "info",
+      "items": [
+        {
+          "title": "Condition Model is currently dormant",
+          "status": "observation",
+          "summary": "Condition vocabularies are populated in the RDL but no production relationship chain is inferred by this snapshot.",
+          "evidence": [
+            "102 Application Conditions.",
+            "184 Requirement Conditions.",
+            "5 Condition Groups."
+          ]
+        },
+        {
+          "title": "Submission Reference Date family",
+          "status": "observation",
+          "summary": "7 Submission Reference Date master definitions are present; usage should be interpreted separately from literal reference-date values.",
+          "evidence": [
+            "The family is retained as a semantic clarification item rather than treated as a structural failure."
+          ]
+        },
+        {
+          "title": "Property Picklist reserved/deprecated candidates",
+          "status": "observation",
+          "summary": "368 master picklist(s) are not referenced by Properties; 1 have no values.",
+          "evidence": [
+            "CFIHOS-50000001 — actuator motion",
+            "CFIHOS-50000002 — actuator seal material",
+            "CFIHOS-50000003 — air cooler type",
+            "CFIHOS-50000004 — asset type",
+            "CFIHOS-50000005 — ATEX category"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "closed",
+      "eyebrow": "Investigation",
+      "title": "Investigated and explained",
+      "description": "Apparent anomalies that resolve as legitimate modelling patterns after deeper reconciliation.",
+      "tone": "normal",
+      "items": [
+        {
+          "title": "Compound Unit dimensions",
+          "status": "closed",
+          "summary": "Semicolon-separated Unit dimension expressions are compound definitions, not missing master IDs.",
+          "evidence": [
+            "20 compound expressions found.",
+            "179 distinct component IDs; 0 unresolved components."
+          ]
+        },
+        {
+          "title": "JIP33 repeated requirement IDs",
+          "status": "closed",
+          "summary": "Repeated JIP33 requirement IDs are contextual mappings rather than automatically being duplicate definitions.",
+          "evidence": [
+            "533 JIP33 rows contain 0 unique requirement IDs.",
+            "0 repeated-ID groups."
+          ]
+        }
+      ]
+    }
+  ]
+}
