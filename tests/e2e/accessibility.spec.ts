@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 const routes = ["/", "/rdls", "/search?q=pump&source=all",
-  "/intelligence", "/documents", "/cis", "/assistant", "/about", "/help"];
+  "/intelligence", "/governance", "/documents", "/cis", "/assistant", "/about", "/help"];
 
 for (const route of routes) {
   test(`no serious or critical automated accessibility violations on ${route}`, async ({ page }) => {

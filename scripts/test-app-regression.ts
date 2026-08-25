@@ -71,6 +71,11 @@ const crossRdlRepository = read("server/rdl/CrossRdlIntelligenceRepository.ts");
 const crossRdlGenerator = read("scripts/generate-cross-rdl-intelligence.ts");
 const crossRdlPage = read("src/pages/RdlIntelligencePage.tsx");
 const rdl010Test = read("scripts/db-test-rdl-010-cross-intelligence.ts");
+const governanceMigration = read("database/migrations/005_create_cross_rdl_mapping_governance.sql");
+const governanceRepository = read("server/rdl/CrossRdlGovernanceRepository.ts");
+const governancePage = read("src/pages/RdlGovernancePage.tsx");
+const governanceGenerator = read("scripts/generate-rdl-governance.ts");
+const rdl011Test = read("database/sql/test_rdl_011_governance.sql");
 
 const routes = [
   "/classes/tag",
@@ -90,6 +95,7 @@ const routes = [
   "/rdls",
   "/search",
   "/intelligence",
+  "/governance",
 ];
 
 for (const route of routes) {
@@ -108,6 +114,7 @@ for (const label of [
   "User Guide",
   "RDL Catalogue",
   "Cross-RDL Intelligence",
+  "Mapping Governance",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
 }
@@ -131,7 +138,7 @@ assert.ok(indexHtml.includes("<title>RDL Explorer</title>"), "Browser title must
 assert.ok(packageJson.includes('"name": "rdl-explorer"'), "Package identity must be rdl-explorer");
 assert.ok(productBoundary.includes("CFIHOS Explorer") && productBoundary.includes("RDL Explorer"), "Product boundary must document the separation from CFIHOS Explorer");
 assert.ok(architecture.includes("PostgreSQL") && architecture.includes("DataGate"), "Architecture must document the PostgreSQL target and DataGate boundary");
-assert.ok(roadmap.includes("RDL-002") && roadmap.includes("RDL-010"), "Roadmap must capture the staged RDL platform programme");
+assert.ok(roadmap.includes("RDL-002") && roadmap.includes("RDL-011"), "Roadmap must capture the staged RDL platform programme");
 assert.ok(requirements.includes("RDL-MODEL-001") && requirements.includes("RDL-DG-001"), "Requirements must capture RDL identity and DataGate integration constraints");
 assert.ok(packageJson.includes('"db:migrate"') && packageJson.includes('"db:health"'), "Package scripts must expose database migration and health commands");
 assert.ok(databaseBootstrap.includes("metadata.schema_migrations"), "Database bootstrap must establish migration history");
@@ -208,6 +215,14 @@ assert.ok(crossRdlGenerator.includes("exact-name candidate mapping") && crossRdl
 assert.ok(crossRdlPage.includes("Governance boundary") && crossRdlPage.includes("Overlap and gap profile") && crossRdlPage.includes("Candidate mappings"), "RDL-010 UX must explain governance and expose comparison/overlap/gap candidates");
 assert.ok(rdl010Test.includes("metre") && rdl010Test.includes("candidate possible matches") && rdl010Test.includes("cross RDL sources"), "RDL-010 database test must verify cross-source isolation and non-authoritative candidate semantics");
 assert.ok(requirements.includes("RDL-XINT-001") && requirements.includes("RDL-XINT-010"), "Requirements must capture RDL-010 cross-RDL intelligence governance constraints");
+assert.ok(packageJson.includes('"generate:rdl-governance"') && packageJson.includes('"db:test:rdl-011"'), "RDL-011 scripts must expose governance projection and database acceptance validation");
+assert.ok(governanceMigration.includes("cross_rdl_mapping_review_event") && governanceMigration.includes("review_cross_rdl_mapping") && governanceMigration.includes("append-only"), "RDL-011 must provide governed transitions and append-only review history");
+assert.ok(governanceMigration.includes("review_version") && governanceMigration.includes("expected_version") && governanceMigration.includes("superseded_by_mapping_id"), "RDL-011 must provide optimistic concurrency and supersession traceability");
+assert.ok(governanceRepository.includes("class CrossRdlGovernanceRepository") && governanceRepository.includes("listReviewQueue") && governanceRepository.includes("getHistory") && governanceRepository.includes("review("), "RDL-011 repository must expose queue, history and governed review operations");
+assert.ok(governancePage.includes("Governed write boundary") && governancePage.includes("Read-only pilot projection") && governancePage.includes("disabled"), "RDL-011 browser review queue must remain honestly read-only");
+assert.ok(governanceGenerator.includes("read-only") && governanceGenerator.includes("reviewVersion"), "RDL-011 governance projection must describe the read-only browser boundary");
+assert.ok(rdl011Test.includes("optimistic versioning") && rdl011Test.includes("append-only audit history") && rdl011Test.includes("candidate -> approved"), "RDL-011 database test must verify governed transitions, audit and concurrency");
+assert.ok(requirements.includes("RDL-GOV-001") && requirements.includes("RDL-GOV-010"), "Requirements must capture RDL-011 mapping governance constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");

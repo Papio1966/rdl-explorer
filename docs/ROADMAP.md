@@ -38,7 +38,11 @@
 
 ## RDL-010 — Cross-RDL Intelligence
 
-**Status: implementation sprint.** Add a governed cross-RDL mapping model, deterministic candidate mappings, source-pair comparison, structural overlap/gap indicators and provenance/confidence-aware UX. Authoritative within-package relationships remain separate. AI-suggested mappings are intentionally deferred until deterministic governance is established.
+**Status: complete.** Add a governed cross-RDL mapping model, deterministic candidate mappings, source-pair comparison, structural overlap/gap indicators and provenance/confidence-aware UX. Authoritative within-package relationships remain separate. AI-suggested mappings are intentionally deferred until deterministic governance is established.
+
+## RDL-011 — Cross-RDL Mapping Governance & Review
+
+**Status: implementation sprint.** Add governed approve/reject/supersede transitions, optimistic review-version checks, reviewer/rationale capture, append-only audit history, a server-side governance repository and a read-only pilot review queue. Browser writes remain out of scope until a deployable authenticated service boundary exists.
 
 ## Later enterprise roadmap
 
