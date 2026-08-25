@@ -104,3 +104,16 @@ RDL-001 is complete when:
 - **RDL-DB-006** — Introducing PostgreSQL shall not change the active CFIHOS snapshot runtime until parity is explicitly demonstrated.
 - **RDL-DB-007** — The application shall depend on an RDL repository abstraction rather than coupling user-interface components directly to SQL.
 - **RDL-DB-008** — DataGate shall not consume RDL Explorer internal database tables directly.
+
+## RDL-003 Core RDL domain model requirements
+
+- **RDL-CORE-001 — RDL source** — The database shall represent the publisher/governance source of an RDL independently from entity-level source standards.
+- **RDL-CORE-002 — Release identity** — Every RDL release shall belong to exactly one RDL source and have a source-local release key/version.
+- **RDL-CORE-003 — Package identity** — Normalized entities shall belong to a version-identified RDL package associated with an exact release.
+- **RDL-CORE-004 — Source-aware entity identity** — Entity uniqueness shall include package, entity type/domain and native identifier; native identifiers alone shall not be globally unique.
+- **RDL-CORE-005 — First-class relationships** — Relationships shall be stored independently from entity payloads and shall identify both source and target entities explicitly.
+- **RDL-CORE-006 — Same-package integrity** — A normalized relationship shall not connect entities from different packages implicitly. Cross-package mapping requires a future explicit mapping construct.
+- **RDL-CORE-007 — Provenance** — Entities, relationships and ingestion runs shall retain authoritative/derived status and source-location or adapter metadata sufficient for audit and reproduction.
+- **RDL-CORE-008 — Extensible vocabulary** — Entity and relationship types shall use registries that can be extended for future RDLs without forcing them into the exact CFIHOS workbook structure.
+- **RDL-CORE-009 — Lifecycle state** — The model shall distinguish active, deprecated, superseded and withdrawn content without deleting historical identity.
+- **RDL-CORE-010 — No runtime cutover** — RDL-003 shall not switch the Explorer UI from the proven CFIHOS snapshot repository to PostgreSQL.

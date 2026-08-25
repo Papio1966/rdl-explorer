@@ -84,3 +84,23 @@ After the core multi-RDL platform is proven:
 - Publisher capabilities;
 - APIs/OEM integration;
 - DataGate package handoff and requirement-to-validation traceability.
+
+### RDL-003 — Core RDL Domain Model
+
+Status target: establish the generic PostgreSQL representation before ingesting CFIHOS.
+
+Deliverables:
+- RDL source, release and package identity;
+- extensible entity and relationship type registries;
+- source-aware normalized entities;
+- first-class typed relationships;
+- ingestion provenance records;
+- resolved logical-identity view;
+- database verification fixture;
+- application-level RDL model vocabulary.
+
+Explicitly deferred to RDL-004:
+- CFIHOS ingestion adapter;
+- loading production CFIHOS data into PostgreSQL;
+- snapshot-versus-database parity tests;
+- runtime repository cutover.

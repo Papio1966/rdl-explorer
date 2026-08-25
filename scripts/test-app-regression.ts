@@ -28,6 +28,9 @@ const packageJson = read("package.json");
 const databaseReadme = read("database/README.md");
 const databaseBootstrap = read("database/bootstrap.sql");
 const databaseMigration = read("database/migrations/001_create_platform_schemas.sql");
+const coreDomainMigration = read("database/migrations/002_create_core_rdl_domain_model.sql");
+const coreDomainTest = read("database/sql/test_rdl_003_core_model.sql");
+const coreDomainModel = read("src/rdl/model/core.ts");
 const databaseHealth = read("scripts/db-health.sh");
 const databaseMigrate = read("scripts/db-migrate.sh");
 const rdlRepository = read("src/rdl/repository/RdlRepository.ts");
@@ -104,6 +107,16 @@ assert.ok(rdlRepository.includes("interface RdlRepository") && rdlRepository.inc
 assert.ok(databaseClient.includes("interface DatabaseClient"), "Server layer must define a database client contract");
 assert.ok(databaseConfig.includes("RDL_DATABASE_URL") && databaseConfig.includes("rdl_explorer"), "Database configuration must use the RDL-specific environment variable and database name");
 assert.ok(requirements.includes("RDL-DB-001") && requirements.includes("RDL-DB-008"), "Requirements must capture PostgreSQL and DataGate database-boundary constraints");
+assert.ok(packageJson.includes('"db:test:rdl-003"'), "Package scripts must expose the RDL-003 database verification command");
+for (const tableName of ["rdl_source", "rdl_release", "rdl_package", "rdl_entity", "rdl_relationship", "ingestion_run"]) {
+  assert.ok(coreDomainMigration.includes(tableName), `RDL-003 migration must define ${tableName}`);
+}
+assert.ok(coreDomainMigration.includes("UNIQUE (package_id, entity_type_code, native_identifier)"), "RDL-003 entity identity must include package, entity type and native identifier");
+assert.ok(coreDomainMigration.includes("FOREIGN KEY (source_entity_id, package_id)") && coreDomainMigration.includes("FOREIGN KEY (target_entity_id, package_id)"), "RDL-003 relationships must stay within an explicit package boundary");
+assert.ok(coreDomainMigration.includes("CREATE OR REPLACE VIEW rdl.entity_identity"), "RDL-003 must expose resolved source-aware entity identity");
+assert.ok(coreDomainTest.includes("Same native identifier can coexist") && coreDomainTest.includes("ROLLBACK"), "RDL-003 database test must verify collision safety without persisting fixture data");
+assert.ok(coreDomainModel.includes("RdlEntityIdentity") && coreDomainModel.includes("RdlRelationshipRecord"), "Application model must expose generic RDL entity and relationship vocabulary");
+assert.ok(requirements.includes("RDL-CORE-001") && requirements.includes("RDL-CORE-010"), "Requirements must capture the RDL-003 core domain constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 reviewed snapshot"), "Pilot data-source provenance is missing from the shell");

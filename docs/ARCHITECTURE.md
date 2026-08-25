@@ -169,3 +169,49 @@ rdl_explorer
 The repository contains a database bootstrap script, ordered SQL migrations, a migration runner, a local database health check, environment configuration guidance, and application/server interfaces that define the future repository boundary.
 
 The current CFIHOS snapshot remains the active repository. No UI route, Assistant behavior or CIS behavior is switched to PostgreSQL in RDL-002.
+
+## 11. RDL-003 core relational model
+
+RDL-003 materializes the generic RDL identity model in PostgreSQL without loading CFIHOS content yet.
+
+```text
+rdl.rdl_source
+      |
+      +-- rdl.rdl_release
+              |
+              +-- rdl.rdl_package
+                      |
+                      +-- rdl.rdl_entity
+                      |       |
+                      |       +-- typed by rdl.entity_type
+                      |
+                      +-- rdl.rdl_relationship
+                              |
+                              +-- typed by rdl.relationship_type
+
+rdl.rdl_package
+      |
+      +-- ingestion.ingestion_run
+```
+
+### Identity rule
+
+The normalized identity is deliberately composite in meaning:
+
+```text
+source : release : entity-type : native-identifier
+```
+
+`rdl.entity_identity` exposes that resolved identity together with package context. The database uniqueness rule is package + entity type + native identifier. This allows the same native identifier to coexist in different entity domains, releases or RDL sources without collision.
+
+### Package boundary
+
+Relationships in RDL-003 are constrained to entities belonging to the same package. This prevents accidental cross-RDL joins from becoming indistinguishable from authoritative source relationships. Future cross-RDL equivalence/mapping will use a separate explicit mapping model.
+
+### Provenance boundary
+
+`rdl.rdl_entity` and `rdl.rdl_relationship` retain authoritative/derived status plus source-locator JSON. `ingestion.ingestion_run` records the adapter, source URI/hash, validation summary and outcome. This is the foundation for reproducible ingestion in RDL-004 and later.
+
+### Runtime boundary
+
+The browser continues to use the inherited CFIHOS snapshot repositories. RDL-003 creates only the normalized persistence model and application vocabulary. No UI route is switched to PostgreSQL until CFIHOS parity is demonstrated.
