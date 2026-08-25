@@ -1,6 +1,7 @@
 import type { SqlJsonClient } from "../db/PsqlJsonClient.ts";
 import { sqlLiteral } from "../db/PsqlJsonClient.ts";
-import type { RdlReadRepository, RdlPackageRecord, RdlReadEntity } from "./RdlReadRepository.ts";
+import type { RdlPackageRecord, RdlReadEntity } from "./RdlReadRepository.ts";
+import type { RdlCutoverRepository } from "./RdlCutoverRepository.ts";
 
 export type PostgresRdlEntity = RdlReadEntity;
 
@@ -15,7 +16,7 @@ export type PostgresRdlRelationship = {
   sourceLocator: Record<string, unknown>;
 };
 
-export class PostgresRdlRepository implements RdlReadRepository {
+export class PostgresRdlRepository implements RdlCutoverRepository {
   constructor(
     private readonly client: SqlJsonClient,
     private readonly sourceKey = "cfihos",

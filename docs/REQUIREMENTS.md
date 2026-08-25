@@ -141,3 +141,15 @@ RDL-001 is complete when:
 - **RDL-READ-006** — A deterministic parity test shall compare PostgreSQL reads with the reviewed CFIHOS snapshot for representative identities, counts, attributes and relationships.
 - **RDL-READ-007** — The active browser runtime shall remain snapshot-backed until a later explicit cutover sprint.
 - **RDL-READ-008** — PostgreSQL access shall remain behind an application/service boundary so later database drivers or hosted infrastructure can replace the local `psql` adapter without changing RDL semantics.
+
+## RDL-006 — Controlled Repository Cutover
+
+- **RDL-CUT-001** — The default server-side RDL read mode shall remain `snapshot` until an explicit cutover decision is made.
+- **RDL-CUT-002** — Supported read modes shall be `snapshot`, `postgresql`, and `dual` only; invalid configuration shall fail explicitly.
+- **RDL-CUT-003** — Repository selection shall remain behind a server-side boundary and shall not expose PostgreSQL connectivity to browser code.
+- **RDL-CUT-004** — Dual-read mode shall execute snapshot and PostgreSQL reads for the selected operation and compare semantic results deterministically.
+- **RDL-CUT-005** — Dual-read mismatch shall fail closed and produce an operation-specific diagnostic rather than silently accepting divergent results.
+- **RDL-CUT-006** — Dual-read semantic comparison shall preserve typed entity identity, package provenance, names, definitions, lifecycle state, normalized metadata and source locator provenance while ignoring implementation-only database surrogate IDs.
+- **RDL-CUT-007** — RDL-006 shall cover representative reads for hierarchy, direct properties, documents, disciplines, controlled values, JIP33, Tag/Equipment mappings, units, source standards and source/property mappings.
+- **RDL-CUT-008** — RDL-006 shall not switch the current browser UI, CIS derivation or Assistant retrieval to PostgreSQL.
+- **RDL-CUT-009** — The reviewed CFIHOS snapshot shall remain the regression oracle during controlled cutover.

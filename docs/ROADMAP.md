@@ -2,59 +2,39 @@
 
 ## RDL-001 — Product Bootstrap
 
-Establish RDL Explorer as a separate product from CFIHOS Explorer.
-
-- preserve inherited functionality;
-- establish RDL Explorer identity;
-- document product boundary, architecture, requirements and roadmap;
-- retain CFIHOS 2.0 as the initial/default RDL;
-- keep all existing quality gates green.
+**Status: complete.** Establish RDL Explorer as a separate product from CFIHOS Explorer while preserving inherited functionality and the reviewed CFIHOS 2.0 baseline.
 
 ## RDL-002 — PostgreSQL Foundation
 
-**Status: implemented foundation.**
+**Status: complete.** Establish the dedicated `rdl_explorer` PostgreSQL database, `rdl`/`ingestion`/`metadata` schemas, migration framework, database health tooling and server/database boundaries while leaving the snapshot runtime unchanged.
 
-Introduce the platform persistence boundary without replacing CFIHOS runtime behavior yet.
+## RDL-003 — Core RDL Domain Model
 
-- PostgreSQL database `rdl_explorer`;
-- initial schemas `rdl`, `ingestion`, `metadata`;
-- migration framework and migration history;
-- environment configuration and local health checks;
-- server database-client contract;
-- application-facing RDL repository boundary;
-- CFIHOS snapshot remains the active runtime path.
+**Status: complete.** Establish source/release/package identity, provenance-aware typed entities, generic relationships and ingestion provenance.
 
-## RDL-003 — Generic RDL Domain Model
+## RDL-004 — CFIHOS PostgreSQL Ingestion & Parity
 
-Implement source/release/package identity, provenance-aware entities and generic relationships.
+**Status: complete.** Ingest the reviewed CFIHOS 2.0 snapshot into the generic PostgreSQL model and prove structural parity, typed identity and package provenance. The snapshot remains the regression oracle.
 
-- `RdlSource`;
-- `RdlRelease`;
-- `RdlPackage`;
-- normalized entity identity;
-- provenance/version metadata;
-- relationship model;
-- architecture for future RDL layering.
+## RDL-005 — PostgreSQL Repository Read Parity
 
-## RDL-004 — CFIHOS Database Ingestion & Parity
+**Status: complete.** Establish server-side normalized PostgreSQL reads and prove semantic parity for representative CFIHOS identities, hierarchy, properties, documents, controlled values, JIP33, tag/equipment mappings, units and provenance.
 
-Status: implementation sprint.
+## RDL-006 — Dual-Read / Controlled Repository Cutover
 
-Load the reviewed CFIHOS 2.0 snapshot through a versioned adapter into the generic PostgreSQL model, retain source/package provenance and contextual mappings, and demonstrate deterministic structural parity against the snapshot.
+**Status: implementation sprint.** Introduce explicit `snapshot`, `postgresql` and `dual` server-side read modes. `snapshot` remains the safe default. `dual` executes both paths, compares semantic results deterministically and fails closed on divergence. Browser pages, CIS derivation and Assistant retrieval remain on the current runtime in this sprint.
 
-The existing CFIHOS snapshot repositories remain the active runtime and regression reference implementation. Runtime cutover is explicitly deferred.
+## RDL-007 — First Additional RDL
 
-## RDL-005 — First Additional RDL
+Assess the available candidate RDLs and ingest one through the generic source/release/package/entity/relationship contract. Choose a candidate that is sufficiently different from CFIHOS to test the model while remaining manageable for a first multi-RDL implementation.
 
-Select one candidate RDL after compatibility assessment and ingest it through the generic contract.
+## RDL-008 — Second Additional RDL / Genericity Proof
 
-## RDL-006 — Second Additional RDL
+Add a structurally different second RDL and prove that ingestion, identity, provenance and repository reads are generic rather than CFIHOS plus one special case.
 
-Add a structurally different second RDL to prove the platform has not become CFIHOS plus a single special case.
+## RDL-009 — Multi-RDL UX & Global Search
 
-## RDL-007 — Multi-RDL UX & Global Search
-
-Expose source-aware exploration only after the backend genuinely supports multiple RDLs.
+Expose source-aware exploration only after the backend genuinely supports multiple RDLs:
 
 - RDL selector;
 - All RDLs mode;
@@ -62,9 +42,9 @@ Expose source-aware exploration only after the backend genuinely supports multip
 - source-aware global search;
 - cross-RDL navigation.
 
-## RDL-008 — Cross-RDL Intelligence
+## RDL-010 — Cross-RDL Intelligence
 
-Add comparison and standards-intelligence capabilities:
+Add standards-intelligence capabilities:
 
 - equivalent concepts;
 - overlaps;
@@ -86,27 +66,3 @@ After the core multi-RDL platform is proven:
 - Publisher capabilities;
 - APIs/OEM integration;
 - DataGate package handoff and requirement-to-validation traceability.
-
-### RDL-003 — Core RDL Domain Model
-
-Status target: establish the generic PostgreSQL representation before ingesting CFIHOS.
-
-Deliverables:
-- RDL source, release and package identity;
-- extensible entity and relationship type registries;
-- source-aware normalized entities;
-- first-class typed relationships;
-- ingestion provenance records;
-- resolved logical-identity view;
-- database verification fixture;
-- application-level RDL model vocabulary.
-
-Explicitly deferred to RDL-004:
-- CFIHOS ingestion adapter;
-- loading production CFIHOS data into PostgreSQL;
-- snapshot-versus-database parity tests;
-- runtime repository cutover.
-
-### RDL-005 — PostgreSQL Repository Read Parity
-
-Status: implementation sprint. Establish server-side normalized RDL reads and prove CFIHOS semantic parity while retaining the snapshot-backed browser runtime. Exit only when source/release/package identity, typed entity lookup, hierarchy, properties, document relationships, controlled values, JIP33, tag/equipment mappings, unit families and provenance pass deterministic read-parity tests.
