@@ -70,6 +70,14 @@ test("cross-RDL intelligence keeps derived matches governed", async ({ page }) =
   await expect(page.getByText("exact name rule", { exact: false }).first()).toBeVisible();
 });
 
+test("mapping governance queue keeps review writes server-governed", async ({ page }) => {
+  await page.goto("/governance");
+  await expect(page.getByRole("heading", { name: "Mapping review queue" })).toBeVisible();
+  await expect(page.getByText("Governed write boundary")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Approve" }).first()).toBeDisabled();
+  await expect(page.getByText("Read-only pilot projection").first()).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 

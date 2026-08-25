@@ -141,3 +141,16 @@ npm run db:test:rdl-010
 ```
 
 The initial exact-name rule emits only `possible_match` / `candidate` mappings at 0.85 confidence. Exact-name equality is evidence, not equivalence. Stronger mapping types (`equivalent`, `broader`, `narrower`, `related`, `no_match`) require explicit governance or later reviewed workflows.
+
+
+## RDL-011 — Mapping governance and audit
+
+After RDL-010 mappings exist, apply and verify the governed review model:
+
+```bash
+npm run db:migrate
+npm run db:test:rdl-011
+npm run generate:rdl-governance
+```
+
+`rdl.review_cross_rdl_mapping(...)` is the only supported write path for review status, reviewer, rationale, review version and supersession metadata. `rdl.cross_rdl_mapping_review_event` is append-only. The browser review queue is intentionally read-only until an authenticated server write boundary is deployed.

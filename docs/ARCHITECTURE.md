@@ -347,3 +347,26 @@ rdl.cross_rdl_mapping
 Each cross-RDL mapping carries a typed relationship, provenance method, confidence, status and evidence. The first deterministic generator uses exact normalized names only to propose `possible_match` candidates. It never promotes exact-name equality to semantic equivalence automatically.
 
 For the pilot browser, `public/rdl-cross-intelligence.json` is a reproducible projection generated from the package-aware global-search projection. The enterprise server path uses the PostgreSQL mapping model through `CrossRdlIntelligenceRepository`.
+
+
+## RDL-011 cross-RDL mapping governance boundary
+
+RDL-011 turns cross-RDL candidate mappings into governable enterprise records without moving authority into the browser. The write path is deliberately server/database-side:
+
+```text
+Candidate mapping
+   |
+   v
+Governance repository/service boundary
+   | reviewer + rationale + expected review version
+   v
+rdl.review_cross_rdl_mapping(...)
+   |
+   +--> mapping state transition
+   +--> reviewed_by / reviewed_at / rationale / version
+   +--> append-only rdl.cross_rdl_mapping_review_event
+```
+
+Allowed governed transitions are candidate -> approved, candidate -> rejected, and approved -> retired through supersession. Optimistic concurrency prevents stale reviewers from overwriting a newer decision. Direct updates to review-state fields are blocked by a trigger unless executed inside the governed function.
+
+The pilot browser exposes a deterministic read-only review projection. Approve/reject/supersede controls are intentionally disabled until an authenticated deployable API/service boundary is available; this avoids pretending that browser-local state is enterprise governance. Future AI suggestions enter as candidates and use the same review path.

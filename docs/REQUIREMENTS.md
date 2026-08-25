@@ -203,3 +203,17 @@ RDL-001 is complete when:
 - **RDL-XINT-008** Structural overlap/gap counts SHALL be labelled as coverage indicators, not semantic completeness claims.
 - **RDL-XINT-009** AI-suggested mappings MAY be added later but SHALL remain distinguishable from manual and rule-derived mappings and require governance before approval.
 - **RDL-XINT-010** Existing CFIHOS, CCUS and Water / Desalination source content and authoritative relationships SHALL remain unchanged by cross-RDL intelligence generation.
+
+
+## RDL-011 — Cross-RDL Mapping Governance & Review
+
+- **RDL-GOV-001 — Governed transitions** — Candidate mappings may be approved or rejected only through a governed database review function; approved mappings may be superseded/retired only through the same boundary.
+- **RDL-GOV-002 — Reviewer identity** — Every review decision shall record a non-empty reviewer identity.
+- **RDL-GOV-003 — Rationale** — Every review decision shall record a non-empty rationale.
+- **RDL-GOV-004 — Audit history** — Review events shall be append-only and retain from/to status, reviewer, rationale, evidence, version and timestamp.
+- **RDL-GOV-005 — Optimistic concurrency** — Review writes shall support expected-version checks and reject stale decisions.
+- **RDL-GOV-006 — Supersession traceability** — A superseded approved mapping shall reference a distinct successor mapping.
+- **RDL-GOV-007 — Direct-update protection** — Review-state fields shall not be directly mutable outside the governed review function.
+- **RDL-GOV-008 — Server-side writes** — Browser code shall not receive PostgreSQL credentials or directly mutate mapping governance state.
+- **RDL-GOV-009 — Honest pilot UX** — Until an authenticated deployable write service exists, the browser review queue shall be read-only and shall not imply that disabled review actions are persisted.
+- **RDL-GOV-010 — AI remains candidate-only** — Future AI-suggested mappings shall enter the same candidate review workflow and shall not bypass human/governed approval.

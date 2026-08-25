@@ -31,7 +31,9 @@
     "db:test:rdl-009": "bash scripts/db-test-rdl-009.sh",
     "generate:rdl-intelligence": "tsx scripts/generate-cross-rdl-intelligence.ts",
     "db:seed:rdl-010": "bash scripts/db-seed-rdl-010.sh",
-    "db:test:rdl-010": "bash scripts/db-test-rdl-010.sh"
+    "db:test:rdl-010": "bash scripts/db-test-rdl-010.sh",
+    "generate:rdl-governance": "tsx scripts/generate-rdl-governance.ts",
+    "db:test:rdl-011": "bash scripts/db-test-rdl-011.sh"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",
