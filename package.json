@@ -22,7 +22,9 @@
     "db:ingest:cfihos": "bash scripts/db-ingest-cfihos.sh",
     "db:test:rdl-004": "bash scripts/db-test-rdl-004.sh",
     "db:test:rdl-005": "bash scripts/db-test-rdl-005.sh",
-    "db:test:rdl-006": "bash scripts/db-test-rdl-006.sh"
+    "db:test:rdl-006": "bash scripts/db-test-rdl-006.sh",
+    "db:ingest:ccus": "bash scripts/db-ingest-ccus.sh",
+    "db:test:rdl-007": "bash scripts/db-test-rdl-007.sh"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",

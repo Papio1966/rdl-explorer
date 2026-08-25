@@ -153,3 +153,14 @@ RDL-001 is complete when:
 - **RDL-CUT-007** — RDL-006 shall cover representative reads for hierarchy, direct properties, documents, disciplines, controlled values, JIP33, Tag/Equipment mappings, units, source standards and source/property mappings.
 - **RDL-CUT-008** — RDL-006 shall not switch the current browser UI, CIS derivation or Assistant retrieval to PostgreSQL.
 - **RDL-CUT-009** — The reviewed CFIHOS snapshot shall remain the regression oracle during controlled cutover.
+
+## RDL-007 — First additional RDL
+
+- **RDL-MR-001** The platform shall ingest CCUS as an independent RDL source, release, and immutable normalized package without altering the CFIHOS package.
+- **RDL-MR-002** Source-specific workbook columns shall be translated by a mapping profile before canonical ingestion logic; the PostgreSQL domain model shall not depend on CCUS workbook headers.
+- **RDL-MR-003** Package provenance shall retain the exact CCUS workbook SHA-256 and source locator.
+- **RDL-MR-004** Native identifiers shall remain package- and entity-type-aware so identifiers reused between CFIHOS and CCUS do not collide.
+- **RDL-MR-005** CCUS entity and relationship ingestion shall be deterministic and idempotent.
+- **RDL-MR-006** Authoritative relationships shall remain within their source package; cross-RDL mappings shall require an explicit future mapping model.
+- **RDL-MR-007** Existing CFIHOS parity and controlled repository-cutover behaviour shall remain unchanged.
+- **RDL-MR-008** RDL-007 shall not introduce browser multi-RDL selection; ingestion/coexistence must be proven before user-facing multi-RDL UX.

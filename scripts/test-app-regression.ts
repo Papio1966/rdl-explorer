@@ -50,6 +50,10 @@ const dualReadRepository = read("server/rdl/DualReadRdlRepository.ts");
 const repositorySelector = read("server/rdl/RdlRepositorySelector.ts");
 const rdl006Test = read("scripts/db-test-rdl-006-dual-read.ts");
 const envExample = read(".env.example");
+const rdl007Profile = read("scripts/rdl-ingestion/CcusCfihosFormatProfile.ts");
+const rdl007Generator = read("scripts/rdl-ingestion/generateCfihosFormatSql.ts");
+const rdl007Test = read("scripts/db-test-rdl-007-multi-rdl.ts");
+const rdl007Ingest = read("scripts/db-ingest-ccus.sh");
 
 const routes = [
   "/classes/tag",
@@ -152,6 +156,13 @@ assert.ok(dualReadRepository.includes("RDL dual-read mismatch") && dualReadRepos
 assert.ok(rdl006Test.includes("CFIHOS-30000521") && rdl006Test.includes("getDirectProperties") && rdl006Test.includes("getUnitsForDimension"), "RDL-006 test must cover typed identity and representative relationship reads");
 assert.ok(envExample.includes("RDL_READ_MODE=snapshot"), "RDL-006 environment example must keep snapshot as the safe default");
 assert.ok(requirements.includes("RDL-CUT-001") && requirements.includes("RDL-CUT-009"), "Requirements must capture controlled cutover and regression-oracle constraints");
+assert.ok(packageJson.includes('"db:ingest:ccus"') && packageJson.includes('"db:test:rdl-007"'), "Package scripts must expose RDL-007 CCUS ingestion and coexistence tests");
+assert.ok(rdl007Profile.includes("ccus-cfihos-format-v1") && rdl007Profile.includes("CCUS_CFIHOS_FORMAT_PROFILE"), "RDL-007 must define a versioned CCUS mapping profile");
+assert.ok(rdl007Generator.includes("RdlWorkbookMappingProfile") && rdl007Generator.includes("mappingProfile"), "RDL-007 ingestion must route source-specific headers through a generic mapping-profile generator");
+assert.ok(rdl007Generator.includes("packageKey") && rdl007Generator.includes("content_sha256"), "RDL-007 ingestion must preserve package identity and source SHA provenance");
+assert.ok(rdl007Test.includes("multi-RDL identity") && rdl007Test.includes("CFIHOS isolation") && rdl007Test.includes("idempotence"), "RDL-007 test must prove package coexistence, CFIHOS isolation and repeatable ingestion");
+assert.ok(rdl007Ingest.includes("generate-ccus-ingestion-sql.ts"), "RDL-007 CCUS command must use the profile-driven SQL generator");
+assert.ok(requirements.includes("RDL-MR-001") && requirements.includes("RDL-MR-008"), "Requirements must capture first multi-RDL ingestion constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 reviewed snapshot"), "Pilot data-source provenance is missing from the shell");
@@ -205,6 +216,7 @@ console.log("PASS RDL-001 bootstrap: product identity, architecture, roadmap and
 console.log("PASS RDL-002 database foundation: schemas, migrations, configuration, health checks and repository boundaries are present.");
 console.log("PASS RDL-005 read parity: server-side PostgreSQL repository, service boundary and deterministic parity gate are present.");
 console.log("PASS RDL-006 controlled cutover: snapshot/postgresql/dual selection and fail-closed parity comparison are present.");
+console.log("PASS RDL-007 multi-RDL foundation: CCUS mapping profile, provenance, coexistence and idempotence gates are present.");
 console.log("PASS pilot readiness: status, provenance, honest search state and feedback route are present.");
 console.log("PASS class detail UX: anchored contents navigation and accessible progressive disclosure are present.");
 console.log("PASS document detail UX: anchored contents navigation and accessible progressive disclosure are present.");

@@ -276,3 +276,15 @@ RDL-006 introduces a server-side repository selector with three explicit modes:
 The selector is intentionally server-side. Browser code does not receive database credentials or direct PostgreSQL access. Dual-read comparison ignores implementation-only database entity IDs while comparing package identity, typed/native identity, names, definitions, lifecycle state, normalized metadata and source locators. A mismatch fails closed rather than silently choosing a candidate result.
 
 RDL-006 does not switch the current browser pages, CIS derivation or Assistant retrieval to PostgreSQL. It establishes the controlled cutover mechanism that a later sprint can wire into selected application endpoints.
+
+## RDL-007 — Mapping-profile ingestion and multi-RDL coexistence
+
+RDL-007 adds CCUS as the first non-CFIHOS RDL source. The authoritative input remains the supplied workbook; PostgreSQL stores a normalized operational representation with the workbook SHA-256 retained on the package.
+
+The ingestion pattern is intentionally profile-driven:
+
+`source workbook -> RDL workbook mapping profile -> canonical ingestion generator -> generic rdl_entity / rdl_relationship model`
+
+The mapping profile owns source-specific sheet/header aliases. The SQL generator owns generic source/release/package, entity, relationship, provenance, and audit behaviour. This avoids embedding CCUS column names in the database model or repository layer and establishes the extension point for structurally different RDLs in later sprints.
+
+CFIHOS and CCUS coexist as independent `rdl_source` / `rdl_release` / `rdl_package` trees. A native identifier may appear in both packages without collision. Authoritative relationships remain package-local; cross-RDL equivalence will be a separate explicit concept rather than an implicit join on native identifiers.

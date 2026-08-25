@@ -22,11 +22,11 @@
 
 ## RDL-006 — Dual-Read / Controlled Repository Cutover
 
-**Status: implementation sprint.** Introduce explicit `snapshot`, `postgresql` and `dual` server-side read modes. `snapshot` remains the safe default. `dual` executes both paths, compares semantic results deterministically and fails closed on divergence. Browser pages, CIS derivation and Assistant retrieval remain on the current runtime in this sprint.
+**Status: complete.** Introduce explicit `snapshot`, `postgresql` and `dual` server-side read modes. `snapshot` remains the safe default. `dual` executes both paths, compares semantic results deterministically and fails closed on divergence. Browser pages, CIS derivation and Assistant retrieval remain on the current runtime in this sprint.
 
 ## RDL-007 — First Additional RDL
 
-Assess the available candidate RDLs and ingest one through the generic source/release/package/entity/relationship contract. Choose a candidate that is sufficiently different from CFIHOS to test the model while remaining manageable for a first multi-RDL implementation.
+**Status: implementation sprint.** Ingest the CCUS RDL Extension as the first non-CFIHOS source. Establish a reusable mapping-profile ingestion pattern, prove CFIHOS/CCUS package coexistence, preserve exact workbook SHA provenance, verify deterministic/idempotent reloads, and keep the browser multi-RDL UX out of scope until backend genericity is proven.
 
 ## RDL-008 — Second Additional RDL / Genericity Proof
 
