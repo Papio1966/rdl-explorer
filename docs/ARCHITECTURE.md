@@ -215,3 +215,37 @@ Relationships in RDL-003 are constrained to entities belonging to the same packa
 ### Runtime boundary
 
 The browser continues to use the inherited CFIHOS snapshot repositories. RDL-003 creates only the normalized persistence model and application vocabulary. No UI route is switched to PostgreSQL until CFIHOS parity is demonstrated.
+
+## RDL-004 — CFIHOS ingestion and parity architecture
+
+RDL-004 adds the first real adapter into the normalized model without changing the browser runtime:
+
+```text
+Reviewed CFIHOS 2.0 snapshot
+        |
+        v
+cfihos-snapshot-v1 adapter
+        |
+        +--> source SHA / source URI / source locators
+        |
+        v
+CFIHOS RDL Source -> Release 2.0 -> immutable normalized package
+        |
+        +--> rdl_entity
+        +--> rdl_relationship
+        +--> source_mapping entities for contextual/ternary mappings
+        |
+        v
+Deterministic parity verification
+        ^
+        |
+Existing CFIHOS snapshot remains runtime reference
+```
+
+The adapter deliberately preserves `tag_class` and `equipment_class` as different typed identities. This is required because CFIHOS can reuse the same native code in both domains.
+
+Some CFIHOS sheets encode contextual mappings that cannot be represented losslessly by one binary relationship. RDL-004 therefore represents the `tag equip class prop src std` rows as first-class `source_mapping` entities linked to property, source standard and any resolvable Tag/Equipment identities. This avoids collapsing multiple mappings that share the same property and source standard.
+
+Where a source sheet itself says only "tag or equipment class", the normalized model records the ambiguity rather than pretending that the source supplied a domain it did not provide.
+
+RDL-004 is a parallel persistence path only. The UI continues to use the reviewed snapshot repositories. Runtime cutover remains deferred until database-backed queries are proven equivalent at behavior level.

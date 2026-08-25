@@ -36,6 +36,9 @@ const databaseMigrate = read("scripts/db-migrate.sh");
 const rdlRepository = read("src/rdl/repository/RdlRepository.ts");
 const databaseClient = read("server/db/DatabaseClient.ts");
 const databaseConfig = read("server/db/config.ts");
+const cfihosVocabularyMigration = read("database/migrations/003_extend_cfihos_ingestion_vocabulary.sql");
+const cfihosIngestionGenerator = read("scripts/generate-cfihos-ingestion-sql.ts");
+const cfihosParityTest = read("scripts/db-test-rdl-004-parity.ts");
 
 const routes = [
   "/classes/tag",
@@ -117,6 +120,13 @@ assert.ok(coreDomainMigration.includes("CREATE OR REPLACE VIEW rdl.entity_identi
 assert.ok(coreDomainTest.includes("Same native identifier can coexist") && coreDomainTest.includes("ROLLBACK"), "RDL-003 database test must verify collision safety without persisting fixture data");
 assert.ok(coreDomainModel.includes("RdlEntityIdentity") && coreDomainModel.includes("RdlRelationshipRecord"), "Application model must expose generic RDL entity and relationship vocabulary");
 assert.ok(requirements.includes("RDL-CORE-001") && requirements.includes("RDL-CORE-010"), "Requirements must capture the RDL-003 core domain constraints");
+assert.ok(packageJson.includes('"db:ingest:cfihos"') && packageJson.includes('"db:test:rdl-004"'), "Package scripts must expose RDL-004 ingestion and parity commands");
+assert.ok(cfihosVocabularyMigration.includes("source_mapping") && cfihosVocabularyMigration.includes("information_requirement"), "RDL-004 vocabulary must preserve contextual mappings and information requirements");
+assert.ok(cfihosIngestionGenerator.includes("cfihos-snapshot-v1") && cfihosIngestionGenerator.includes("content_sha256"), "CFIHOS adapter must be versioned and retain source hash provenance");
+assert.ok(cfihosIngestionGenerator.includes('"tag_class"') && cfihosIngestionGenerator.includes('"equipment_class"'), "CFIHOS adapter must preserve typed Tag and Equipment identities");
+assert.ok(cfihosIngestionGenerator.includes("ambiguous-tag-or-equipment"), "CFIHOS adapter must retain unresolved Tag/Equipment source ambiguity");
+assert.ok(cfihosParityTest.includes("CFIHOS-30000521") && cfihosParityTest.includes("sourceSha"), "RDL-004 parity test must verify typed identity and package provenance");
+assert.ok(requirements.includes("RDL-CFIHOS-001") && requirements.includes("RDL-CFIHOS-010"), "Requirements must capture the RDL-004 ingestion and parity constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 reviewed snapshot"), "Pilot data-source provenance is missing from the shell");

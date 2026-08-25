@@ -38,9 +38,11 @@ Implement source/release/package identity, provenance-aware entities and generic
 
 ## RDL-004 — CFIHOS Database Ingestion & Parity
 
-Load CFIHOS into PostgreSQL through an adapter and demonstrate parity with the inherited CFIHOS Explorer behavior.
+Status: implementation sprint.
 
-CFIHOS remains the regression reference implementation.
+Load the reviewed CFIHOS 2.0 snapshot through a versioned adapter into the generic PostgreSQL model, retain source/package provenance and contextual mappings, and demonstrate deterministic structural parity against the snapshot.
+
+The existing CFIHOS snapshot repositories remain the active runtime and regression reference implementation. Runtime cutover is explicitly deferred.
 
 ## RDL-005 — First Additional RDL
 
