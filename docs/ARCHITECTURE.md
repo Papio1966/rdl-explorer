@@ -288,3 +288,19 @@ The ingestion pattern is intentionally profile-driven:
 The mapping profile owns source-specific sheet/header aliases. The SQL generator owns generic source/release/package, entity, relationship, provenance, and audit behaviour. This avoids embedding CCUS column names in the database model or repository layer and establishes the extension point for structurally different RDLs in later sprints.
 
 CFIHOS and CCUS coexist as independent `rdl_source` / `rdl_release` / `rdl_package` trees. A native identifier may appear in both packages without collision. Authoritative relationships remain package-local; cross-RDL equivalence will be a separate explicit concept rather than an implicit join on native identifiers.
+
+## RDL-008 — Water / Desalination format-generic ingestion
+
+RDL-008 uses the supplied Water / Desalination workbook to prove that the RDL ingestion boundary is not tied to CFIHOS column names or source-native identifiers.
+
+The source has the familiar workbook subject areas but materially different headers and identity conventions. Examples include `equipment class code`, `property code`, `unit code`, discipline codes without separate object IDs, picklist values without native value IDs, and source-property mappings without native mapping IDs.
+
+The normalized path is therefore:
+
+`Water / Desalination workbook -> water-desalination-normalized-v1 profile -> generic workbook ingestion generator -> existing rdl_entity / rdl_relationship model`
+
+The mapping profile translates source sheet/header vocabulary. Where the source omits a native identifier for a first-class normalized object, the generic generator creates a deterministic canonical identifier derived from source-key plus stable source fields. The source locator still retains workbook sheet, row and mapping-profile provenance. This is intentionally different from inventing source-native IDs.
+
+Code-based hierarchy is also handled generically: a profile may supply an explicit parent identifier instead of the CFIHOS-style parent-name lookup. No Water-specific PostgreSQL table, relationship type or repository implementation is introduced.
+
+RDL-008 keeps authoritative relationships package-local and proves independent coexistence of CFIHOS, CCUS and Water / Desalination. Browser multi-RDL UX remains deferred to RDL-009.

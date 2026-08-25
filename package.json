@@ -24,7 +24,9 @@
     "db:test:rdl-005": "bash scripts/db-test-rdl-005.sh",
     "db:test:rdl-006": "bash scripts/db-test-rdl-006.sh",
     "db:ingest:ccus": "bash scripts/db-ingest-ccus.sh",
-    "db:test:rdl-007": "bash scripts/db-test-rdl-007.sh"
+    "db:test:rdl-007": "bash scripts/db-test-rdl-007.sh",
+    "db:ingest:water-desalination": "bash scripts/db-ingest-water-desalination.sh",
+    "db:test:rdl-008": "bash scripts/db-test-rdl-008.sh"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",

@@ -11,6 +11,12 @@ const truthy = (value: string) => ["yes", "y", "true", "1"].includes(value.toLow
 
 type Row = Record<string, unknown>;
 
+function stableDerivedId(sourceKey: string, kind: string, parts: string[]): string {
+  const seed = parts.map((part) => part.trim().toLowerCase()).join("|");
+  const digest = createHash("sha256").update(seed).digest("hex").slice(0, 16);
+  return `${sourceKey}:${kind}:${digest}`;
+}
+
 export function generateCfihosFormatSql(profile: RdlWorkbookMappingProfile): string {
   const path = resolve(profile.workbookPath);
   const bytes = readFileSync(path);
@@ -43,21 +49,30 @@ export function generateCfihosFormatSql(profile: RdlWorkbookMappingProfile): str
     emit(`INSERT INTO rdl.rdl_entity (package_id, entity_type_code, native_identifier, name, definition, lifecycle_status, is_authoritative, normalized_metadata, source_locator) SELECT package_id, ${sql(type)}, ${sql(nativeId)}, ${sql(name)}, ${definition ? sql(definition) : "NULL"}, 'active', true, ${jsonSql(metadata)}, ${jsonSql({ sheet, row: rowIndex + 2, mappingProfile: profile.profileKey })} FROM rdl.rdl_package WHERE package_key=${sql(packageKey)} ON CONFLICT (package_id, entity_type_code, native_identifier) DO UPDATE SET name=EXCLUDED.name, definition=EXCLUDED.definition, normalized_metadata=EXCLUDED.normalized_metadata, source_locator=EXCLUDED.source_locator;`);
   }
 
-  rows("tagClass").forEach((r, i) => entity("tag_class", t(r,"tagClassId"), t(r,"tagClassName"), t(r,"tagClassDefinition"), { parentName:t(r,"tagParentName"), abstract:truthy(String(r["abstract class indicator"] ?? "")), equipmentExpectedInstalled:String(r["equipment expected to be installed indicator"] ?? "").trim() }, profile.sheetNames.tagClass, i));
-  rows("equipmentClass").forEach((r, i) => entity("equipment_class", t(r,"equipmentClassId"), t(r,"equipmentClassName"), t(r,"equipmentClassDefinition"), { parentName:t(r,"equipmentParentName"), abstract:truthy(String(r["abstract class indicator"] ?? "")), sparePartInformationRequired:String(r["spare part information required indicator"] ?? "").trim() }, profile.sheetNames.equipmentClass, i));
+  rows("tagClass").forEach((r, i) => entity("tag_class", t(r,"tagClassId"), t(r,"tagClassName"), t(r,"tagClassDefinition"), { parentName:t(r,"tagParentName"), parentId:t(r,"tagParentId"), abstract:truthy(String(r["abstract class indicator"] ?? "")), equipmentExpectedInstalled:String(r["equipment expected to be installed indicator"] ?? "").trim() }, profile.sheetNames.tagClass, i));
+  rows("equipmentClass").forEach((r, i) => entity("equipment_class", t(r,"equipmentClassId"), t(r,"equipmentClassName"), t(r,"equipmentClassDefinition"), { parentName:t(r,"equipmentParentName"), parentId:t(r,"equipmentParentId"), abstract:truthy(String(r["abstract class indicator"] ?? "")), sparePartInformationRequired:String(r["spare part information required indicator"] ?? "").trim() }, profile.sheetNames.equipmentClass, i));
   rows("property").forEach((r, i) => entity("property", t(r,"propertyId"), t(r,"propertyName"), t(r,"propertyDefinition"), { dataType:t(r,"propertyDataType"), dataTypeLength:t(r,"propertyLength"), unitId:t(r,"propertyUnitId"), controlledListId:t(r,"propertyPicklistId") }, profile.sheetNames.property, i));
   rows("documentType").forEach((r, i) => entity("document_type", t(r,"documentId"), t(r,"documentName"), t(r,"documentDefinition"), { shortCode:t(r,"documentShortCode"), classification:t(r,"documentClassification") }, profile.sheetNames.documentType, i));
   rows("discipline").forEach((r, i) => entity("discipline", t(r,"disciplineId"), t(r,"disciplineName"), t(r,"disciplineDescription"), { code:t(r,"disciplineCode") }, profile.sheetNames.discipline, i));
-  rows("unit").forEach((r, i) => entity("unit_of_measure", t(r,"unitId"), t(r,"unitName"), String(r["unit of measure description"] ?? "").trim(), { symbol:t(r,"unitSymbol"), dimensionName:t(r,"unitDimensionName"), dimensionId:t(r,"unitId") }, profile.sheetNames.unit, i));
-  rows("sourceStandard").forEach((r, i) => entity("source_standard", t(r,"sourceStandardId"), t(r,"sourceStandardCode") || t(r,"sourceStandardId"), t(r,"sourceStandardDescription"), {}, profile.sheetNames.sourceStandard, i));
-  rows("handoverEvent").forEach((r, i) => entity("handover_event", t(r,"handoverId"), t(r,"handoverName"), t(r,"handoverDescription"), { sequence:String(r["handover event reporting sequence number"] ?? "").trim() }, profile.sheetNames.handoverEvent, i));
+  rows("unit").forEach((r, i) => entity("unit_of_measure", t(r,"unitId"), t(r,"unitName"), t(r,"unitDescription") || String(r["unit of measure description"] ?? "").trim(), { symbol:t(r,"unitSymbol"), dimensionName:t(r,"unitDimensionName"), dimensionId:t(r,"unitId") }, profile.sheetNames.unit, i));
+  rows("sourceStandard").forEach((r, i) => entity("source_standard", t(r,"sourceStandardId"), t(r,"sourceStandardName") || t(r,"sourceStandardCode") || t(r,"sourceStandardId"), t(r,"sourceStandardDescription"), {}, profile.sheetNames.sourceStandard, i));
+  rows("handoverEvent").forEach((r, i) => entity("handover_event", t(r,"handoverId"), t(r,"handoverName"), t(r,"handoverDescription"), { sequence:t(r,"handoverSequence") || String(r["handover event reporting sequence number"] ?? "").trim() }, profile.sheetNames.handoverEvent, i));
 
   const controlledLists = new Map<string,string>();
   rows("controlledValue").forEach((r) => { const id=t(r,"picklistId"); if(id) controlledLists.set(id,t(r,"picklistName")||id); });
   [...controlledLists].forEach(([id,name],i)=>entity("controlled_list",id,name,"",{},profile.sheetNames.controlledValue,i));
-  rows("controlledValue").forEach((r,i)=>entity("controlled_value",t(r,"picklistValueId"),t(r,"picklistValueCode")||t(r,"picklistValueId"),t(r,"picklistValueDescription"),{controlledListId:t(r,"picklistId"),controlledListName:t(r,"picklistName")},profile.sheetNames.controlledValue,i));
-  rows("informationRequirement").forEach((r,i)=>entity("information_requirement",t(r,"informationRequirementId"),t(r,"informationRequirementTitle")||t(r,"informationRequirementNumber")||t(r,"informationRequirementId"),t(r,"informationRequirementDescription"),{requirementNumber:t(r,"informationRequirementNumber"),typicalDeliverable:String(r["typical deliverable"]??"").trim(),sourceStandard:String(r["source standard"]??"").trim()},profile.sheetNames.informationRequirement,i));
-  rows("sourceMapping").forEach((r,i)=>entity("source_mapping",t(r,"mappingId"),t(r,"mappingId"),"",{classId:t(r,"classId"),propertyId:t(r,"propertyId"),sourceStandardId:t(r,"sourceStandardId"),sourceSection:String(r["source standard section"]??"").trim(),sourceField:String(r["source standard field"]??"").trim()},profile.sheetNames.sourceMapping,i));
+  rows("controlledValue").forEach((r,i)=>{
+    const listId=t(r,"picklistId");
+    const valueCode=t(r,"picklistValueCode");
+    const valueId=t(r,"picklistValueId") || stableDerivedId(profile.sourceKey,"controlled-value",[listId,valueCode,t(r,"picklistValueSequence")]);
+    entity("controlled_value",valueId,valueCode||valueId,t(r,"picklistValueDescription"),{controlledListId:listId,controlledListName:t(r,"picklistName"),sequence:t(r,"picklistValueSequence")},profile.sheetNames.controlledValue,i);
+  });
+  rows("informationRequirement").forEach((r,i)=>entity("information_requirement",t(r,"informationRequirementId"),t(r,"informationRequirementTitle")||t(r,"informationRequirementNumber")||t(r,"informationRequirementId"),t(r,"informationRequirementDescription"),{requirementNumber:t(r,"informationRequirementNumber"),classId:t(r,"informationRequirementClassId"),propertyId:t(r,"informationRequirementPropertyId"),requirementLevel:t(r,"informationRequirementLevel"),typicalDeliverable:String(r["typical deliverable"]??"").trim(),sourceStandard:String(r["source standard"]??"").trim()},profile.sheetNames.informationRequirement,i));
+  rows("sourceMapping").forEach((r,i)=>{
+    const classId=t(r,"classId"), propertyId=t(r,"propertyId"), sourceStandardId=t(r,"sourceStandardId");
+    const mappingId=t(r,"mappingId") || stableDerivedId(profile.sourceKey,"source-mapping",[classId,propertyId,sourceStandardId,t(r,"mappingNote")]);
+    entity("source_mapping",mappingId,mappingId,"",{classId,propertyId,sourceStandardId,sourceSection:String(r["source standard section"]??"").trim(),sourceField:String(r["source standard field"]??"").trim(),mappingNote:t(r,"mappingNote")},profile.sheetNames.sourceMapping,i);
+  });
 
   const tagIds = new Set(rows("tagClass").map(r=>t(r,"tagClassId")).filter(Boolean));
   const equipmentIds = new Set(rows("equipmentClass").map(r=>t(r,"equipmentClassId")).filter(Boolean));
@@ -67,22 +82,34 @@ export function generateCfihosFormatSql(profile: RdlWorkbookMappingProfile): str
     emit(`INSERT INTO rdl.rdl_relationship (package_id, relationship_type_code, source_entity_id, target_entity_id, relationship_status, is_authoritative, attributes, source_locator) SELECT p.package_id, ${sql(type)}, s.entity_id, t.entity_id, 'active', true, ${jsonSql(attrs)}, ${jsonSql({sheet,row:rowIndex+2,mappingProfile:profile.profileKey})} FROM rdl.rdl_package p JOIN rdl.rdl_entity s ON s.package_id=p.package_id AND s.entity_type_code=${sql(sourceType)} AND s.native_identifier=${sql(sourceId)} JOIN rdl.rdl_entity t ON t.package_id=p.package_id AND t.entity_type_code=${sql(targetType)} AND t.native_identifier=${sql(targetId)} WHERE p.package_key=${sql(packageKey)} ON CONFLICT (package_id, relationship_type_code, source_entity_id, target_entity_id) DO UPDATE SET attributes=EXCLUDED.attributes, source_locator=EXCLUDED.source_locator;`);
   }
 
-  function hierarchy(key:string,type:string,idField:string,nameField:string,parentField:string){
-    const data=rows(key); const byName=new Map(data.map(r=>[t(r,nameField).toLowerCase(),t(r,idField)]));
-    data.forEach((r,i)=>{const parent=byName.get(t(r,parentField).toLowerCase()); if(parent) relation("entity_parent",type,t(r,idField),type,parent,{},profile.sheetNames[key],i);});
+  function hierarchy(key:string,type:string,idField:string,nameField:string,parentNameField:string,parentIdField:string){
+    const data=rows(key);
+    const byName=new Map(data.map(r=>[t(r,nameField).toLowerCase(),t(r,idField)]));
+    const ids=new Set(data.map(r=>t(r,idField)).filter(Boolean));
+    data.forEach((r,i)=>{
+      const explicitParent=t(r,parentIdField);
+      const namedParent=byName.get(t(r,parentNameField).toLowerCase()) ?? "";
+      const parent=explicitParent && ids.has(explicitParent) ? explicitParent : namedParent;
+      if(parent) relation("entity_parent",type,t(r,idField),type,parent,{},profile.sheetNames[key],i);
+    });
   }
-  hierarchy("tagClass","tag_class","tagClassId","tagClassName","tagParentName");
-  hierarchy("equipmentClass","equipment_class","equipmentClassId","equipmentClassName","equipmentParentName");
+  hierarchy("tagClass","tag_class","tagClassId","tagClassName","tagParentName","tagParentId");
+  hierarchy("equipmentClass","equipment_class","equipmentClassId","equipmentClassName","equipmentParentName","equipmentParentId");
 
-  rows("tagClassProperty").forEach((r,i)=>relation("class_property","tag_class",t(r,"tagClassId"),"property",t(r,"propertyId"),{sequence:String(r["property sequence number"]??"").trim()},profile.sheetNames.tagClassProperty,i));
-  rows("equipmentClassProperty").forEach((r,i)=>relation("class_property","equipment_class",t(r,"equipmentClassId"),"property",t(r,"propertyId"),{mandatory:String(r["mandatory indicator"]??"").trim(),sequence:String(r["property sequence number"]??"").trim()},profile.sheetNames.equipmentClassProperty,i));
+  rows("tagClassProperty").forEach((r,i)=>relation("class_property","tag_class",t(r,"tagClassId"),"property",t(r,"propertyId"),{mandatory:t(r,"mandatory"),relevance:t(r,"relevance"),sequence:String(r["property sequence number"]??"").trim()},profile.sheetNames.tagClassProperty,i));
+  rows("equipmentClassProperty").forEach((r,i)=>relation("class_property","equipment_class",t(r,"equipmentClassId"),"property",t(r,"propertyId"),{mandatory:t(r,"mandatory")||String(r["mandatory indicator"]??"").trim(),relevance:t(r,"relevance"),sequence:String(r["property sequence number"]??"").trim()},profile.sheetNames.equipmentClassProperty,i));
   const disciplineByCode = new Map(rows("discipline").map(r => [t(r,"disciplineCode").toLowerCase(), t(r,"disciplineId")]));
   rows("disciplineDocument").forEach((r,i)=>{
     const disciplineId = disciplineByCode.get(t(r,"disciplineRefCode").toLowerCase()) ?? "";
-    relation("document_discipline","document_type",t(r,"documentId"),"discipline",disciplineId,{},profile.sheetNames.disciplineDocument,i);
+    relation("document_discipline","document_type",t(r,"documentId"),"discipline",disciplineId,{requirementLevel:t(r,"requirementLevel")},profile.sheetNames.disciplineDocument,i);
   });
-  rows("tagEquipment").forEach((r,i)=>relation("tag_equipment_mapping","tag_class",t(r,"tagClassId"),"equipment_class",t(r,"equipmentClassId"),{mappingId:t(r,"relationshipId"),reason:String(r["relationship reason for mapping"]??"").trim()},profile.sheetNames.tagEquipment,i));
-  rows("controlledValue").forEach((r,i)=>relation("controlled_list_value","controlled_list",t(r,"picklistId"),"controlled_value",t(r,"picklistValueId"),{},profile.sheetNames.controlledValue,i));
+  rows("tagEquipment").forEach((r,i)=>relation("tag_equipment_mapping","tag_class",t(r,"tagClassId"),"equipment_class",t(r,"equipmentClassId"),{mappingId:t(r,"relationshipId"),relationshipType:t(r,"relationshipType"),reason:String(r["relationship reason for mapping"]??"").trim()},profile.sheetNames.tagEquipment,i));
+  rows("controlledValue").forEach((r,i)=>{
+    const listId=t(r,"picklistId");
+    const valueCode=t(r,"picklistValueCode");
+    const valueId=t(r,"picklistValueId") || stableDerivedId(profile.sourceKey,"controlled-value",[listId,valueCode,t(r,"picklistValueSequence")]);
+    relation("controlled_list_value","controlled_list",listId,"controlled_value",valueId,{sequence:t(r,"picklistValueSequence")},profile.sheetNames.controlledValue,i);
+  });
 
   rows("property").forEach((r,i)=>{
     const prop=t(r,"propertyId"), pick=t(r,"propertyPicklistId"), unit=t(r,"propertyUnitId");
@@ -92,18 +119,20 @@ export function generateCfihosFormatSql(profile: RdlWorkbookMappingProfile): str
 
   rows("classDocument").forEach((r,i)=>{
     const classId=t(r,"classId"), doc=t(r,"documentId");
-    if(tagIds.has(classId)) relation("class_document","tag_class",classId,"document_type",doc,{requirementId:t(r,"informationRequirementId")},profile.sheetNames.classDocument,i);
-    if(equipmentIds.has(classId)) relation("class_document","equipment_class",classId,"document_type",doc,{requirementId:t(r,"informationRequirementId")},profile.sheetNames.classDocument,i);
+    const attrs={requirementId:t(r,"informationRequirementId"),requirementLevel:t(r,"requirementLevel")};
+    if(tagIds.has(classId)) relation("class_document","tag_class",classId,"document_type",doc,attrs,profile.sheetNames.classDocument,i);
+    if(equipmentIds.has(classId)) relation("class_document","equipment_class",classId,"document_type",doc,attrs,profile.sheetNames.classDocument,i);
   });
 
   rows("classSourceStandard").forEach((r,i)=>{
     const classId=t(r,"classId"), standard=t(r,"sourceStandardId");
-    if(tagIds.has(classId)) relation("entity_source_standard","tag_class",classId,"source_standard",standard,{},profile.sheetNames.classSourceStandard,i);
-    if(equipmentIds.has(classId)) relation("entity_source_standard","equipment_class",classId,"source_standard",standard,{},profile.sheetNames.classSourceStandard,i);
+    if(tagIds.has(classId)) relation("entity_source_standard","tag_class",classId,"source_standard",standard,{mappingNote:t(r,"mappingNote")},profile.sheetNames.classSourceStandard,i);
+    if(equipmentIds.has(classId)) relation("entity_source_standard","equipment_class",classId,"source_standard",standard,{mappingNote:t(r,"mappingNote")},profile.sheetNames.classSourceStandard,i);
   });
 
   rows("sourceMapping").forEach((r,i)=>{
-    const mapping=t(r,"mappingId"), classId=t(r,"classId"), prop=t(r,"propertyId"), standard=t(r,"sourceStandardId");
+    const classId=t(r,"classId"), prop=t(r,"propertyId"), standard=t(r,"sourceStandardId");
+    const mapping=t(r,"mappingId") || stableDerivedId(profile.sourceKey,"source-mapping",[classId,prop,standard,t(r,"mappingNote")]);
     relation("mapping_property","source_mapping",mapping,"property",prop,{},profile.sheetNames.sourceMapping,i);
     relation("mapping_standard","source_mapping",mapping,"source_standard",standard,{},profile.sheetNames.sourceMapping,i);
     if(tagIds.has(classId)) relation("mapping_tag_class","source_mapping",mapping,"tag_class",classId,{},profile.sheetNames.sourceMapping,i);

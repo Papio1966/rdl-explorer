@@ -54,6 +54,9 @@ const rdl007Profile = read("scripts/rdl-ingestion/CcusCfihosFormatProfile.ts");
 const rdl007Generator = read("scripts/rdl-ingestion/generateCfihosFormatSql.ts");
 const rdl007Test = read("scripts/db-test-rdl-007-multi-rdl.ts");
 const rdl007Ingest = read("scripts/db-ingest-ccus.sh");
+const rdl008Profile = read("scripts/rdl-ingestion/WaterDesalinationProfile.ts");
+const rdl008Test = read("scripts/db-test-rdl-008-genericity.ts");
+const rdl008Ingest = read("scripts/db-ingest-water-desalination.sh");
 
 const routes = [
   "/classes/tag",
@@ -163,6 +166,12 @@ assert.ok(rdl007Generator.includes("packageKey") && rdl007Generator.includes("co
 assert.ok(rdl007Test.includes("multi-RDL identity") && rdl007Test.includes("CFIHOS isolation") && rdl007Test.includes("idempotence"), "RDL-007 test must prove package coexistence, CFIHOS isolation and repeatable ingestion");
 assert.ok(rdl007Ingest.includes("generate-ccus-ingestion-sql.ts"), "RDL-007 CCUS command must use the profile-driven SQL generator");
 assert.ok(requirements.includes("RDL-MR-001") && requirements.includes("RDL-MR-008"), "Requirements must capture first multi-RDL ingestion constraints");
+assert.ok(packageJson.includes('"db:ingest:water-desalination"') && packageJson.includes('"db:test:rdl-008"'), "Package scripts must expose RDL-008 Water ingestion and genericity tests");
+assert.ok(rdl008Profile.includes("water-desalination-normalized-v1") && rdl008Profile.includes("WATER_DESALINATION_PROFILE"), "RDL-008 must define a versioned Water / Desalination mapping profile");
+assert.ok(rdl007Generator.includes("stableDerivedId") && rdl007Generator.includes("parentIdField"), "RDL-008 must generalize ingestion for identifier gaps and code-based hierarchy without source-specific tables");
+assert.ok(rdl008Test.includes("format genericity") && rdl008Test.includes("three-RDL coexistence") && rdl008Test.includes("prior baselines"), "RDL-008 test must prove format genericity, three-RDL coexistence and prior baseline protection");
+assert.ok(rdl008Ingest.includes("generate-water-desalination-ingestion-sql.ts"), "RDL-008 Water command must use the generic mapping-profile SQL generator");
+assert.ok(requirements.includes("RDL-GEN-001") && requirements.includes("RDL-GEN-009"), "Requirements must capture the RDL-008 genericity constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 reviewed snapshot"), "Pilot data-source provenance is missing from the shell");
@@ -217,6 +226,7 @@ console.log("PASS RDL-002 database foundation: schemas, migrations, configuratio
 console.log("PASS RDL-005 read parity: server-side PostgreSQL repository, service boundary and deterministic parity gate are present.");
 console.log("PASS RDL-006 controlled cutover: snapshot/postgresql/dual selection and fail-closed parity comparison are present.");
 console.log("PASS RDL-007 multi-RDL foundation: CCUS mapping profile, provenance, coexistence and idempotence gates are present.");
+console.log("PASS RDL-008 genericity proof: Water / Desalination mapping, deterministic identifier derivation and three-RDL coexistence gates are present.");
 console.log("PASS pilot readiness: status, provenance, honest search state and feedback route are present.");
 console.log("PASS class detail UX: anchored contents navigation and accessible progressive disclosure are present.");
 console.log("PASS document detail UX: anchored contents navigation and accessible progressive disclosure are present.");
