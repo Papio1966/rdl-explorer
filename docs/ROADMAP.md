@@ -12,13 +12,17 @@ Establish RDL Explorer as a separate product from CFIHOS Explorer.
 
 ## RDL-002 — PostgreSQL Foundation
 
+**Status: implemented foundation.**
+
 Introduce the platform persistence boundary without replacing CFIHOS runtime behavior yet.
 
 - PostgreSQL database `rdl_explorer`;
-- initial schemas such as `rdl`, `ingestion`, `metadata`;
-- migration framework;
-- application configuration and health checks;
-- service/repository boundary suitable for database-backed reads.
+- initial schemas `rdl`, `ingestion`, `metadata`;
+- migration framework and migration history;
+- environment configuration and local health checks;
+- server database-client contract;
+- application-facing RDL repository boundary;
+- CFIHOS snapshot remains the active runtime path.
 
 ## RDL-003 — Generic RDL Domain Model
 

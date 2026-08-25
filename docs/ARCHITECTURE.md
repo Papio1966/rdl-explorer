@@ -4,7 +4,7 @@
 
 RDL Explorer evolves the proven CFIHOS Explorer experience into a provenance-aware, multi-RDL engineering-information platform.
 
-RDL-001 establishes the target architecture without changing the inherited runtime data path.
+RDL-001 established the target architecture. RDL-002 adds the PostgreSQL infrastructure boundary without changing the inherited runtime data path.
 
 ## 2. Authority and persistence
 
@@ -153,3 +153,19 @@ PostgreSQL-backed CFIHOS package
 ```
 
 The database path becomes authoritative for RDL Explorer only after reproducible parity is demonstrated for agreed reference cases and regression tests.
+
+## 10. RDL-002 PostgreSQL foundation
+
+RDL-002 creates the initial database and migration boundary while deliberately deferring RDL domain tables to RDL-003.
+
+```text
+rdl_explorer
+  |
+  +-- rdl        future normalized RDL domain
+  +-- ingestion  import/process operational state
+  +-- metadata   migration and platform metadata
+```
+
+The repository contains a database bootstrap script, ordered SQL migrations, a migration runner, a local database health check, environment configuration guidance, and application/server interfaces that define the future repository boundary.
+
+The current CFIHOS snapshot remains the active repository. No UI route, Assistant behavior or CIS behavior is switched to PostgreSQL in RDL-002.

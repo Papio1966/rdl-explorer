@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "db:migrate": "bash scripts/db-migrate.sh",
+    "db:health": "bash scripts/db-health.sh",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
