@@ -49,6 +49,7 @@ const HelpPage = lazyNamed(() => import("./pages/HelpPage"), "HelpPage");
 const RdlCataloguePage = lazyNamed(() => import("./pages/RdlCataloguePage"), "RdlCataloguePage");
 const RdlSearchPage = lazyNamed(() => import("./pages/RdlSearchPage"), "RdlSearchPage");
 const RdlEntityPage = lazyNamed(() => import("./pages/RdlEntityPage"), "RdlEntityPage");
+const RdlIntelligencePage = lazyNamed(() => import("./pages/RdlIntelligencePage"), "RdlIntelligencePage");
 
 function RouteFallback() {
   return (
@@ -74,6 +75,7 @@ export default function App() {
             <Route path="/rdls" element={<RdlCataloguePage />} />
             <Route path="/search" element={<RdlSearchPage />} />
             <Route path="/rdl/:sourceKey/:entityType/:nativeIdentifier" element={<RdlEntityPage />} />
+            <Route path="/intelligence" element={<RdlIntelligencePage />} />
             <Route path="/inspect/documents" element={<DocumentSchemaInspectionPage />} />
             <Route path="/inspect/standards" element={<SourceStandardsInspectionPage />} />
             <Route path="/classes/tag" element={<TagClassesPage />} />

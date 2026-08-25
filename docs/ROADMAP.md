@@ -34,19 +34,11 @@
 
 ## RDL-009 — Multi-RDL UX & Global Search
 
-**Status: implementation sprint.** Expose the three proven RDL packages through an RDL scope selector, catalogue, source-aware global search, package-aware generic entity routes and provenance badges. Retain the established deep CFIHOS specialist pages while multi-RDL relationship UX remains a later concern.
+**Status: complete.** Expose the three proven RDL packages through an RDL scope selector, catalogue, source-aware global search, package-aware generic entity routes and provenance badges. Retain the established deep CFIHOS specialist pages while multi-RDL relationship UX remains a later concern.
 
 ## RDL-010 — Cross-RDL Intelligence
 
-Add standards-intelligence capabilities:
-
-- equivalent concepts;
-- overlaps;
-- gaps;
-- conflicting definitions;
-- complementary properties/documents;
-- governed mappings;
-- AI-assisted cross-RDL interpretation.
+**Status: implementation sprint.** Add a governed cross-RDL mapping model, deterministic candidate mappings, source-pair comparison, structural overlap/gap indicators and provenance/confidence-aware UX. Authoritative within-package relationships remain separate. AI-suggested mappings are intentionally deferred until deterministic governance is established.
 
 ## Later enterprise roadmap
 

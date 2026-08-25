@@ -190,3 +190,16 @@ RDL-001 is complete when:
 - **RDL-UX-008 — Browser-safe projection** — Until hosted PostgreSQL connectivity is introduced, the browser search index shall be a deterministic generated projection of the same governed source packages and shall contain no database credentials.
 - **RDL-UX-009 — Specialist-view continuity** — RDL-009 shall not remove the existing deep CFIHOS browse/detail pages, CIS behaviour or Assistant retrieval.
 - **RDL-UX-010 — No semantic equivalence yet** — Global search shall find and navigate entities but shall not infer cross-RDL equivalence, overlap, conflict or gap semantics; those belong to RDL-010.
+
+## RDL-010 — Cross-RDL Intelligence
+
+- **RDL-XINT-001** Cross-RDL mappings SHALL be stored separately from source-authoritative within-package relationships.
+- **RDL-XINT-002** Every cross-RDL mapping SHALL retain mapping type, provenance method, confidence, lifecycle status and evidence.
+- **RDL-XINT-003** Automatic exact-name rules SHALL create only candidate `possible_match` mappings and SHALL NOT assert equivalence.
+- **RDL-XINT-004** Cross-RDL mappings SHALL connect entities from different RDL sources/packages only.
+- **RDL-XINT-005** The platform SHALL support mapping types `equivalent`, `broader`, `narrower`, `related`, `possible_match` and `no_match`.
+- **RDL-XINT-006** The browser SHALL expose deterministic comparison, overlap/gap indicators and candidate mappings without requiring database credentials.
+- **RDL-XINT-007** Comparison SHALL retain source, release, entity type and native identifier provenance for both sides.
+- **RDL-XINT-008** Structural overlap/gap counts SHALL be labelled as coverage indicators, not semantic completeness claims.
+- **RDL-XINT-009** AI-suggested mappings MAY be added later but SHALL remain distinguishable from manual and rule-derived mappings and require governance before approval.
+- **RDL-XINT-010** Existing CFIHOS, CCUS and Water / Desalination source content and authoritative relationships SHALL remain unchanged by cross-RDL intelligence generation.
