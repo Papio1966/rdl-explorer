@@ -83,6 +83,12 @@ const governanceQueueApi = read("api/governance/queue.ts");
 const governanceReviewApi = read("api/governance/review.ts");
 const governanceBrowserService = read("src/rdl/governanceService.ts");
 const rdl012Test = read("scripts/test-rdl-012-service-boundary.ts");
+const pgJsonClient = read("server/db/PgJsonClient.ts");
+const databaseRuntime = read("server/db/runtime.ts");
+const governanceApiShared = read("api/governance/_shared.ts");
+const healthApi = read("api/health.ts");
+const readinessApi = read("api/readiness.ts");
+const rdl013Test = read("scripts/test-rdl-013-runtime.ts");
 
 const routes = [
   "/classes/tag",
@@ -238,6 +244,14 @@ assert.ok(governanceBrowserService.includes("/api/governance/session") && govern
 assert.ok(governancePage.includes("Authenticated governance service boundary") && governancePage.includes("live governed actions enabled") && governancePage.includes("Read-only mode"), "RDL-012 governance page must enable live actions only for an authenticated reviewer session");
 assert.ok(rdl012Test.includes("signature is invalid") && rdl012Test.includes("not authorized") && rdl012Test.includes("stale or invalid"), "RDL-012 test must cover signature integrity, reviewer authorization and replay-window rejection");
 assert.ok(requirements.includes("RDL-AUTH-001") && requirements.includes("RDL-AUTH-010"), "Requirements must capture RDL-012 authenticated governance service constraints");
+assert.ok(packageJson.includes('"test:rdl-013"') && packageJson.includes('"db:test:rdl-013"'), "RDL-013 must expose runtime and database integration tests");
+assert.ok(pgJsonClient.includes('from "pg"') && pgJsonClient.includes("class PgJsonClient") && pgJsonClient.includes("transaction"), "RDL-013 must use a managed Node PostgreSQL pool with an explicit transaction boundary");
+assert.ok(databaseRuntime.includes("getRdlDatabaseClient") && databaseRuntime.includes("PgJsonClient.fromConfig"), "RDL-013 must expose a singleton production database runtime");
+assert.ok(governanceApiShared.includes("getRdlDatabaseClient") && !governanceApiShared.includes("PsqlJsonClient"), "RDL-013 production governance API must not spawn psql");
+assert.ok(healthApi.includes('check: "liveness"') && readinessApi.includes('check: "readiness"') && readinessApi.includes("database.health"), "RDL-013 must separate liveness from database-backed readiness");
+assert.ok(envExample.includes("RDL_DATABASE_POOL_MAX") && envExample.includes("RDL_DATABASE_SSL_REJECT_UNAUTHORIZED"), "RDL-013 must document pool and TLS runtime configuration");
+assert.ok(rdl013Test.includes("DatabaseRuntimeError") && rdl013Test.includes("poolStats"), "RDL-013 runtime test must cover structured errors and pool telemetry");
+assert.ok(requirements.includes("RDL-RUNTIME-001") && requirements.includes("RDL-RUNTIME-010"), "Requirements must capture RDL-013 production runtime constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");

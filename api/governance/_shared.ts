@@ -1,6 +1,6 @@
 import { GovernanceAuthError, authenticateGovernanceIdentity, type HeaderBag } from "../../server/auth/GovernanceIdentity.ts";
-import { PsqlJsonClient } from "../../server/db/PsqlJsonClient.ts";
-import { getRdlDatabaseConfig } from "../../server/db/config.ts";
+import { getRdlDatabaseClient } from "../../server/db/runtime.ts";
+import { DatabaseRuntimeError } from "../../server/db/PgJsonClient.ts";
 import { CrossRdlGovernanceRepository } from "../../server/rdl/CrossRdlGovernanceRepository.ts";
 import { GovernanceService } from "../../server/rdl/GovernanceService.ts";
 
@@ -9,14 +9,18 @@ export type ApiResponse = { status(code: number): ApiResponse; json(value: unkno
 
 export function authenticatedContext(request: ApiRequest) {
   const identity = authenticateGovernanceIdentity(request.headers);
-  const { connectionString } = getRdlDatabaseConfig();
-  const repository = new CrossRdlGovernanceRepository(new PsqlJsonClient(connectionString));
+  const repository = new CrossRdlGovernanceRepository(getRdlDatabaseClient());
   return { identity, service: new GovernanceService(repository) };
 }
 
 export function handleApiError(response: ApiResponse, error: unknown) {
   if (error instanceof GovernanceAuthError) {
     response.status(error.statusCode).json({ error: error.message });
+    return;
+  }
+  if (error instanceof DatabaseRuntimeError) {
+    console.error("Governance database request failed", { code: error.code });
+    response.status(503).json({ error: "The governance database is temporarily unavailable." });
     return;
   }
   const message = error instanceof Error ? error.message : "Unexpected governance service error.";

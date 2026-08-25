@@ -46,7 +46,11 @@
 
 ## RDL-012 — Authenticated Governance Service Boundary
 
-**Status: implementation sprint.** Add a trusted signed reviewer identity boundary, reviewer-role authorization, same-origin governance session/queue/review APIs, live repository-backed review actions and graceful read-only fallback when no enterprise identity assertion is present. Browser code never receives database credentials or the server signing secret.
+**Status: complete.** Add a trusted signed reviewer identity boundary, reviewer-role authorization, same-origin governance session/queue/review APIs, live repository-backed review actions and graceful read-only fallback when no enterprise identity assertion is present. Browser code never receives database credentials or the server signing secret.
+
+## RDL-013 — Production Server Runtime & PostgreSQL Driver
+
+**Status: implementation sprint.** Replace production governance API `psql` process spawning with a managed Node PostgreSQL pool, structured database/runtime errors, explicit transaction support, configurable TLS/pool settings, and separate liveness/readiness endpoints. Preserve all RDL-012 browser and governance API semantics.
 
 ## Later enterprise roadmap
 

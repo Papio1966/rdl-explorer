@@ -230,3 +230,16 @@ RDL-001 is complete when:
 - **RDL-AUTH-008 — Graceful unauthenticated mode** — Without a trusted reviewer session, the browser shall remain read-only and shall not imply that governance decisions can be persisted.
 - **RDL-AUTH-009 — Live authenticated queue** — Authenticated reviewers shall be able to load live repository-backed review items rather than relying on the static pilot projection.
 - **RDL-AUTH-010 — Gateway header hygiene** — Production deployment shall strip client-supplied governance identity headers before adding the trusted signed identity assertion.
+
+## RDL-013 — Production Server Runtime & PostgreSQL Driver
+
+- **RDL-RUNTIME-001** — Production API code shall use a managed Node PostgreSQL connection pool rather than spawning the `psql` CLI for each request.
+- **RDL-RUNTIME-002** — PostgreSQL connection details and pool configuration shall remain server-only and shall never be exposed to browser code.
+- **RDL-RUNTIME-003** — The runtime shall expose separate liveness and database-backed readiness checks.
+- **RDL-RUNTIME-004** — The database client shall provide deterministic close/shutdown behavior and pool telemetry suitable for operational diagnostics.
+- **RDL-RUNTIME-005** — Repository failures shall be surfaced through a structured server-side database error boundary without leaking credentials or raw connection strings to clients.
+- **RDL-RUNTIME-006** — The runtime shall support explicit transaction boundaries for future multi-step governed operations.
+- **RDL-RUNTIME-007** — Existing RDL repository contracts and RDL-012 governance API semantics shall remain unchanged when the database adapter changes.
+- **RDL-RUNTIME-008** — Local CLI `psql` tooling may remain for migrations and historical parity tests, but production request handling shall not depend on spawning `psql`.
+- **RDL-RUNTIME-009** — TLS behavior, pool size, idle timeout and connection timeout shall be deployment-configurable through server environment variables with safe local defaults.
+- **RDL-RUNTIME-010** — A database-backed integration test shall verify connectivity to the existing `rdl_explorer` schema without mutating governed data.

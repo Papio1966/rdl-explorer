@@ -34,10 +34,13 @@
     "db:test:rdl-010": "bash scripts/db-test-rdl-010.sh",
     "generate:rdl-governance": "tsx scripts/generate-rdl-governance.ts",
     "db:test:rdl-011": "bash scripts/db-test-rdl-011.sh",
-    "test:rdl-012": "tsx scripts/test-rdl-012-service-boundary.ts"
+    "test:rdl-012": "tsx scripts/test-rdl-012-service-boundary.ts",
+    "test:rdl-013": "tsx scripts/test-rdl-013-runtime.ts",
+    "db:test:rdl-013": "tsx scripts/db-test-rdl-013.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",
+    "pg": "8.16.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-markdown": "^10.1.0",
@@ -47,6 +50,7 @@
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.62.1",
     "@types/node": "^24.13.3",
+    "@types/pg": "8.15.5",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",

@@ -410,3 +410,15 @@ The browser never receives `RDL_GOVERNANCE_AUTH_SECRET` or PostgreSQL credential
 When no trusted assertion is present, the Mapping Governance page remains read-only and continues to use the deterministic projection. When a valid reviewer assertion is present, the page can use the live queue and submit approve/reject/supersede decisions through the same-origin API. The service passes the authenticated reviewer identity to the RDL-011 governance function and never trusts a browser-provided reviewer name.
 
 The current PostgreSQL repository adapter uses the existing server-only `psql` JSON client. The authentication/service contract is intentionally independent of that adapter so a managed Node PostgreSQL driver can replace it for hosted production without changing browser semantics or governance rules.
+
+## RDL-013 production PostgreSQL runtime
+
+RDL-013 replaces the governance API's per-request `psql` process execution with a long-lived Node PostgreSQL pool. The application service and repository contracts do not change:
+
+`Browser -> same-origin API -> GovernanceService -> CrossRdlGovernanceRepository -> PgJsonClient -> PostgreSQL`
+
+The pool is a server-runtime singleton. It owns connection reuse, connection timeouts, idle cleanup and optional TLS. Browser code receives neither `RDL_DATABASE_URL` nor any pool/TLS secret. The legacy `PsqlJsonClient` remains only as a compatibility tool for earlier local parity scripts; it is no longer used by production governance API request handling.
+
+Liveness (`/api/health`) proves that the server process can answer requests without depending on PostgreSQL. Readiness (`/api/readiness`) verifies PostgreSQL connectivity and reports non-sensitive pool counters. This separation allows an orchestrator to distinguish an alive process from one that is not ready to serve database-backed traffic.
+
+`PgJsonClient.transaction(...)` establishes the runtime transaction boundary for later multi-step enterprise operations. Structured `DatabaseRuntimeError` instances preserve a database error code server-side while API handlers continue to return controlled messages rather than raw connection details.
