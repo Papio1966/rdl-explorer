@@ -304,3 +304,30 @@ The mapping profile translates source sheet/header vocabulary. Where the source 
 Code-based hierarchy is also handled generically: a profile may supply an explicit parent identifier instead of the CFIHOS-style parent-name lookup. No Water-specific PostgreSQL table, relationship type or repository implementation is introduced.
 
 RDL-008 keeps authoritative relationships package-local and proves independent coexistence of CFIHOS, CCUS and Water / Desalination. Browser multi-RDL UX remains deferred to RDL-009.
+
+
+## RDL-009 — Multi-RDL user experience and global search
+
+RDL-009 exposes CFIHOS, CCUS and Water / Desalination through a source-aware user experience without weakening package identity. The browser receives a deterministic, generated search projection containing only public/pilot RDL entity fields and provenance metadata; it never receives PostgreSQL credentials. The projection is reproducible from the governed source workbooks and reviewed CFIHOS snapshot via `npm run generate:rdl-search-index`.
+
+```text
+Governed source packages
+      |
+      +--> normalized PostgreSQL RDL model
+      |       |
+      |       +--> RdlGlobalSearchRepository (server-side validation/read contract)
+      |
+      +--> deterministic browser search projection
+              |
+              v
+        Global RDL Search UI
+              |
+       source + type + identifier
+              |
+              v
+      package-aware entity route
+```
+
+The browser projection is a transition mechanism, not a second system of record. It exists because the current pilot deployment has no hosted PostgreSQL driver/API boundary. Once that infrastructure is introduced, the same UI contract can be served by the normalized repository search service without changing package-aware identity semantics.
+
+Existing Tag Class, Equipment Class, Document, Discipline, Dictionary, Source Standard and Unit pages remain the deep CFIHOS specialist experience in RDL-009. Multi-RDL search routes provide safe generic detail/provenance for all loaded RDLs. Cross-RDL semantic equivalence and comparison remain RDL-010 scope.

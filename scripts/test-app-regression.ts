@@ -57,6 +57,15 @@ const rdl007Ingest = read("scripts/db-ingest-ccus.sh");
 const rdl008Profile = read("scripts/rdl-ingestion/WaterDesalinationProfile.ts");
 const rdl008Test = read("scripts/db-test-rdl-008-genericity.ts");
 const rdl008Ingest = read("scripts/db-ingest-water-desalination.sh");
+const rdlScopeContext = read("src/rdl/RdlScopeContext.tsx");
+const globalSearch = read("src/components/GlobalRdlSearch.tsx");
+const scopeSelector = read("src/components/RdlScopeSelector.tsx");
+const rdlSearchPage = read("src/pages/RdlSearchPage.tsx");
+const rdlEntityPage = read("src/pages/RdlEntityPage.tsx");
+const rdlCataloguePage = read("src/pages/RdlCataloguePage.tsx");
+const rdlSearchGenerator = read("scripts/generate-rdl-search-index.ts");
+const rdlGlobalSearchRepository = read("server/rdl/RdlGlobalSearchRepository.ts");
+const rdl009Test = read("scripts/db-test-rdl-009-search.ts");
 
 const routes = [
   "/classes/tag",
@@ -73,6 +82,8 @@ const routes = [
   "/cis",
   "/about",
   "/help",
+  "/rdls",
+  "/search",
 ];
 
 for (const route of routes) {
@@ -89,6 +100,7 @@ for (const label of [
   "Validation",
   "About RDL Explorer",
   "User Guide",
+  "RDL Catalogue",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
 }
@@ -172,13 +184,23 @@ assert.ok(rdl007Generator.includes("stableDerivedId") && rdl007Generator.include
 assert.ok(rdl008Test.includes("format genericity") && rdl008Test.includes("three-RDL coexistence") && rdl008Test.includes("prior baselines"), "RDL-008 test must prove format genericity, three-RDL coexistence and prior baseline protection");
 assert.ok(rdl008Ingest.includes("generate-water-desalination-ingestion-sql.ts"), "RDL-008 Water command must use the generic mapping-profile SQL generator");
 assert.ok(requirements.includes("RDL-GEN-001") && requirements.includes("RDL-GEN-009"), "Requirements must capture the RDL-008 genericity constraints");
+assert.ok(packageJson.includes('"generate:rdl-search-index"') && packageJson.includes('"db:test:rdl-009"'), "RDL-009 scripts must expose deterministic search-index generation and PostgreSQL search validation");
+assert.ok(rdlScopeContext.includes('"all"') && rdlScopeContext.includes('"water-desalination"') && rdlScopeContext.includes("localStorage"), "RDL-009 scope must persist All/CFIHOS/CCUS/Water selection");
+assert.ok(globalSearch.includes('/search?') && scopeSelector.includes("Active RDL search scope"), "RDL-009 top bar must provide global search and an accessible source selector");
+assert.ok(rdlSearchPage.includes("sourceKey") && rdlSearchPage.includes("packageKey") && rdlSearchPage.includes("entityType"), "RDL-009 search results must retain package-aware typed identity");
+assert.ok(rdlEntityPage.includes("Provenance") && rdlEntityPage.includes("packageKey"), "RDL-009 generic entity route must surface provenance");
+assert.ok(rdlCataloguePage.toLowerCase().includes("candidate") && rdlCataloguePage.toLowerCase().includes("reviewed"), "RDL catalogue must distinguish candidate extensions from reviewed CFIHOS");
+assert.ok(rdlSearchGenerator.includes("CCUS_CFIHOS_FORMAT_PROFILE") && rdlSearchGenerator.includes("WATER_DESALINATION_PROFILE") && rdlSearchGenerator.includes("cfihos-workbook.json"), "RDL-009 browser search projection must be reproducible from all three governed sources");
+assert.ok(rdlGlobalSearchRepository.includes("source_key") && rdlGlobalSearchRepository.includes("entity_type_code"), "RDL-009 PostgreSQL search contract must preserve source and typed identity");
+assert.ok(rdl009Test.includes("CFIHOS-30000521") && rdl009Test.includes("water-desalination") && rdl009Test.includes("ccus"), "RDL-009 database test must prove typed and source-filtered multi-RDL search");
+assert.ok(requirements.includes("RDL-UX-001") && requirements.includes("RDL-UX-010"), "Requirements must capture RDL-009 multi-RDL UX and search constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
-assert.ok(shell.includes("CFIHOS 2.0 reviewed snapshot"), "Pilot data-source provenance is missing from the shell");
-assert.ok(shell.includes("Global search coming soon") && shell.includes("disabled"), "Unimplemented global search must remain visibly disabled during pilot");
+assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");
+assert.ok(shell.includes("GlobalRdlSearch") && shell.includes("RdlScopeSelector"), "RDL-009 global search and scope selector must be present in the application shell");
 assert.ok(shell.includes("alessandro@papioconsulting.eu"), "Pilot feedback route is missing from the application shell");
 assert.ok(about.includes("controlled evaluation") && about.includes("pilot"), "About page must explain pilot status");
-assert.ok(help.includes("not enabled in this pilot"), "User Guide must explain the global-search pilot limitation");
+assert.ok(help.includes("Global RDL search is enabled") && help.includes("RDL scope") && help.includes("source and release provenance"), "User Guide must explain the enabled multi-RDL global-search pilot behavior");
 assert.ok(help.includes("Do not include confidential project information"), "Pilot feedback guidance must warn against confidential information");
 
 for (const [name, source] of [["Tag Classes", tagClasses], ["Equipment Classes", equipmentClasses]] as const) {
@@ -227,6 +249,7 @@ console.log("PASS RDL-005 read parity: server-side PostgreSQL repository, servic
 console.log("PASS RDL-006 controlled cutover: snapshot/postgresql/dual selection and fail-closed parity comparison are present.");
 console.log("PASS RDL-007 multi-RDL foundation: CCUS mapping profile, provenance, coexistence and idempotence gates are present.");
 console.log("PASS RDL-008 genericity proof: Water / Desalination mapping, deterministic identifier derivation and three-RDL coexistence gates are present.");
+console.log("PASS RDL-009 multi-RDL UX: scope selection, package-aware global search, provenance routes and search repository gates are present.");
 console.log("PASS pilot readiness: status, provenance, honest search state and feedback route are present.");
 console.log("PASS class detail UX: anchored contents navigation and accessible progressive disclosure are present.");
 console.log("PASS document detail UX: anchored contents navigation and accessible progressive disclosure are present.");

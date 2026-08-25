@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("core Explorer navigation is available", async ({ page }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Explore CFIHOS. Understand the data.", level: 1 }),
+    page.getByRole("heading", { name: "Explore reference data. Understand the source.", level: 1 }),
   ).toBeVisible();
 
   await page.getByRole("link", { name: "Document Types", exact: true }).click();
@@ -12,7 +12,7 @@ test("core Explorer navigation is available", async ({ page }) => {
   await page.getByRole("link", { name: "About RDL Explorer" }).click();
   await expect(page).toHaveURL(/\/about$/);
 
-  await page.getByRole("link", { name: "User Guide" }).click();
+  await page.getByRole("link", { name: "User Guide", exact: true }).click();
   await expect(page).toHaveURL(/\/help$/);
 });
 
@@ -37,12 +37,29 @@ test("CIS Builder exposes the authoring workflow", async ({ page }) => {
 test("pilot status, provenance and feedback route are visible", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("Pilot", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("Current pilot data source: CFIHOS version 2.0")).toBeVisible();
+  await expect(page.getByLabel("Active RDL search scope")).toHaveValue("all");
+  await expect(page.getByRole("search", { name: "Global RDL search" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Send pilot feedback" })).toHaveAttribute(
     "href",
     /mailto:alessandro@papioconsulting\.eu/,
   );
-  await expect(page.getByLabel("Global RDL search coming soon")).toBeDisabled();
+});
+
+
+test("global RDL search preserves source and typed identity", async ({ page }) => {
+  await page.goto("/");
+  const globalSearch = page.getByRole("search", { name: "Global RDL search" });
+  await globalSearch.getByRole("searchbox").fill("CFIHOS-30000521");
+  await globalSearch.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/\/search\?/);
+  await expect(page.getByText("Tag Class", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Equipment Class", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("CFIHOS · 2.0", { exact: true }).first()).toBeVisible();
+
+  await page.getByLabel("Source").selectOption("water-desalination");
+  await page.getByLabel("Global RDL search query").fill("water");
+  await page.getByRole("button", { name: "Search", exact: true }).last().click();
+  await expect(page.getByText(/Water \/ Desalination · 0.1 draft/).first()).toBeVisible();
 });
 
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {

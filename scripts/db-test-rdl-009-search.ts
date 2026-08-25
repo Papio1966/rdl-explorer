@@ -1,0 +1,17 @@
+import assert from "node:assert/strict";
+import { PsqlJsonClient } from "../server/db/PsqlJsonClient.ts";
+import { RdlGlobalSearchRepository } from "../server/rdl/RdlGlobalSearchRepository.ts";
+const url=process.env.RDL_DATABASE_URL;if(!url) throw new Error("RDL_DATABASE_URL is required");
+const repo=new RdlGlobalSearchRepository(new PsqlJsonClient(url));
+const shared=await repo.search("CFIHOS-30000521","cfihos");
+assert.ok(shared.some(x=>x.entityType==="tag_class"),"typed global search must return tag identity");
+assert.ok(shared.some(x=>x.entityType==="equipment_class"),"typed global search must return equipment identity");
+const all=await repo.search("water",null,200);
+assert.ok(all.some(x=>x.sourceKey==="water-desalination"),"all-RDL search must return Water / Desalination content");
+const water=await repo.search("water","water-desalination",200);
+assert.ok(water.length>0 && water.every(x=>x.sourceKey==="water-desalination"),"source filter must isolate Water / Desalination results");
+const ccus=await repo.search("CO2","ccus",200);
+assert.ok(ccus.length>0 && ccus.every(x=>x.sourceKey==="ccus"),"source filter must isolate CCUS results");
+console.log(`PASS typed global search: ${shared.length} CFIHOS matches for shared identifier`);
+console.log(`PASS source-aware global search: Water=${water.length}, CCUS=${ccus.length}`);
+console.log("PASS RDL-009 multi-RDL global search repository");
