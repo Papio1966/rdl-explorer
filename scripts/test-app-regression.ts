@@ -25,6 +25,14 @@ const roadmap = read("docs/ROADMAP.md");
 const requirements = read("docs/REQUIREMENTS.md");
 const indexHtml = read("index.html");
 const packageJson = read("package.json");
+const databaseReadme = read("database/README.md");
+const databaseBootstrap = read("database/bootstrap.sql");
+const databaseMigration = read("database/migrations/001_create_platform_schemas.sql");
+const databaseHealth = read("scripts/db-health.sh");
+const databaseMigrate = read("scripts/db-migrate.sh");
+const rdlRepository = read("src/rdl/repository/RdlRepository.ts");
+const databaseClient = read("server/db/DatabaseClient.ts");
+const databaseConfig = read("server/db/config.ts");
 
 const routes = [
   "/classes/tag",
@@ -82,6 +90,20 @@ assert.ok(productBoundary.includes("CFIHOS Explorer") && productBoundary.include
 assert.ok(architecture.includes("PostgreSQL") && architecture.includes("DataGate"), "Architecture must document the PostgreSQL target and DataGate boundary");
 assert.ok(roadmap.includes("RDL-002") && roadmap.includes("RDL-008"), "Roadmap must capture the staged RDL platform programme");
 assert.ok(requirements.includes("RDL-MODEL-001") && requirements.includes("RDL-DG-001"), "Requirements must capture RDL identity and DataGate integration constraints");
+assert.ok(packageJson.includes('"db:migrate"') && packageJson.includes('"db:health"'), "Package scripts must expose database migration and health commands");
+assert.ok(databaseBootstrap.includes("metadata.schema_migrations"), "Database bootstrap must establish migration history");
+for (const schema of ["rdl", "ingestion", "metadata"]) {
+  assert.ok(databaseMigration.includes(`CREATE SCHEMA IF NOT EXISTS ${schema}`), `RDL-002 migration must create ${schema} schema`);
+}
+assert.ok(databaseHealth.includes("RDL_DATABASE_URL") && databaseHealth.includes("psql"), "Database health check must use configured PostgreSQL connectivity");
+assert.ok(databaseMigrate.includes("schema_migrations") && databaseMigrate.includes("database/migrations"), "Migration runner must apply and record ordered migrations");
+assert.ok(databaseReadme.includes("DBeaver") && databaseReadme.includes("CFIHOS snapshot"), "Database guide must document DBeaver local setup and transitional runtime boundary");
+assert.ok(databaseMigrate.includes("-f -") && databaseMigrate.includes(`:'migration_name'`), "Migration runner must interpolate migration names through psql input rather than an unsafe -c path");
+assert.ok(!databaseMigrate.includes(`-c "SELECT 1 FROM metadata.schema_migrations WHERE migration_name = :'migration_name';"`), "Migration runner must not use the broken psql -c variable-substitution form");
+assert.ok(rdlRepository.includes("interface RdlRepository") && rdlRepository.includes('"postgresql"'), "Application must define a PostgreSQL-capable RDL repository boundary");
+assert.ok(databaseClient.includes("interface DatabaseClient"), "Server layer must define a database client contract");
+assert.ok(databaseConfig.includes("RDL_DATABASE_URL") && databaseConfig.includes("rdl_explorer"), "Database configuration must use the RDL-specific environment variable and database name");
+assert.ok(requirements.includes("RDL-DB-001") && requirements.includes("RDL-DB-008"), "Requirements must capture PostgreSQL and DataGate database-boundary constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 reviewed snapshot"), "Pilot data-source provenance is missing from the shell");
@@ -132,6 +154,7 @@ console.log("PASS navigation: critical Explorer capabilities remain discoverable
 console.log("PASS performance contract: route-level lazy loading and accessible fallback are present.");
 console.log("PASS CIS/Assistant contract: persistence, active CIS context and server-side AI boundary are present.");
 console.log("PASS RDL-001 bootstrap: product identity, architecture, roadmap and requirements are present.");
+console.log("PASS RDL-002 database foundation: schemas, migrations, configuration, health checks and repository boundaries are present.");
 console.log("PASS pilot readiness: status, provenance, honest search state and feedback route are present.");
 console.log("PASS class detail UX: anchored contents navigation and accessible progressive disclosure are present.");
 console.log("PASS document detail UX: anchored contents navigation and accessible progressive disclosure are present.");

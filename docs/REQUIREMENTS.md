@@ -93,3 +93,14 @@ RDL-001 is complete when:
 3. product boundary, target architecture, roadmap and requirements are versioned in the repository;
 4. no PostgreSQL runtime dependency or second RDL has been introduced;
 5. regression, build and browser CI remain green.
+
+## RDL-002 PostgreSQL foundation requirements
+
+- **RDL-DB-001** — RDL Explorer shall use a logically separate PostgreSQL database named `rdl_explorer`.
+- **RDL-DB-002** — The initial logical schema boundaries shall be `rdl`, `ingestion` and `metadata`.
+- **RDL-DB-003** — Database changes shall be applied through ordered, auditable migrations recorded in `metadata.schema_migrations`.
+- **RDL-DB-004** — Database credentials shall be provided through environment configuration and shall not be committed to source control.
+- **RDL-DB-005** — RDL-002 shall provide a repeatable local database health check.
+- **RDL-DB-006** — Introducing PostgreSQL shall not change the active CFIHOS snapshot runtime until parity is explicitly demonstrated.
+- **RDL-DB-007** — The application shall depend on an RDL repository abstraction rather than coupling user-interface components directly to SQL.
+- **RDL-DB-008** — DataGate shall not consume RDL Explorer internal database tables directly.

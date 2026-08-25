@@ -13,7 +13,7 @@ RDL-001 intentionally preserves the current CFIHOS functionality while establish
 
 See [Product Boundary](docs/PRODUCT_BOUNDARY.md) for the full separation.
 
-## Current status — RDL-001
+## Current status — RDL-002
 
 This bootstrap release preserves the existing CFIHOS 2.0 capabilities:
 
@@ -28,7 +28,7 @@ This bootstrap release preserves the existing CFIHOS 2.0 capabilities:
 - route-level code splitting, progressive disclosure and regression checks
 - scheduled upstream CFIHOS change monitoring
 
-No PostgreSQL runtime, additional RDL or multi-RDL selector is introduced in RDL-001.
+RDL-002 adds the PostgreSQL platform foundation while intentionally leaving the current CFIHOS snapshot runtime unchanged. The database is additive infrastructure at this stage; no CFIHOS entities are read from PostgreSQL yet.
 
 ## Technology
 
@@ -39,7 +39,7 @@ No PostgreSQL runtime, additional RDL or multi-RDL selector is introduced in RDL
 - GitHub Actions
 - Vercel
 - OpenAI Responses API for optional server-side generative synthesis
-- PostgreSQL is the target normalized RDL repository from RDL-002 onward, not part of this bootstrap runtime.
+- PostgreSQL foundation is present from RDL-002 onward; the CFIHOS snapshot remains the active runtime until parity is proven.
 
 ## Quick start
 
@@ -53,6 +53,23 @@ npm run dev
 ```
 
 The browser currently consumes the committed `public/cfihos-workbook.json` snapshot. It does not parse the upstream XLSX at runtime. This remains the RDL-001 compatibility path.
+
+
+## PostgreSQL foundation
+
+RDL-002 establishes the database boundary without changing the current Explorer data path.
+
+- database: `rdl_explorer`;
+- schemas: `rdl`, `ingestion`, `metadata`;
+- migration history: `metadata.schema_migrations`;
+- migration runner: `npm run db:migrate`;
+- health check: `npm run db:health`;
+- local setup: [`database/README.md`](database/README.md);
+- connection environment variable: `RDL_DATABASE_URL`.
+
+The default local connection string is `postgresql://localhost:5432/rdl_explorer`. Credentials must not be committed.
+
+The database does **not** become the source authority: governed RDL packages remain authoritative. The current `public/cfihos-workbook.json` runtime remains active until database parity is demonstrated in a later sprint.
 
 ## Documentation
 
