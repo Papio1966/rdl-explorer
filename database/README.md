@@ -42,3 +42,22 @@ No credentials belong in Git.
 ## Runtime boundary
 
 The current Explorer continues to use the committed CFIHOS snapshot. The PostgreSQL path is additive in RDL-002 and must not change current user-visible behavior.
+
+## RDL-003 core domain model
+
+After RDL-002 is present, apply the next migration with:
+
+```bash
+export RDL_DATABASE_URL="postgresql://localhost:5432/rdl_explorer"
+npm run db:migrate
+```
+
+RDL-003 creates generic RDL source/release/package, entity, relationship and ingestion-provenance structures. It does **not** load CFIHOS data and does not change the active browser runtime.
+
+Verify the model with a transaction-scoped fixture that rolls itself back:
+
+```bash
+npm run db:test:rdl-003
+```
+
+The test proves that the same native identifier can coexist across entity domains and RDL sources, that logical identities remain distinct, that typed relationships persist, and that ingestion provenance is recorded.
