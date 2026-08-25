@@ -114,3 +114,16 @@ npm run db:test:rdl-007
 ```
 
 The dedicated test deliberately performs a repeat CCUS load to prove idempotence. It also confirms package-level identity isolation, source SHA provenance, relationship isolation, representative CCUS parity, and that existing CFIHOS counts are unchanged.
+
+## RDL-008 — Water / Desalination genericity proof
+
+RDL-008 requires no database migration. It deliberately reuses the existing generic RDL schema.
+
+With `RDL_DATABASE_URL` set, load and verify the third RDL with:
+
+```bash
+npm run db:ingest:water-desalination
+npm run db:test:rdl-008
+```
+
+The acceptance test performs a second ingestion intentionally to verify deterministic/idempotent package state. It also confirms coexistence with CFIHOS and CCUS and checks that Water-specific header/identifier differences are absorbed by the mapping/ingestion layer rather than by new PostgreSQL tables.

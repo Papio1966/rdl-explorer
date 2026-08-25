@@ -20,8 +20,12 @@ test("Assistant uses a mocked API response and never spends API credit", async (
   const input = page.getByPlaceholder("Ask about CFIHOS or what you can do in the Explorer…");
   await input.fill("What is an asset reference plan?");
   await page.getByRole("button", { name: "Ask" }).click();
-  await expect(page.getByText("Asset reference plan", { exact: false }).last()).toBeVisible();
-  expect(apiCalls).toBe(1);
+
+  // Wait for text unique to the mocked assistant response, not the user's question.
+  await expect(
+    page.getByText("supported by the retrieved CFIHOS evidence", { exact: false }),
+  ).toBeVisible();
+  await expect.poll(() => apiCalls).toBe(1);
 });
 
 test("Assistant capability action navigates to CIS Builder", async ({ page }) => {

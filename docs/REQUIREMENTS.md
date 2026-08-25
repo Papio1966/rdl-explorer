@@ -164,3 +164,15 @@ RDL-001 is complete when:
 - **RDL-MR-006** Authoritative relationships shall remain within their source package; cross-RDL mappings shall require an explicit future mapping model.
 - **RDL-MR-007** Existing CFIHOS parity and controlled repository-cutover behaviour shall remain unchanged.
 - **RDL-MR-008** RDL-007 shall not introduce browser multi-RDL selection; ingestion/coexistence must be proven before user-facing multi-RDL UX.
+
+## RDL-008 — Water / Desalination genericity proof
+
+- **RDL-GEN-001 — Structurally different source** — Water / Desalination shall be ingested as an independent source/release/package using its supplied workbook vocabulary rather than requiring CFIHOS header names.
+- **RDL-GEN-002 — Mapping-layer normalization** — Source-specific sheet/header differences shall be resolved in a versioned mapping profile and generic ingestion layer, not in PostgreSQL tables or repository SQL.
+- **RDL-GEN-003 — Identifier-gap handling** — Where the workbook does not provide a source-native identifier for a normalized first-class object, ingestion shall create a deterministic canonical identifier while retaining exact row/profile provenance.
+- **RDL-GEN-004 — Generic hierarchy mapping** — Ingestion shall support source hierarchy expressed by parent identifiers as well as parent names without introducing source-specific relationship tables.
+- **RDL-GEN-005 — Three-RDL coexistence** — CFIHOS, CCUS and Water / Desalination shall remain independently addressable in the same generic repository.
+- **RDL-GEN-006 — Package isolation** — Water / Desalination authoritative relationships shall remain within the Water package; cross-RDL mapping requires a future explicit mapping model.
+- **RDL-GEN-007 — Prior baseline protection** — Water ingestion shall not alter established CFIHOS counts, CCUS package provenance or controlled repository-cutover behaviour.
+- **RDL-GEN-008 — Idempotence and provenance** — Re-ingesting the same Water workbook shall produce one deterministic package state with exact workbook SHA and current ingestion audit record.
+- **RDL-GEN-009 — No multi-RDL browser cutover** — RDL-008 shall prove backend genericity before RDL-009 introduces user-facing multi-RDL navigation and global search.

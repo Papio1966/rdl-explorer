@@ -26,11 +26,11 @@
 
 ## RDL-007 — First Additional RDL
 
-**Status: implementation sprint.** Ingest the CCUS RDL Extension as the first non-CFIHOS source. Establish a reusable mapping-profile ingestion pattern, prove CFIHOS/CCUS package coexistence, preserve exact workbook SHA provenance, verify deterministic/idempotent reloads, and keep the browser multi-RDL UX out of scope until backend genericity is proven.
+**Status: complete.** Ingest the CCUS RDL Extension as the first non-CFIHOS source. Establish a reusable mapping-profile ingestion pattern, prove CFIHOS/CCUS package coexistence, preserve exact workbook SHA provenance, verify deterministic/idempotent reloads, and keep the browser multi-RDL UX out of scope until backend genericity is proven.
 
-## RDL-008 — Second Additional RDL / Genericity Proof
+## RDL-008 — Water / Desalination Genericity Proof
 
-Add a structurally different second RDL and prove that ingestion, identity, provenance and repository reads are generic rather than CFIHOS plus one special case.
+**Status: implementation sprint.** Ingest the structurally different Water / Desalination RDL through a versioned mapping profile. Prove deterministic identifier derivation for source objects without native IDs, code-based hierarchy mapping, three-RDL coexistence, package isolation, prior baseline protection and idempotent provenance without adding Water-specific database tables.
 
 ## RDL-009 — Multi-RDL UX & Global Search
 
