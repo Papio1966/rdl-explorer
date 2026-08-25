@@ -764,7 +764,7 @@ a {
 .content-page { padding: 2rem 2.25rem 4rem; max-width: 1320px; margin: 0 auto; }
 .page-heading { display: flex; justify-content: space-between; gap: 2rem; align-items: flex-end; margin-bottom: 1.5rem; }
 .page-heading h1 { margin: 0.35rem 0 0; }
-.page-heading > p { max-width: 560px; color: var(--text-muted, #66756f); margin: 0; }
+.page-heading > p { max-width: 560px; color: #5f6d68; margin: 0; }
 .rdl-source-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .rdl-source-card, .rdl-search-result, .rdl-entity-panel, .rdl-provenance-note {
   border: 1px solid var(--border, #dfe6e3);
@@ -785,14 +785,14 @@ a {
 .rdl-search-form { display: flex; align-items: center; gap: 0.6rem; border: 1px solid var(--border, #dfe6e3); border-radius: 12px; padding: 0.65rem 0.8rem; background: var(--surface, #fff); }
 .rdl-search-form input { flex: 1; border: 0; outline: 0; font: inherit; background: transparent; }
 .rdl-search-form button { border: 0; border-radius: 8px; padding: 0.55rem 0.9rem; background: var(--text, #17352b); color: white; font-weight: 650; }
-.rdl-search-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin: 0.85rem 0 1rem; color: var(--text-muted, #66756f); }
+.rdl-search-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin: 0.85rem 0 1rem; color: #5f6d68; }
 .rdl-search-toolbar label { display: flex; gap: 0.55rem; align-items: center; }
 .rdl-search-results { display: grid; gap: 0.75rem; }
 .rdl-search-result { padding: 1rem 1.1rem; text-decoration: none; color: inherit; transition: border-color 120ms ease, transform 120ms ease; }
 .rdl-search-result:hover { transform: translateY(-1px); border-color: #8ea69d; }
 .rdl-search-result-top { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
 .rdl-entity-type { background: #edf2f0; }
-.rdl-source-badge { background: #f3f5f4; color: var(--text-muted, #66756f); }
+.rdl-source-badge { background: #f3f5f4; color: #5f6d68; }
 .rdl-search-result h2 { font-size: 1.02rem; margin: 0.6rem 0 0.2rem; }
 .rdl-search-result code, .rdl-entity-page code { font-size: 0.78rem; }
 .rdl-search-result p { margin: 0.55rem 0 0; color: var(--text-muted, #66756f); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

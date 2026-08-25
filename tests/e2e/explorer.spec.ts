@@ -12,7 +12,7 @@ test("core Explorer navigation is available", async ({ page }) => {
   await page.getByRole("link", { name: "About RDL Explorer" }).click();
   await expect(page).toHaveURL(/\/about$/);
 
-  await page.getByRole("link", { name: "User Guide" }).click();
+  await page.getByRole("link", { name: "User Guide", exact: true }).click();
   await expect(page).toHaveURL(/\/help$/);
 });
 
