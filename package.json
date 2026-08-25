@@ -20,7 +20,8 @@
     "test:e2e:headed": "playwright test --headed",
     "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
     "db:ingest:cfihos": "bash scripts/db-ingest-cfihos.sh",
-    "db:test:rdl-004": "bash scripts/db-test-rdl-004.sh"
+    "db:test:rdl-004": "bash scripts/db-test-rdl-004.sh",
+    "db:test:rdl-005": "bash scripts/db-test-rdl-005.sh"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",

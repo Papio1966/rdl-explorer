@@ -106,3 +106,7 @@ Explicitly deferred to RDL-004:
 - loading production CFIHOS data into PostgreSQL;
 - snapshot-versus-database parity tests;
 - runtime repository cutover.
+
+### RDL-005 — PostgreSQL Repository Read Parity
+
+Status: implementation sprint. Establish server-side normalized RDL reads and prove CFIHOS semantic parity while retaining the snapshot-backed browser runtime. Exit only when source/release/package identity, typed entity lookup, hierarchy, properties, document relationships, controlled values, JIP33, tag/equipment mappings, unit families and provenance pass deterministic read-parity tests.

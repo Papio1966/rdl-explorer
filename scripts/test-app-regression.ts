@@ -39,6 +39,11 @@ const databaseConfig = read("server/db/config.ts");
 const cfihosVocabularyMigration = read("database/migrations/003_extend_cfihos_ingestion_vocabulary.sql");
 const cfihosIngestionGenerator = read("scripts/generate-cfihos-ingestion-sql.ts");
 const cfihosParityTest = read("scripts/db-test-rdl-004-parity.ts");
+const postgresReadRepository = read("server/rdl/PostgresRdlRepository.ts");
+const psqlJsonClient = read("server/db/PsqlJsonClient.ts");
+const rdlReadService = read("server/rdl/RdlReadService.ts");
+const rdlReadRepository = read("server/rdl/RdlReadRepository.ts");
+const rdl005ParityTest = read("scripts/db-test-rdl-005-read-parity.ts");
 
 const routes = [
   "/classes/tag",
@@ -127,6 +132,12 @@ assert.ok(cfihosIngestionGenerator.includes('"tag_class"') && cfihosIngestionGen
 assert.ok(cfihosIngestionGenerator.includes("ambiguous-tag-or-equipment"), "CFIHOS adapter must retain unresolved Tag/Equipment source ambiguity");
 assert.ok(cfihosParityTest.includes("CFIHOS-30000521") && cfihosParityTest.includes("sourceSha"), "RDL-004 parity test must verify typed identity and package provenance");
 assert.ok(requirements.includes("RDL-CFIHOS-001") && requirements.includes("RDL-CFIHOS-010"), "Requirements must capture the RDL-004 ingestion and parity constraints");
+assert.ok(packageJson.includes('"db:test:rdl-005"'), "Package scripts must expose the RDL-005 read-parity command");
+assert.ok(postgresReadRepository.includes("class PostgresRdlRepository") && postgresReadRepository.includes("getDirectProperties") && postgresReadRepository.includes("getUnitsForDimension"), "RDL-005 must provide representative PostgreSQL RDL reads");
+assert.ok(psqlJsonClient.includes("class PsqlJsonClient") && psqlJsonClient.includes("--no-psqlrc"), "RDL-005 local database adapter must isolate psql configuration");
+assert.ok(rdlReadRepository.includes("interface RdlReadRepository") && rdlReadService.includes("class RdlReadService"), "RDL-005 must keep database reads behind repository and server-side service boundaries");
+assert.ok(rdl005ParityTest.includes("CFIHOS-30000521") && rdl005ParityTest.includes("contentSha256") && rdl005ParityTest.includes("unit-family/dimension reads"), "RDL-005 parity must verify typed identity, provenance and representative relationships");
+assert.ok(requirements.includes("RDL-READ-001") && requirements.includes("RDL-READ-008"), "Requirements must capture the RDL-005 read-parity constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 reviewed snapshot"), "Pilot data-source provenance is missing from the shell");
@@ -178,6 +189,7 @@ console.log("PASS performance contract: route-level lazy loading and accessible 
 console.log("PASS CIS/Assistant contract: persistence, active CIS context and server-side AI boundary are present.");
 console.log("PASS RDL-001 bootstrap: product identity, architecture, roadmap and requirements are present.");
 console.log("PASS RDL-002 database foundation: schemas, migrations, configuration, health checks and repository boundaries are present.");
+console.log("PASS RDL-005 read parity: server-side PostgreSQL repository, service boundary and deterministic parity gate are present.");
 console.log("PASS pilot readiness: status, provenance, honest search state and feedback route are present.");
 console.log("PASS class detail UX: anchored contents navigation and accessible progressive disclosure are present.");
 console.log("PASS document detail UX: anchored contents navigation and accessible progressive disclosure are present.");
