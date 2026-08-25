@@ -76,6 +76,13 @@ const governanceRepository = read("server/rdl/CrossRdlGovernanceRepository.ts");
 const governancePage = read("src/pages/RdlGovernancePage.tsx");
 const governanceGenerator = read("scripts/generate-rdl-governance.ts");
 const rdl011Test = read("database/sql/test_rdl_011_governance.sql");
+const governanceIdentity = read("server/auth/GovernanceIdentity.ts");
+const governanceService = read("server/rdl/GovernanceService.ts");
+const governanceSessionApi = read("api/governance/session.ts");
+const governanceQueueApi = read("api/governance/queue.ts");
+const governanceReviewApi = read("api/governance/review.ts");
+const governanceBrowserService = read("src/rdl/governanceService.ts");
+const rdl012Test = read("scripts/test-rdl-012-service-boundary.ts");
 
 const routes = [
   "/classes/tag",
@@ -138,7 +145,7 @@ assert.ok(indexHtml.includes("<title>RDL Explorer</title>"), "Browser title must
 assert.ok(packageJson.includes('"name": "rdl-explorer"'), "Package identity must be rdl-explorer");
 assert.ok(productBoundary.includes("CFIHOS Explorer") && productBoundary.includes("RDL Explorer"), "Product boundary must document the separation from CFIHOS Explorer");
 assert.ok(architecture.includes("PostgreSQL") && architecture.includes("DataGate"), "Architecture must document the PostgreSQL target and DataGate boundary");
-assert.ok(roadmap.includes("RDL-002") && roadmap.includes("RDL-011"), "Roadmap must capture the staged RDL platform programme");
+assert.ok(roadmap.includes("RDL-002") && roadmap.includes("RDL-012"), "Roadmap must capture the staged RDL platform programme");
 assert.ok(requirements.includes("RDL-MODEL-001") && requirements.includes("RDL-DG-001"), "Requirements must capture RDL identity and DataGate integration constraints");
 assert.ok(packageJson.includes('"db:migrate"') && packageJson.includes('"db:health"'), "Package scripts must expose database migration and health commands");
 assert.ok(databaseBootstrap.includes("metadata.schema_migrations"), "Database bootstrap must establish migration history");
@@ -219,10 +226,18 @@ assert.ok(packageJson.includes('"generate:rdl-governance"') && packageJson.inclu
 assert.ok(governanceMigration.includes("cross_rdl_mapping_review_event") && governanceMigration.includes("review_cross_rdl_mapping") && governanceMigration.includes("append-only"), "RDL-011 must provide governed transitions and append-only review history");
 assert.ok(governanceMigration.includes("review_version") && governanceMigration.includes("expected_version") && governanceMigration.includes("superseded_by_mapping_id"), "RDL-011 must provide optimistic concurrency and supersession traceability");
 assert.ok(governanceRepository.includes("class CrossRdlGovernanceRepository") && governanceRepository.includes("listReviewQueue") && governanceRepository.includes("getHistory") && governanceRepository.includes("review("), "RDL-011 repository must expose queue, history and governed review operations");
-assert.ok(governancePage.includes("Governed write boundary") && governancePage.includes("Read-only pilot projection") && governancePage.includes("disabled"), "RDL-011 browser review queue must remain honestly read-only");
+assert.ok(governancePage.includes("Authenticated governance service boundary") && governancePage.includes("Read-only mode") && governancePage.includes("disabled={!session"), "RDL-011 governance protections must remain fail-closed when RDL-012 has no authenticated reviewer session");
 assert.ok(governanceGenerator.includes("read-only") && governanceGenerator.includes("reviewVersion"), "RDL-011 governance projection must describe the read-only browser boundary");
 assert.ok(rdl011Test.includes("optimistic versioning") && rdl011Test.includes("append-only audit history") && rdl011Test.includes("candidate -> approved"), "RDL-011 database test must verify governed transitions, audit and concurrency");
 assert.ok(requirements.includes("RDL-GOV-001") && requirements.includes("RDL-GOV-010"), "Requirements must capture RDL-011 mapping governance constraints");
+assert.ok(packageJson.includes('"test:rdl-012"'), "RDL-012 must expose an authenticated governance service-boundary test");
+assert.ok(governanceIdentity.includes("RDL_GOVERNANCE_AUTH_SECRET") && governanceIdentity.includes("timingSafeEqual") && governanceIdentity.includes("rdl-mapping-reviewer"), "RDL-012 identity boundary must verify signed reviewer assertions and reviewer role");
+assert.ok(governanceService.includes("identity.reviewer") && !governanceService.includes("body.reviewer"), "RDL-012 governance service must derive reviewer identity from the authenticated server context");
+assert.ok(governanceSessionApi.includes("authenticatedContext") && governanceQueueApi.includes("listQueue") && governanceReviewApi.includes("service.review"), "RDL-012 must expose authenticated session, live queue and review API boundaries");
+assert.ok(governanceBrowserService.includes("/api/governance/session") && governanceBrowserService.includes("/api/governance/queue") && governanceBrowserService.includes("/api/governance/review"), "RDL-012 browser client must use the same-origin governance service boundary");
+assert.ok(governancePage.includes("Authenticated governance service boundary") && governancePage.includes("live governed actions enabled") && governancePage.includes("Read-only mode"), "RDL-012 governance page must enable live actions only for an authenticated reviewer session");
+assert.ok(rdl012Test.includes("signature is invalid") && rdl012Test.includes("not authorized") && rdl012Test.includes("stale or invalid"), "RDL-012 test must cover signature integrity, reviewer authorization and replay-window rejection");
+assert.ok(requirements.includes("RDL-AUTH-001") && requirements.includes("RDL-AUTH-010"), "Requirements must capture RDL-012 authenticated governance service constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");

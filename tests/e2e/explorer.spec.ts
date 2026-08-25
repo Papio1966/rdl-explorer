@@ -73,10 +73,40 @@ test("cross-RDL intelligence keeps derived matches governed", async ({ page }) =
 test("mapping governance queue keeps review writes server-governed", async ({ page }) => {
   await page.goto("/governance");
   await expect(page.getByRole("heading", { name: "Mapping review queue" })).toBeVisible();
-  await expect(page.getByText("Governed write boundary")).toBeVisible();
+  await expect(page.getByText("Authenticated governance service boundary")).toBeVisible();
   await expect(page.getByRole("button", { name: "Approve" }).first()).toBeDisabled();
-  await expect(page.getByText("Read-only pilot projection").first()).toBeVisible();
+  await expect(page.getByText("Read-only mode")).toBeVisible();
 });
+
+test("authenticated mapping reviewer can submit a governed decision through the service boundary", async ({ page }) => {
+  await page.route("**/api/governance/session", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ authenticated: true, reviewer: "reviewer@example.test", roles: ["rdl-mapping-reviewer"], authenticatedAt: new Date().toISOString() }) });
+  });
+  await page.route("**/api/governance/queue?**", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ reviewer: "reviewer@example.test", status: "candidate", items: [{
+      mappingId: 42, status: "candidate", reviewVersion: 3, mappingType: "possible_match", provenanceMethod: "exact_name_rule", confidence: 0.85,
+      sourceKey: "cfihos", sourceEntityType: "unit_of_measure", sourceNativeIdentifier: "CFIHOS-60000001", sourceName: "metre",
+      targetKey: "water-desalination", targetEntityType: "unit_of_measure", targetNativeIdentifier: "WD-UOM-M", targetName: "metre"
+    }] }) });
+  });
+  let reviewBody: any;
+  await page.route("**/api/governance/review", async (route) => {
+    reviewBody = route.request().postDataJSON();
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ reviewer: "reviewer@example.test", result: { mapping_id: 42, status: "approved", review_version: 4 } }) });
+  });
+
+  await page.goto("/governance");
+  await expect(page.getByText("Authenticated reviewer")).toBeVisible();
+  const approve = page.getByRole("button", { name: "Approve" }).first();
+  await expect(approve).toBeEnabled();
+  await approve.click();
+  await page.getByLabel("Rationale").fill("Reviewed against the engineering definition and accepted as the governed mapping.");
+  await page.getByRole("button", { name: "Record governed decision" }).click();
+  await expect.poll(() => reviewBody).toBeTruthy();
+  expect(reviewBody).toMatchObject({ mappingId: 42, action: "approve", expectedVersion: 3 });
+  expect(reviewBody).not.toHaveProperty("reviewer");
+});
+
 
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
