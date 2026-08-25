@@ -370,3 +370,43 @@ rdl.review_cross_rdl_mapping(...)
 Allowed governed transitions are candidate -> approved, candidate -> rejected, and approved -> retired through supersession. Optimistic concurrency prevents stale reviewers from overwriting a newer decision. Direct updates to review-state fields are blocked by a trigger unless executed inside the governed function.
 
 The pilot browser exposes a deterministic read-only review projection. Approve/reject/supersede controls are intentionally disabled until an authenticated deployable API/service boundary is available; this avoids pretending that browser-local state is enterprise governance. Future AI suggestions enter as candidates and use the same review path.
+
+## RDL-012 authenticated governance service boundary
+
+RDL-012 introduces an authenticated HTTP service boundary between the browser review workflow and the RDL-011 governed database function.
+
+```text
+Enterprise identity provider / trusted gateway
+        |
+        | signed reviewer + roles + timestamp
+        v
+/api/governance/session
+/api/governance/queue
+/api/governance/review
+        |
+        v
+GovernanceIdentity verification
+        |
+        +-- signature freshness
+        +-- HMAC integrity
+        +-- rdl-mapping-reviewer role
+        |
+        v
+GovernanceService
+        |
+        v
+CrossRdlGovernanceRepository
+        |
+        v
+rdl.review_cross_rdl_mapping(...)
+        |
+        +-- optimistic review version
+        +-- reviewer / rationale
+        +-- append-only review event
+```
+
+The browser never receives `RDL_GOVERNANCE_AUTH_SECRET` or PostgreSQL credentials. Reviewer identity is not accepted from the review request body. It is derived only from a short-lived signed identity assertion supplied by a trusted upstream authentication gateway or BFF. A deployment using this pattern MUST strip client-supplied `x-rdl-reviewer`, `x-rdl-roles`, `x-rdl-auth-timestamp` and `x-rdl-auth-signature` headers before injecting its own signed values.
+
+When no trusted assertion is present, the Mapping Governance page remains read-only and continues to use the deterministic projection. When a valid reviewer assertion is present, the page can use the live queue and submit approve/reject/supersede decisions through the same-origin API. The service passes the authenticated reviewer identity to the RDL-011 governance function and never trusts a browser-provided reviewer name.
+
+The current PostgreSQL repository adapter uses the existing server-only `psql` JSON client. The authentication/service contract is intentionally independent of that adapter so a managed Node PostgreSQL driver can replace it for hosted production without changing browser semantics or governance rules.

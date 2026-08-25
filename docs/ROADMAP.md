@@ -42,7 +42,11 @@
 
 ## RDL-011 — Cross-RDL Mapping Governance & Review
 
-**Status: implementation sprint.** Add governed approve/reject/supersede transitions, optimistic review-version checks, reviewer/rationale capture, append-only audit history, a server-side governance repository and a read-only pilot review queue. Browser writes remain out of scope until a deployable authenticated service boundary exists.
+**Status: complete.** Add governed approve/reject/supersede transitions, optimistic review-version checks, reviewer/rationale capture, append-only audit history, a server-side governance repository and a read-only pilot review queue. Browser writes remain out of scope until a deployable authenticated service boundary exists.
+
+## RDL-012 — Authenticated Governance Service Boundary
+
+**Status: implementation sprint.** Add a trusted signed reviewer identity boundary, reviewer-role authorization, same-origin governance session/queue/review APIs, live repository-backed review actions and graceful read-only fallback when no enterprise identity assertion is present. Browser code never receives database credentials or the server signing secret.
 
 ## Later enterprise roadmap
 

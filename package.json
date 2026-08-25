@@ -33,7 +33,8 @@
     "db:seed:rdl-010": "bash scripts/db-seed-rdl-010.sh",
     "db:test:rdl-010": "bash scripts/db-test-rdl-010.sh",
     "generate:rdl-governance": "tsx scripts/generate-rdl-governance.ts",
-    "db:test:rdl-011": "bash scripts/db-test-rdl-011.sh"
+    "db:test:rdl-011": "bash scripts/db-test-rdl-011.sh",
+    "test:rdl-012": "tsx scripts/test-rdl-012-service-boundary.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",

@@ -217,3 +217,16 @@ RDL-001 is complete when:
 - **RDL-GOV-008 — Server-side writes** — Browser code shall not receive PostgreSQL credentials or directly mutate mapping governance state.
 - **RDL-GOV-009 — Honest pilot UX** — Until an authenticated deployable write service exists, the browser review queue shall be read-only and shall not imply that disabled review actions are persisted.
 - **RDL-GOV-010 — AI remains candidate-only** — Future AI-suggested mappings shall enter the same candidate review workflow and shall not bypass human/governed approval.
+
+## RDL-012 — Authenticated Governance Service Boundary
+
+- **RDL-AUTH-001 — Server-only identity trust** — Mapping review writes shall derive reviewer identity from a server-verified authentication assertion and shall never trust reviewer identity supplied in the browser request body.
+- **RDL-AUTH-002 — Signed assertion** — Reviewer, roles and assertion timestamp shall be integrity-protected using a server-side signing secret shared only with the trusted upstream identity gateway/BFF.
+- **RDL-AUTH-003 — Replay window** — Signed governance identity assertions shall have a bounded freshness window and stale assertions shall be rejected.
+- **RDL-AUTH-004 — Reviewer authorization** — A review write shall require the `rdl-mapping-reviewer` role.
+- **RDL-AUTH-005 — No browser secrets** — The browser shall receive neither the governance signing secret nor PostgreSQL credentials.
+- **RDL-AUTH-006 — Governed service path** — Approve, reject and supersede actions shall flow through `GovernanceService` and `CrossRdlGovernanceRepository` to `rdl.review_cross_rdl_mapping(...)`.
+- **RDL-AUTH-007 — Optimistic concurrency** — Review requests shall carry the mapping review version and stale versions shall continue to fail at the governed database boundary.
+- **RDL-AUTH-008 — Graceful unauthenticated mode** — Without a trusted reviewer session, the browser shall remain read-only and shall not imply that governance decisions can be persisted.
+- **RDL-AUTH-009 — Live authenticated queue** — Authenticated reviewers shall be able to load live repository-backed review items rather than relying on the static pilot projection.
+- **RDL-AUTH-010 — Gateway header hygiene** — Production deployment shall strip client-supplied governance identity headers before adding the trusted signed identity assertion.
