@@ -102,3 +102,15 @@ npm run db:test:rdl-006
 ```
 
 `RDL_READ_MODE` accepts `snapshot`, `postgresql`, or `dual`. The default is `snapshot`. RDL-006 tests the selector directly and does not change the browser runtime.
+
+## CCUS ingestion (RDL-007)
+
+RDL-007 adds the first additional RDL using a profile-driven ingestion adapter. The supplied workbook is stored at `data/rdl/ccus/CCUS_RDL_Extension_CFIHOS_Format.xlsx`.
+
+```bash
+export RDL_DATABASE_URL="postgresql://localhost:5432/rdl_explorer"
+npm run db:ingest:ccus
+npm run db:test:rdl-007
+```
+
+The dedicated test deliberately performs a repeat CCUS load to prove idempotence. It also confirms package-level identity isolation, source SHA provenance, relationship isolation, representative CCUS parity, and that existing CFIHOS counts are unchanged.
