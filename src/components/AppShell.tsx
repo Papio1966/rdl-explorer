@@ -11,21 +11,23 @@ import {
   CircleHelp,
   Mail,
   Menu,
-  Search,
   Sparkles,
   Shapes,
   Ruler,
   ShieldCheck,
   Tags,
+  LibraryBig,
   X,
 } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
+import { GlobalRdlSearch } from "./GlobalRdlSearch";
+import { RdlScopeSelector } from "./RdlScopeSelector";
 
 const PILOT_FEEDBACK_EMAIL = "alessandro@papioconsulting.eu";
 
 const navigation = [
-  { label: "Explore", items: [{ label: "Overview", to: "/", icon: CircleGauge }] },
+  { label: "Explore", items: [{ label: "Overview", to: "/", icon: CircleGauge }, { label: "RDL Catalogue", to: "/rdls", icon: LibraryBig }] },
   { label: "Classes", items: [{ label: "Tag Classes", to: "/classes/tag", icon: Tags }, { label: "Equipment Classes", to: "/classes/equipment", icon: Boxes }] },
   { label: "Information", items: [{ label: "Document Types", to: "/documents", icon: FileText }, { label: "Disciplines", to: "/disciplines", icon: Shapes }, { label: "Lifecycle Requirements", to: "/lifecycle", icon: CalendarRange }] },
   { label: "Reference", items: [{ label: "Data Dictionary", to: "/dictionary", icon: BookOpen }, { label: "Source Standards", to: "/standards", icon: Database }, { label: "Units of Measure", to: "/units", icon: Ruler }] },
@@ -68,8 +70,8 @@ export function AppShell() {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-footer-label">Pilot data source</div>
-          <div className="sidebar-version">CFIHOS 2.0 reviewed snapshot</div>
+          <div className="sidebar-footer-label">Loaded RDLs</div>
+          <div className="sidebar-version">CFIHOS 2.0 + 2 candidate extensions</div>
           <a className="pilot-feedback-link" href={`mailto:${PILOT_FEEDBACK_EMAIL}?subject=RDL%20Explorer%20pilot%20feedback`}><Mail size={14} />Send pilot feedback</a>
         </div>
       </aside>
@@ -80,15 +82,8 @@ export function AppShell() {
         <header className="topbar">
           <button type="button" className="mobile-menu" aria-label="Open navigation" onClick={() => setSidebarOpen(true)}><Menu size={21} /></button>
 
-          <div className="global-search global-search-disabled" aria-label="Global search is planned for a future release">
-            <Search size={18} />
-            <input type="search" placeholder="Global search coming soon" aria-label="Global RDL search coming soon" disabled />
-            <span className="coming-soon-label">Coming soon</span>
-          </div>
-
-          <div className="version-selector" aria-label="Current pilot data source: CFIHOS version 2.0">
-            <span><small>DATA SOURCE</small>CFIHOS 2.0</span>
-          </div>
+          <GlobalRdlSearch />
+          <RdlScopeSelector />
         </header>
 
         <main className="main-content" style={{ height: "calc(100vh - var(--topbar-height))", minHeight: 0, overflowX: "hidden", overflowY: "auto", overscrollBehavior: "contain" }}><Outlet /></main>

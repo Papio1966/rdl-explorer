@@ -731,3 +731,105 @@ a {
     display: none;
   }
 }
+/* RDL-009 multi-RDL UX and global search */
+.rdl-scope-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 250px;
+  border-left: 1px solid var(--border, #dfe6e3);
+  padding-left: 1rem;
+}
+.rdl-scope-copy { display: flex; flex-direction: column; }
+.rdl-scope-copy small { font-size: 0.62rem; letter-spacing: 0.08em; color: var(--text-muted, #66756f); font-weight: 700; }
+.rdl-scope-selector select, .rdl-search-toolbar select {
+  border: 1px solid var(--border, #dfe6e3);
+  background: var(--surface, #fff);
+  border-radius: 8px;
+  padding: 0.48rem 0.65rem;
+  color: inherit;
+  font: inherit;
+  max-width: 175px;
+}
+.global-search button {
+  border: 0;
+  border-radius: 7px;
+  padding: 0.42rem 0.7rem;
+  background: var(--text, #17352b);
+  color: #fff;
+  font-weight: 650;
+  cursor: pointer;
+}
+.global-search button:disabled { opacity: 0.45; cursor: default; }
+.content-page { padding: 2rem 2.25rem 4rem; max-width: 1320px; margin: 0 auto; }
+.page-heading { display: flex; justify-content: space-between; gap: 2rem; align-items: flex-end; margin-bottom: 1.5rem; }
+.page-heading h1 { margin: 0.35rem 0 0; }
+.page-heading > p { max-width: 560px; color: var(--text-muted, #66756f); margin: 0; }
+.rdl-source-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.rdl-source-card, .rdl-search-result, .rdl-entity-panel, .rdl-provenance-note {
+  border: 1px solid var(--border, #dfe6e3);
+  background: var(--surface, #fff);
+  border-radius: 14px;
+}
+.rdl-source-card { padding: 1.35rem; }
+.rdl-source-card-heading { display: flex; justify-content: space-between; align-items: center; }
+.rdl-source-card h2 { margin: 1rem 0 0.25rem; font-size: 1.1rem; }
+.rdl-source-card p { color: var(--text-muted, #66756f); min-height: 4.2em; }
+.rdl-source-card a, .rdl-back-link { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 650; text-decoration: none; }
+.rdl-source-version { color: var(--text-muted, #66756f); font-size: 0.86rem; }
+.rdl-status-badge, .rdl-entity-type, .rdl-source-badge { display: inline-flex; align-items: center; gap: 0.3rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; padding: 0.28rem 0.55rem; }
+.rdl-status-reviewed { background: #e8f4ee; }
+.rdl-status-candidate { background: #f5f0df; }
+.rdl-provenance-note { display: flex; gap: 0.8rem; padding: 1rem 1.1rem; margin-top: 1rem; }
+.rdl-provenance-note p { margin: 0.2rem 0 0; color: var(--text-muted, #66756f); }
+.rdl-search-form { display: flex; align-items: center; gap: 0.6rem; border: 1px solid var(--border, #dfe6e3); border-radius: 12px; padding: 0.65rem 0.8rem; background: var(--surface, #fff); }
+.rdl-search-form input { flex: 1; border: 0; outline: 0; font: inherit; background: transparent; }
+.rdl-search-form button { border: 0; border-radius: 8px; padding: 0.55rem 0.9rem; background: var(--text, #17352b); color: white; font-weight: 650; }
+.rdl-search-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin: 0.85rem 0 1rem; color: var(--text-muted, #66756f); }
+.rdl-search-toolbar label { display: flex; gap: 0.55rem; align-items: center; }
+.rdl-search-results { display: grid; gap: 0.75rem; }
+.rdl-search-result { padding: 1rem 1.1rem; text-decoration: none; color: inherit; transition: border-color 120ms ease, transform 120ms ease; }
+.rdl-search-result:hover { transform: translateY(-1px); border-color: #8ea69d; }
+.rdl-search-result-top { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+.rdl-entity-type { background: #edf2f0; }
+.rdl-source-badge { background: #f3f5f4; color: var(--text-muted, #66756f); }
+.rdl-search-result h2 { font-size: 1.02rem; margin: 0.6rem 0 0.2rem; }
+.rdl-search-result code, .rdl-entity-page code { font-size: 0.78rem; }
+.rdl-search-result p { margin: 0.55rem 0 0; color: var(--text-muted, #66756f); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rdl-search-state { min-height: 190px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.45rem; text-align: center; color: var(--text-muted, #66756f); }
+.rdl-entity-hero { display: flex; justify-content: space-between; gap: 2rem; align-items: flex-start; margin: 1.2rem 0 1.5rem; }
+.rdl-entity-hero h1 { margin: 0.35rem 0 0.25rem; }
+.rdl-entity-source { min-width: 280px; display: flex; gap: 0.65rem; padding: 0.8rem 0.9rem; border: 1px solid var(--border, #dfe6e3); border-radius: 12px; }
+.rdl-entity-source div { display: flex; flex-direction: column; }
+.rdl-entity-source small { color: var(--text-muted, #66756f); letter-spacing: 0.08em; font-size: 0.62rem; font-weight: 700; }
+.rdl-entity-source span { color: var(--text-muted, #66756f); font-size: 0.8rem; margin-top: 0.15rem; }
+.rdl-entity-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 1rem; }
+.rdl-entity-panel { padding: 1.2rem; }
+.rdl-entity-panel h2 { font-size: 1rem; margin-top: 0; }
+.rdl-entity-panel dl { display: grid; grid-template-columns: 95px 1fr; gap: 0.55rem 0.8rem; font-size: 0.86rem; }
+.rdl-entity-panel dt { color: var(--text-muted, #66756f); }
+.rdl-entity-panel dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 980px) {
+  .rdl-scope-selector { min-width: 0; border-left: 0; padding-left: 0; }
+  .rdl-scope-copy { display: none; }
+  .rdl-scope-selector select { max-width: 140px; }
+  .rdl-source-grid { grid-template-columns: 1fr; }
+  .page-heading, .rdl-entity-hero { flex-direction: column; align-items: stretch; }
+  .rdl-entity-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .content-page { padding: 1.25rem 1rem 3rem; }
+  .rdl-scope-selector { display: none; }
+  .global-search button { display: none; }
+}
+.hero-search button {
+  padding: 11px 18px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--brand);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.hero-search button:disabled { opacity: 0.45; cursor: default; }

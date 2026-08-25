@@ -176,3 +176,17 @@ RDL-001 is complete when:
 - **RDL-GEN-007 — Prior baseline protection** — Water ingestion shall not alter established CFIHOS counts, CCUS package provenance or controlled repository-cutover behaviour.
 - **RDL-GEN-008 — Idempotence and provenance** — Re-ingesting the same Water workbook shall produce one deterministic package state with exact workbook SHA and current ingestion audit record.
 - **RDL-GEN-009 — No multi-RDL browser cutover** — RDL-008 shall prove backend genericity before RDL-009 introduces user-facing multi-RDL navigation and global search.
+
+
+## RDL-009 — Multi-RDL UX and global search
+
+- **RDL-UX-001 — RDL scope** — Users shall be able to select All RDLs, CFIHOS, CCUS or Water / Desalination as the active global-search scope.
+- **RDL-UX-002 — Searchable packages** — Global search shall cover the loaded normalized entity population across the three proven source/release/package trees.
+- **RDL-UX-003 — Typed result identity** — Search-result identity shall include source/package, entity type and native/canonical identifier so duplicate identifiers cannot collapse.
+- **RDL-UX-004 — Visible provenance** — Every cross-RDL result and generic entity view shall display source and release provenance.
+- **RDL-UX-005 — Safe navigation** — Cross-RDL result routes shall encode source, entity type and identifier.
+- **RDL-UX-006 — Source status** — Candidate CCUS and Water / Desalination extensions shall remain visually distinguishable from the reviewed CFIHOS baseline.
+- **RDL-UX-007 — Database search contract** — A server-side PostgreSQL search repository shall prove source-aware and typed search against the normalized RDL model.
+- **RDL-UX-008 — Browser-safe projection** — Until hosted PostgreSQL connectivity is introduced, the browser search index shall be a deterministic generated projection of the same governed source packages and shall contain no database credentials.
+- **RDL-UX-009 — Specialist-view continuity** — RDL-009 shall not remove the existing deep CFIHOS browse/detail pages, CIS behaviour or Assistant retrieval.
+- **RDL-UX-010 — No semantic equivalence yet** — Global search shall find and navigate entities but shall not infer cross-RDL equivalence, overlap, conflict or gap semantics; those belong to RDL-010.

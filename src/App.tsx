@@ -6,6 +6,7 @@ import {
   Routes,
 } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
+import { RdlScopeProvider } from "./rdl/RdlScopeContext";
 
 function lazyNamed<T extends Record<string, unknown>, K extends keyof T>(
   loader: () => Promise<T>,
@@ -45,6 +46,9 @@ const CisBuilderPage = lazyNamed(() => import("./pages/CisBuilderPage"), "CisBui
 const AssistantPage = lazyNamed(() => import("./pages/AssistantPage"), "AssistantPage");
 const AboutPage = lazyNamed(() => import("./pages/AboutPage"), "AboutPage");
 const HelpPage = lazyNamed(() => import("./pages/HelpPage"), "HelpPage");
+const RdlCataloguePage = lazyNamed(() => import("./pages/RdlCataloguePage"), "RdlCataloguePage");
+const RdlSearchPage = lazyNamed(() => import("./pages/RdlSearchPage"), "RdlSearchPage");
+const RdlEntityPage = lazyNamed(() => import("./pages/RdlEntityPage"), "RdlEntityPage");
 
 function RouteFallback() {
   return (
@@ -61,11 +65,15 @@ function RouteFallback() {
 export default function App() {
   return (
     <BrowserRouter>
+      <RdlScopeProvider>
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route element={<AppShell />}>
             <Route index element={<HomePage />} />
             <Route path="/source" element={<DataSourcePage />} />
+            <Route path="/rdls" element={<RdlCataloguePage />} />
+            <Route path="/search" element={<RdlSearchPage />} />
+            <Route path="/rdl/:sourceKey/:entityType/:nativeIdentifier" element={<RdlEntityPage />} />
             <Route path="/inspect/documents" element={<DocumentSchemaInspectionPage />} />
             <Route path="/inspect/standards" element={<SourceStandardsInspectionPage />} />
             <Route path="/classes/tag" element={<TagClassesPage />} />
@@ -95,6 +103,7 @@ export default function App() {
           </Route>
         </Routes>
       </Suspense>
+      </RdlScopeProvider>
     </BrowserRouter>
   );
 }

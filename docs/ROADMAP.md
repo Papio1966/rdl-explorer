@@ -30,17 +30,11 @@
 
 ## RDL-008 — Water / Desalination Genericity Proof
 
-**Status: implementation sprint.** Ingest the structurally different Water / Desalination RDL through a versioned mapping profile. Prove deterministic identifier derivation for source objects without native IDs, code-based hierarchy mapping, three-RDL coexistence, package isolation, prior baseline protection and idempotent provenance without adding Water-specific database tables.
+**Status: complete.** Ingest the structurally different Water / Desalination RDL through a versioned mapping profile. Prove deterministic identifier derivation for source objects without native IDs, code-based hierarchy mapping, three-RDL coexistence, package isolation, prior baseline protection and idempotent provenance without adding Water-specific database tables.
 
 ## RDL-009 — Multi-RDL UX & Global Search
 
-Expose source-aware exploration only after the backend genuinely supports multiple RDLs:
-
-- RDL selector;
-- All RDLs mode;
-- provenance/source badges;
-- source-aware global search;
-- cross-RDL navigation.
+**Status: implementation sprint.** Expose the three proven RDL packages through an RDL scope selector, catalogue, source-aware global search, package-aware generic entity routes and provenance badges. Retain the established deep CFIHOS specialist pages while multi-RDL relationship UX remains a later concern.
 
 ## RDL-010 — Cross-RDL Intelligence
 

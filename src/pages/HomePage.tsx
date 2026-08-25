@@ -6,7 +6,9 @@ import {
   Search,
   Tags,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, type FormEvent } from "react";
+import { useRdlScope } from "../rdl/RdlScopeContext";
 
 const cards = [
   {
@@ -44,45 +46,43 @@ const cards = [
 ];
 
 export function HomePage() {
+  const navigate = useNavigate();
+  const { scope } = useRdlScope();
+  const [query, setQuery] = useState("");
+  function submitSearch(event: FormEvent) { event.preventDefault(); const value=query.trim(); if(value) navigate(`/search?q=${encodeURIComponent(value)}&source=${encodeURIComponent(scope)}`); }
   return (
     <div className="home-page">
       <section className="hero">
         <div className="hero-copy">
-          <div className="eyebrow">CFIHOS 2.0</div>
+          <div className="eyebrow">CFIHOS · CCUS · Water / Desalination</div>
 
           <h1>
-            Explore CFIHOS.
+            Explore reference data.
             <br />
-            Understand the data.
+            Understand the source.
           </h1>
 
           <p>
-            Navigate classes, properties, documents and relationships across
-            the CFIHOS reference data model from one connected workspace.
+            Search and navigate classes, properties, documents and reference data across multiple RDL packages while retaining source and release provenance.
           </p>
         </div>
 
-        <div className="hero-search">
+        <form className="hero-search" onSubmit={submitSearch}>
           <Search size={21} />
-          <input
-            type="search"
-            placeholder="What are you looking for?"
-            aria-label="Search the CFIHOS model"
-          />
-          <span>Search</span>
-        </div>
+          <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="What are you looking for?" aria-label="Search loaded RDLs" />
+          <button type="submit" disabled={!query.trim()}>Search</button>
+        </form>
       </section>
 
       <section className="section">
         <div className="section-heading">
           <div>
             <div className="eyebrow">Explore</div>
-            <h2>Browse the standard</h2>
+            <h2>Browse the reference model</h2>
           </div>
 
           <p>
-            Start with a CFIHOS information area and follow the relationships
-            between entities.
+            Use the established CFIHOS deep views or the RDL Catalogue and global search for source-aware navigation across all loaded libraries.
           </p>
         </div>
 
@@ -119,18 +119,16 @@ export function HomePage() {
       <section className="section getting-started">
         <div>
           <div className="eyebrow">Getting started</div>
-          <h2>One model. Connected information.</h2>
+          <h2>Multiple RDLs. Preserved provenance.</h2>
         </div>
 
         <div className="getting-started-copy">
           <p>
-            Use the navigation to explore CFIHOS by class, document,
-            discipline or reference data. Later we'll connect global search
-            directly to the underlying CFIHOS workbook.
+            Use Global Search to find typed entities across CFIHOS, CCUS and Water / Desalination. Every multi-RDL result retains its source, release and package identity.
           </p>
 
-          <Link to="/classes/tag">
-            Start exploring
+          <Link to="/rdls">
+            Browse RDL catalogue
             <ArrowRight size={17} />
           </Link>
         </div>
