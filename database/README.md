@@ -61,3 +61,20 @@ npm run db:test:rdl-003
 ```
 
 The test proves that the same native identifier can coexist across entity domains and RDL sources, that logical identities remain distinct, that typed relationships persist, and that ingestion provenance is recorded.
+
+## RDL-004 — Load the reviewed CFIHOS snapshot
+
+After migrations are current, ingest the reviewed snapshot into the normalized RDL model:
+
+```bash
+export RDL_DATABASE_URL="postgresql://localhost:5432/rdl_explorer"
+npm run db:migrate
+npm run db:ingest:cfihos
+npm run db:test:rdl-004
+```
+
+The adapter reads `public/cfihos-workbook.json`, creates/updates the CFIHOS source, release and normalized package, replaces the normalized contents of that exact package deterministically, and records an `ingestion.ingestion_run` audit record.
+
+The package retains the snapshot SHA-256 and source URL. PostgreSQL remains an operational normalized representation; the published CFIHOS source package remains authoritative.
+
+RDL-004 does not switch the browser UI to PostgreSQL. The existing CFIHOS snapshot remains the active runtime and the parity reference.

@@ -117,3 +117,16 @@ RDL-001 is complete when:
 - **RDL-CORE-008 — Extensible vocabulary** — Entity and relationship types shall use registries that can be extended for future RDLs without forcing them into the exact CFIHOS workbook structure.
 - **RDL-CORE-009 — Lifecycle state** — The model shall distinguish active, deprecated, superseded and withdrawn content without deleting historical identity.
 - **RDL-CORE-010 — No runtime cutover** — RDL-003 shall not switch the Explorer UI from the proven CFIHOS snapshot repository to PostgreSQL.
+
+## RDL-004 CFIHOS ingestion and parity requirements
+
+- **RDL-CFIHOS-001 — Adapter boundary** — CFIHOS shall be ingested through a versioned adapter from the reviewed snapshot; PostgreSQL shall not become the authoritative source.
+- **RDL-CFIHOS-002 — Typed class identity** — Tag Class and Equipment Class identities shall remain distinct even when CFIHOS reuses the same native identifier.
+- **RDL-CFIHOS-003 — Reproducible package** — The normalized CFIHOS package shall retain the reviewed snapshot SHA-256 and source URI.
+- **RDL-CFIHOS-004 — Core entity parity** — Database verification shall compare normalized identity counts derived from the source rows for tag classes, equipment classes, properties, document types, disciplines, units, source standards, controlled values, handover events and JIP33 information requirements.
+- **RDL-CFIHOS-005 — Relationship parity** — Database verification shall compare direct CFIHOS class-property, discipline-document, tag-equipment and controlled-list relationships with the reviewed snapshot.
+- **RDL-CFIHOS-006 — Lossless contextual mappings** — Source-standard property mappings that are not safely representable as one binary relationship shall be retained as first-class source-mapping entities with explicit links to their referenced entities.
+- **RDL-CFIHOS-007 — Ambiguity preservation** — Where the CFIHOS source sheet does not disambiguate Tag versus Equipment class context, ingestion shall retain that ambiguity rather than silently inventing a single domain.
+- **RDL-CFIHOS-008 — Auditability** — Each successful load shall record a completed ingestion run with adapter key/version and source hash.
+- **RDL-CFIHOS-009 — Idempotence** — Re-running the adapter against the same package shall replace that normalized package content deterministically rather than creating duplicate entities or relationships.
+- **RDL-CFIHOS-010 — No runtime cutover** — RDL-004 shall keep the existing CFIHOS snapshot repositories active until a later sprint explicitly approves database-backed runtime cutover.
