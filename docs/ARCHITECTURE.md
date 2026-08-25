@@ -264,3 +264,15 @@ rdl_explorer PostgreSQL -> PsqlJsonClient -> PostgresRdlRepository -> RdlReadSer
 The repository reads normalized source/release/package identity, typed entities, hierarchy, direct properties, document relationships, controlled values, JIP33 requirements, tag/equipment mappings, unit dimension families, source-standard provenance, and first-class source mappings. The read path is source/release scoped and therefore does not assume that a CFIHOS native identifier is globally unique.
 
 No UI repository cutover is part of RDL-005. The PostgreSQL implementation must first demonstrate deterministic semantic parity against the reviewed CFIHOS snapshot. `psql` remains an implementation detail of the local server-side adapter; browser code never receives database credentials and never connects directly to PostgreSQL.
+
+## RDL-006 controlled repository cutover
+
+RDL-006 introduces a server-side repository selector with three explicit modes:
+
+- `snapshot` — the reviewed CFIHOS snapshot is the authoritative read path and remains the default.
+- `postgresql` — normalized PostgreSQL is the selected read path.
+- `dual` — the snapshot and PostgreSQL paths execute in parallel; semantic results are compared and the snapshot result is returned only when parity is confirmed.
+
+The selector is intentionally server-side. Browser code does not receive database credentials or direct PostgreSQL access. Dual-read comparison ignores implementation-only database entity IDs while comparing package identity, typed/native identity, names, definitions, lifecycle state, normalized metadata and source locators. A mismatch fails closed rather than silently choosing a candidate result.
+
+RDL-006 does not switch the current browser pages, CIS derivation or Assistant retrieval to PostgreSQL. It establishes the controlled cutover mechanism that a later sprint can wire into selected application endpoints.

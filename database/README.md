@@ -91,3 +91,14 @@ npm run db:test:rdl-005
 ```
 
 The local adapter uses the installed `psql` executable and emits JSON to the server-side repository. This avoids introducing a browser/database dependency while the repository contract is still being proven. A later deployment may replace the adapter with a pooled PostgreSQL driver behind the same repository/service boundary.
+
+## RDL-006 read-mode validation
+
+After CFIHOS ingestion and RDL-005 parity are present, run:
+
+```bash
+export RDL_DATABASE_URL="postgresql://localhost:5432/rdl_explorer"
+npm run db:test:rdl-006
+```
+
+`RDL_READ_MODE` accepts `snapshot`, `postgresql`, or `dual`. The default is `snapshot`. RDL-006 tests the selector directly and does not change the browser runtime.

@@ -44,6 +44,12 @@ const psqlJsonClient = read("server/db/PsqlJsonClient.ts");
 const rdlReadService = read("server/rdl/RdlReadService.ts");
 const rdlReadRepository = read("server/rdl/RdlReadRepository.ts");
 const rdl005ParityTest = read("scripts/db-test-rdl-005-read-parity.ts");
+const rdlCutoverRepository = read("server/rdl/RdlCutoverRepository.ts");
+const snapshotReadRepository = read("server/rdl/SnapshotRdlReadRepository.ts");
+const dualReadRepository = read("server/rdl/DualReadRdlRepository.ts");
+const repositorySelector = read("server/rdl/RdlRepositorySelector.ts");
+const rdl006Test = read("scripts/db-test-rdl-006-dual-read.ts");
+const envExample = read(".env.example");
 
 const routes = [
   "/classes/tag",
@@ -99,7 +105,7 @@ assert.ok(indexHtml.includes("<title>RDL Explorer</title>"), "Browser title must
 assert.ok(packageJson.includes('"name": "rdl-explorer"'), "Package identity must be rdl-explorer");
 assert.ok(productBoundary.includes("CFIHOS Explorer") && productBoundary.includes("RDL Explorer"), "Product boundary must document the separation from CFIHOS Explorer");
 assert.ok(architecture.includes("PostgreSQL") && architecture.includes("DataGate"), "Architecture must document the PostgreSQL target and DataGate boundary");
-assert.ok(roadmap.includes("RDL-002") && roadmap.includes("RDL-008"), "Roadmap must capture the staged RDL platform programme");
+assert.ok(roadmap.includes("RDL-002") && roadmap.includes("RDL-010"), "Roadmap must capture the staged RDL platform programme");
 assert.ok(requirements.includes("RDL-MODEL-001") && requirements.includes("RDL-DG-001"), "Requirements must capture RDL identity and DataGate integration constraints");
 assert.ok(packageJson.includes('"db:migrate"') && packageJson.includes('"db:health"'), "Package scripts must expose database migration and health commands");
 assert.ok(databaseBootstrap.includes("metadata.schema_migrations"), "Database bootstrap must establish migration history");
@@ -138,6 +144,14 @@ assert.ok(psqlJsonClient.includes("class PsqlJsonClient") && psqlJsonClient.incl
 assert.ok(rdlReadRepository.includes("interface RdlReadRepository") && rdlReadService.includes("class RdlReadService"), "RDL-005 must keep database reads behind repository and server-side service boundaries");
 assert.ok(rdl005ParityTest.includes("CFIHOS-30000521") && rdl005ParityTest.includes("contentSha256") && rdl005ParityTest.includes("unit-family/dimension reads"), "RDL-005 parity must verify typed identity, provenance and representative relationships");
 assert.ok(requirements.includes("RDL-READ-001") && requirements.includes("RDL-READ-008"), "Requirements must capture the RDL-005 read-parity constraints");
+assert.ok(packageJson.includes('"db:test:rdl-006"'), "Package scripts must expose the RDL-006 controlled-cutover test");
+assert.ok(rdlCutoverRepository.includes('RdlReadMode = "snapshot" | "postgresql" | "dual"'), "RDL-006 must define the three controlled read modes");
+assert.ok(snapshotReadRepository.includes("class SnapshotRdlReadRepository") && dualReadRepository.includes("class DualReadRdlRepository"), "RDL-006 must preserve snapshot reference reads and add a dual-read comparator");
+assert.ok(repositorySelector.includes('value ?? "snapshot"') && repositorySelector.includes("Invalid RDL_READ_MODE"), "RDL-006 selector must default safely and reject invalid modes");
+assert.ok(dualReadRepository.includes("RDL dual-read mismatch") && dualReadRepository.includes("return reference"), "RDL-006 dual reads must fail closed and retain snapshot authority");
+assert.ok(rdl006Test.includes("CFIHOS-30000521") && rdl006Test.includes("getDirectProperties") && rdl006Test.includes("getUnitsForDimension"), "RDL-006 test must cover typed identity and representative relationship reads");
+assert.ok(envExample.includes("RDL_READ_MODE=snapshot"), "RDL-006 environment example must keep snapshot as the safe default");
+assert.ok(requirements.includes("RDL-CUT-001") && requirements.includes("RDL-CUT-009"), "Requirements must capture controlled cutover and regression-oracle constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 reviewed snapshot"), "Pilot data-source provenance is missing from the shell");
@@ -190,6 +204,7 @@ console.log("PASS CIS/Assistant contract: persistence, active CIS context and se
 console.log("PASS RDL-001 bootstrap: product identity, architecture, roadmap and requirements are present.");
 console.log("PASS RDL-002 database foundation: schemas, migrations, configuration, health checks and repository boundaries are present.");
 console.log("PASS RDL-005 read parity: server-side PostgreSQL repository, service boundary and deterministic parity gate are present.");
+console.log("PASS RDL-006 controlled cutover: snapshot/postgresql/dual selection and fail-closed parity comparison are present.");
 console.log("PASS pilot readiness: status, provenance, honest search state and feedback route are present.");
 console.log("PASS class detail UX: anchored contents navigation and accessible progressive disclosure are present.");
 console.log("PASS document detail UX: anchored contents navigation and accessible progressive disclosure are present.");
