@@ -3,7 +3,7 @@ import { ArrowRight, CheckCircle2, CircleHelp, FileJson, FileSpreadsheet, Mail, 
 import "./HelpPage.css";
 
 const PILOT_FEEDBACK_EMAIL = "alessandro@papioconsulting.eu";
-const sections = [["getting-started", "Getting started"], ["pilot", "Pilot status"], ["navigation", "Navigation & search"], ["classes", "Classes"], ["information", "Information"], ["reference", "Reference"], ["model", "Data Model"], ["validation", "Validation"], ["cis", "CIS Builder"], ["assistant", "AI Assistant"], ["workflows", "Common workflows"], ["feedback", "Feedback"]];
+const sections = [["getting-started", "Getting started"], ["pilot", "Pilot status"], ["navigation", "Navigation & search"], ["classes", "Classes"], ["information", "Information"], ["reference", "Reference"], ["model", "Data Model"], ["validation", "Validation"], ["cis", "CIS Builder"], ["assistant", "AI Assistant"], ["cross-rdl", "Cross-RDL Intelligence"], ["workflows", "Common workflows"], ["feedback", "Feedback"]];
 
 function GuideSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) { return <section className="guide-section" id={id}><h2>{title}</h2>{children}</section>; }
 
@@ -38,8 +38,10 @@ export function HelpPage() {
 
         <GuideSection id="feedback" title="Pilot feedback"><p>Feedback from pilot users is part of the evaluation. Please include the page or workflow you were using, what you expected, what happened, and—where appropriate—the CFIHOS identifier involved. Do not include confidential project information, credentials or API keys in feedback emails.</p><a className="guide-feedback-link" href={`mailto:${PILOT_FEEDBACK_EMAIL}?subject=RDL%20Explorer%20pilot%20feedback`}><Mail size={16}/>Email pilot feedback</a></GuideSection>
 
+        <GuideSection id="cross-rdl" title="Cross-RDL Intelligence"><p>Use <Link to="/intelligence">Cross-RDL Intelligence</Link> to compare loaded RDLs, review deterministic candidate mappings and inspect structural overlap/gap indicators. Candidate mappings show provenance, confidence and status; they are not treated as authoritative equivalence.</p></GuideSection>
+
         <footer className="guide-footer"><span>Need context on the application itself?</span><Link to="/about">About RDL Explorer <ArrowRight size={15}/></Link></footer>
       </article>
-    </div>
+</div>
   );
 }

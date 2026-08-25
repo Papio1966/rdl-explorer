@@ -66,6 +66,11 @@ const rdlCataloguePage = read("src/pages/RdlCataloguePage.tsx");
 const rdlSearchGenerator = read("scripts/generate-rdl-search-index.ts");
 const rdlGlobalSearchRepository = read("server/rdl/RdlGlobalSearchRepository.ts");
 const rdl009Test = read("scripts/db-test-rdl-009-search.ts");
+const crossRdlMigration = read("database/migrations/004_create_cross_rdl_mapping.sql");
+const crossRdlRepository = read("server/rdl/CrossRdlIntelligenceRepository.ts");
+const crossRdlGenerator = read("scripts/generate-cross-rdl-intelligence.ts");
+const crossRdlPage = read("src/pages/RdlIntelligencePage.tsx");
+const rdl010Test = read("scripts/db-test-rdl-010-cross-intelligence.ts");
 
 const routes = [
   "/classes/tag",
@@ -84,6 +89,7 @@ const routes = [
   "/help",
   "/rdls",
   "/search",
+  "/intelligence",
 ];
 
 for (const route of routes) {
@@ -101,6 +107,7 @@ for (const label of [
   "About RDL Explorer",
   "User Guide",
   "RDL Catalogue",
+  "Cross-RDL Intelligence",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
 }
@@ -194,6 +201,13 @@ assert.ok(rdlSearchGenerator.includes("CCUS_CFIHOS_FORMAT_PROFILE") && rdlSearch
 assert.ok(rdlGlobalSearchRepository.includes("source_key") && rdlGlobalSearchRepository.includes("entity_type_code"), "RDL-009 PostgreSQL search contract must preserve source and typed identity");
 assert.ok(rdl009Test.includes("CFIHOS-30000521") && rdl009Test.includes("water-desalination") && rdl009Test.includes("ccus"), "RDL-009 database test must prove typed and source-filtered multi-RDL search");
 assert.ok(requirements.includes("RDL-UX-001") && requirements.includes("RDL-UX-010"), "Requirements must capture RDL-009 multi-RDL UX and search constraints");
+assert.ok(packageJson.includes('"generate:rdl-intelligence"') && packageJson.includes('"db:seed:rdl-010"') && packageJson.includes('"db:test:rdl-010"'), "RDL-010 scripts must expose projection generation, mapping seed and repository validation");
+assert.ok(crossRdlMigration.includes("cross_rdl_mapping") && crossRdlMigration.includes("possible_match") && crossRdlMigration.includes("ai_suggested"), "RDL-010 must separate governed cross-RDL mappings from source-authoritative relationships");
+assert.ok(crossRdlRepository.includes("class CrossRdlIntelligenceRepository") && crossRdlRepository.includes("provenance_method") && crossRdlRepository.includes("confidence"), "RDL-010 repository must expose typed provenance-aware mappings");
+assert.ok(crossRdlGenerator.includes("exact-name candidate mapping") && crossRdlGenerator.includes('mappingType:"possible_match"'), "RDL-010 deterministic browser projection must never promote exact names directly to equivalence");
+assert.ok(crossRdlPage.includes("Governance boundary") && crossRdlPage.includes("Overlap and gap profile") && crossRdlPage.includes("Candidate mappings"), "RDL-010 UX must explain governance and expose comparison/overlap/gap candidates");
+assert.ok(rdl010Test.includes("metre") && rdl010Test.includes("candidate possible matches") && rdl010Test.includes("cross RDL sources"), "RDL-010 database test must verify cross-source isolation and non-authoritative candidate semantics");
+assert.ok(requirements.includes("RDL-XINT-001") && requirements.includes("RDL-XINT-010"), "Requirements must capture RDL-010 cross-RDL intelligence governance constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");

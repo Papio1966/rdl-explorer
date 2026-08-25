@@ -127,3 +127,17 @@ npm run db:test:rdl-008
 ```
 
 The acceptance test performs a second ingestion intentionally to verify deterministic/idempotent package state. It also confirms coexistence with CFIHOS and CCUS and checks that Water-specific header/identifier differences are absorbed by the mapping/ingestion layer rather than by new PostgreSQL tables.
+
+## RDL-010 — Cross-RDL intelligence
+
+RDL-010 adds a governed `rdl.cross_rdl_mapping` table for relationships between entities in different RDL packages. These mappings are deliberately separate from `rdl.rdl_relationship`, which remains the source-authoritative within-package relationship model.
+
+Apply and seed deterministic candidate mappings with:
+
+```bash
+npm run db:migrate
+npm run db:seed:rdl-010
+npm run db:test:rdl-010
+```
+
+The initial exact-name rule emits only `possible_match` / `candidate` mappings at 0.85 confidence. Exact-name equality is evidence, not equivalence. Stronger mapping types (`equivalent`, `broader`, `narrower`, `related`, `no_match`) require explicit governance or later reviewed workflows.

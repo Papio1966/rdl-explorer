@@ -32,7 +32,7 @@ const navigation = [
   { label: "Information", items: [{ label: "Document Types", to: "/documents", icon: FileText }, { label: "Disciplines", to: "/disciplines", icon: Shapes }, { label: "Lifecycle Requirements", to: "/lifecycle", icon: CalendarRange }] },
   { label: "Reference", items: [{ label: "Data Dictionary", to: "/dictionary", icon: BookOpen }, { label: "Source Standards", to: "/standards", icon: Database }, { label: "Units of Measure", to: "/units", icon: Ruler }] },
   { label: "Model", items: [{ label: "Data Model", to: "/model", icon: GitBranch }] },
-  { label: "Intelligence", items: [{ label: "AI Assistant", to: "/assistant", icon: Sparkles }] },
+  { label: "Intelligence", items: [{ label: "Cross-RDL Intelligence", to: "/intelligence", icon: GitBranch }, { label: "AI Assistant", to: "/assistant", icon: Sparkles }] },
   { label: "Contract", items: [{ label: "CIS Builder", to: "/cis", icon: ClipboardList }] },
   { label: "Quality", items: [{ label: "Validation", to: "/validation", icon: ShieldCheck }] },
   { label: "Help", items: [{ label: "About RDL Explorer", to: "/about", icon: Info }, { label: "User Guide", to: "/help", icon: CircleHelp }] },

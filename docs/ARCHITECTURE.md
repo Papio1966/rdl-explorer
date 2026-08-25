@@ -331,3 +331,19 @@ Governed source packages
 The browser projection is a transition mechanism, not a second system of record. It exists because the current pilot deployment has no hosted PostgreSQL driver/API boundary. Once that infrastructure is introduced, the same UI contract can be served by the normalized repository search service without changing package-aware identity semantics.
 
 Existing Tag Class, Equipment Class, Document, Discipline, Dictionary, Source Standard and Unit pages remain the deep CFIHOS specialist experience in RDL-009. Multi-RDL search routes provide safe generic detail/provenance for all loaded RDLs. Cross-RDL semantic equivalence and comparison remain RDL-010 scope.
+
+## RDL-010 cross-RDL intelligence boundary
+
+RDL-010 introduces a deliberate separation between source truth and derived intelligence:
+
+```text
+rdl.rdl_relationship
+  = authoritative relationship inside one RDL package
+
+rdl.cross_rdl_mapping
+  = curated / rule-derived / future AI-suggested relationship across RDL packages
+```
+
+Each cross-RDL mapping carries a typed relationship, provenance method, confidence, status and evidence. The first deterministic generator uses exact normalized names only to propose `possible_match` candidates. It never promotes exact-name equality to semantic equivalence automatically.
+
+For the pilot browser, `public/rdl-cross-intelligence.json` is a reproducible projection generated from the package-aware global-search projection. The enterprise server path uses the PostgreSQL mapping model through `CrossRdlIntelligenceRepository`.

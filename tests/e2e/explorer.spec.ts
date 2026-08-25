@@ -62,6 +62,14 @@ test("global RDL search preserves source and typed identity", async ({ page }) =
   await expect(page.getByText(/Water \/ Desalination · 0.1 draft/).first()).toBeVisible();
 });
 
+test("cross-RDL intelligence keeps derived matches governed", async ({ page }) => {
+  await page.goto("/intelligence?left=cfihos&right=water-desalination&type=unit_of_measure");
+  await expect(page.getByRole("heading", { name: "Compare RDLs" })).toBeVisible();
+  await expect(page.getByText("Governance boundary")).toBeVisible();
+  await expect(page.getByText("possible match", { exact: false }).first()).toBeVisible();
+  await expect(page.getByText("exact name rule", { exact: false }).first()).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 
