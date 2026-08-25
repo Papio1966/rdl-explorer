@@ -130,3 +130,14 @@ RDL-001 is complete when:
 - **RDL-CFIHOS-008 — Auditability** — Each successful load shall record a completed ingestion run with adapter key/version and source hash.
 - **RDL-CFIHOS-009 — Idempotence** — Re-running the adapter against the same package shall replace that normalized package content deterministically rather than creating duplicate entities or relationships.
 - **RDL-CFIHOS-010 — No runtime cutover** — RDL-004 shall keep the existing CFIHOS snapshot repositories active until a later sprint explicitly approves database-backed runtime cutover.
+
+## RDL-005 — PostgreSQL Repository Read Parity
+
+- **RDL-READ-001** — A server-side repository shall read normalized RDL content from PostgreSQL without exposing database connectivity to browser code.
+- **RDL-READ-002** — Every repository query shall be scoped by RDL source and release, preserving source-aware identity.
+- **RDL-READ-003** — Entity lookup shall include entity type so identical native identifiers in different domains remain independently addressable.
+- **RDL-READ-004** — The repository shall expose hierarchy and representative relationship reads required by CFIHOS Explorer behaviour.
+- **RDL-READ-005** — Repository reads shall retain package SHA and entity source-locator provenance.
+- **RDL-READ-006** — A deterministic parity test shall compare PostgreSQL reads with the reviewed CFIHOS snapshot for representative identities, counts, attributes and relationships.
+- **RDL-READ-007** — The active browser runtime shall remain snapshot-backed until a later explicit cutover sprint.
+- **RDL-READ-008** — PostgreSQL access shall remain behind an application/service boundary so later database drivers or hosted infrastructure can replace the local `psql` adapter without changing RDL semantics.

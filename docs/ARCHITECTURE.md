@@ -249,3 +249,18 @@ Some CFIHOS sheets encode contextual mappings that cannot be represented lossles
 Where a source sheet itself says only "tag or equipment class", the normalized model records the ambiguity rather than pretending that the source supplied a domain it did not provide.
 
 RDL-004 is a parallel persistence path only. The UI continues to use the reviewed snapshot repositories. Runtime cutover remains deferred until database-backed queries are proven equivalent at behavior level.
+
+## RDL-005 — PostgreSQL repository read parity
+
+RDL-005 introduces a server-side PostgreSQL read path while keeping the browser on the existing CFIHOS snapshot repositories:
+
+```text
+Browser UI -> existing CFIHOS snapshot repositories (active runtime)
+
+Server-side parity path:
+rdl_explorer PostgreSQL -> PsqlJsonClient -> PostgresRdlRepository -> RdlReadService
+```
+
+The repository reads normalized source/release/package identity, typed entities, hierarchy, direct properties, document relationships, controlled values, JIP33 requirements, tag/equipment mappings, unit dimension families, source-standard provenance, and first-class source mappings. The read path is source/release scoped and therefore does not assume that a CFIHOS native identifier is globally unique.
+
+No UI repository cutover is part of RDL-005. The PostgreSQL implementation must first demonstrate deterministic semantic parity against the reviewed CFIHOS snapshot. `psql` remains an implementation detail of the local server-side adapter; browser code never receives database credentials and never connects directly to PostgreSQL.

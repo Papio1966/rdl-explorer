@@ -78,3 +78,16 @@ The adapter reads `public/cfihos-workbook.json`, creates/updates the CFIHOS sour
 The package retains the snapshot SHA-256 and source URL. PostgreSQL remains an operational normalized representation; the published CFIHOS source package remains authoritative.
 
 RDL-004 does not switch the browser UI to PostgreSQL. The existing CFIHOS snapshot remains the active runtime and the parity reference.
+
+## RDL-005 repository read parity
+
+RDL-005 adds a server-side read implementation over the normalized PostgreSQL model. It deliberately does not connect the browser directly to PostgreSQL and does not switch the active CFIHOS UI repositories.
+
+Run the read-parity gate after RDL-004 ingestion:
+
+```bash
+export RDL_DATABASE_URL="postgresql://localhost:5432/rdl_explorer"
+npm run db:test:rdl-005
+```
+
+The local adapter uses the installed `psql` executable and emits JSON to the server-side repository. This avoids introducing a browser/database dependency while the repository contract is still being proven. A later deployment may replace the adapter with a pooled PostgreSQL driver behind the same repository/service boundary.
