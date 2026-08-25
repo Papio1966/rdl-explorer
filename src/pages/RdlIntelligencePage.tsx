@@ -147,10 +147,10 @@ export function RdlIntelligencePage() {
               aria-label="RDL entity type overlap and gap profile"
             >
               <div className="rdl-gap-row rdl-gap-head" role="row">
-                <span>Entity type</span>
-                <span>{getRdlSource(left)?.shortName}</span>
-                <span>{getRdlSource(right)?.shortName}</span>
-                <span>Candidate exact-name overlap</span>
+                <span role="columnheader">Entity type</span>
+                <span role="columnheader">{getRdlSource(left)?.shortName}</span>
+                <span role="columnheader">{getRdlSource(right)?.shortName}</span>
+                <span role="columnheader">Candidate exact-name overlap</span>
               </div>
               {types.map((entityType) => {
                 const overlap = data.mappings.filter((mapping) => {
@@ -166,10 +166,10 @@ export function RdlIntelligencePage() {
 
                 return (
                   <div className="rdl-gap-row" role="row" key={entityType}>
-                    <span>{entityTypeLabel(entityType)}</span>
-                    <span>{leftCounts[entityType] ?? 0}</span>
-                    <span>{rightCounts[entityType] ?? 0}</span>
-                    <span>{overlap}</span>
+                    <span role="rowheader">{entityTypeLabel(entityType)}</span>
+                    <span role="cell">{leftCounts[entityType] ?? 0}</span>
+                    <span role="cell">{rightCounts[entityType] ?? 0}</span>
+                    <span role="cell">{overlap}</span>
                   </div>
                 );
               })}
