@@ -59,7 +59,11 @@
 
 ## RDL-015 — Deployment Automation & Observability
 
-**Status: implementation sprint.** Package the hardened runtime into a CI-produced deployable artifact, expose release/build metadata, add process-local diagnostic metrics, define environment promotion and rollback contracts, and provide automated post-deployment smoke testing without changing RDL or governance semantics.
+**Status: complete.** Package the hardened runtime into a CI-produced deployable artifact, expose release/build metadata, add process-local diagnostic metrics, define environment promotion and rollback contracts, and provide automated post-deployment smoke testing without changing RDL or governance semantics.
+
+## RDL-016 — Enterprise RDL Hierarchy & Extension Governance
+
+**Status: implementation sprint.** Materialize Industry → Company → Asset → Project/CIS layering with explicit parent contexts, exact package pinning, governed add/override/retire extension records, frozen active-project baselines, immutable effective-package publications and provenance-aware hierarchy UX.
 
 ## Later enterprise roadmap
 

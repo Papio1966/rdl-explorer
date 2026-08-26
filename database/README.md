@@ -154,3 +154,7 @@ npm run generate:rdl-governance
 ```
 
 `rdl.review_cross_rdl_mapping(...)` is the only supported write path for review status, reviewer, rationale, review version and supersession metadata. `rdl.cross_rdl_mapping_review_event` is append-only. The browser review queue is intentionally read-only until an authenticated server write boundary is deployed.
+
+## RDL-016 enterprise hierarchy
+
+Migration `007_create_enterprise_rdl_hierarchy.sql` adds Company, Asset and Project/CIS contexts, exact package pins, governed extension changes and immutable effective-context publication records. Run `npm run db:migrate` and `npm run db:test:rdl-016`. Active project package pins are intentionally immutable; create a new context/version to adopt a newer upstream standard.

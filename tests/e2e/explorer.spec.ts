@@ -108,6 +108,18 @@ test("authenticated mapping reviewer can submit a governed decision through the 
 });
 
 
+
+test("enterprise RDL hierarchy preserves immutable upstream and project pinning semantics", async ({ page }) => {
+  await page.goto("/hierarchy");
+  await expect(page.getByRole("heading", { name: "RDL hierarchy & effective context" })).toBeVisible();
+  await expect(page.getByText("Governance boundary")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Industry RDL" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Company RDL" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Asset RDL" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Project / CIS RDL" })).toBeVisible();
+  await expect(page.getByText(/does not auto-migrate/i)).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 
