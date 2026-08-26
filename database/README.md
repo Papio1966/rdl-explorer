@@ -176,3 +176,7 @@ Migration `011_create_consumer_integration_notification.sql` adds consumer subsc
 ### RDL-021 release impact
 
 Migration `012_create_release_change_intelligence.sql` adds immutable release-to-release impact analysis records. Run `npm run db:test:rdl-021` after migration.
+
+## RDL-022 migration planning
+
+Migration `013_create_migration_planning_controlled_adoption.sql` adds governed release migration plans, remediation actions and append-only history. Run `npm run db:test:rdl-022` after migration to verify approval/readiness/staging/activation gates.

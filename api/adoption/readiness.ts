@@ -1,0 +1,5 @@
+import { beginApiRequest, completeApiRequest } from "../_runtime.ts";
+import { parseBody } from "../governance/_shared.ts";
+import { authenticatedMigrationContext,handleApiError,type ApiRequest,type ApiResponse } from "./_shared.ts";
+type Body={planId:number;readiness:"not_ready"|"in_progress"|"ready"|"blocked";rationale:string;expectedVersion:number};
+export default async function handler(request:ApiRequest,response:ApiResponse){const context=beginApiRequest(request,response,"adoption.readiness");if(request.method!=="POST"){completeApiRequest(context,405);response.status(405).json({error:"Method not allowed."});return;}try{const {identity,service}=authenticatedMigrationContext(request,context);const body=parseBody<Body>(request.body);const plan=await service.readiness(Number(body.planId),body.readiness,identity.reviewer,String(body.rationale??""),Number(body.expectedVersion));completeApiRequest(context,200,{consumer:identity.reviewer});response.status(200).json({plan});}catch(error){handleApiError(response,error,context);}}

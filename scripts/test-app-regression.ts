@@ -134,6 +134,11 @@ const releaseImpactBrowserService = read("src/rdl/releaseImpactService.ts");
 const releaseImpactRepository = read("server/rdl/ReleaseChangeIntelligenceRepository.ts");
 const releaseImpactMigration = read("database/migrations/012_create_release_change_intelligence.sql");
 const rdl021Test = read("scripts/test-rdl-021-release-impact.ts");
+const migrationPlanningPage = read("src/pages/RdlMigrationPlanningPage.tsx");
+const migrationPlanningBrowserService = read("src/rdl/migrationPlanningService.ts");
+const migrationPlanningRepository = read("server/rdl/MigrationPlanningRepository.ts");
+const migrationPlanningMigration = read("database/migrations/013_create_migration_planning_controlled_adoption.sql");
+const rdl022Test = read("scripts/test-rdl-022-migration-adoption.ts");
 
 const routes = [
   "/classes/tag",
@@ -158,6 +163,7 @@ const routes = [
   "/publication",
   "/distribution",
   "/integration",
+  "/migration",
 ];
 
 for (const route of routes) {
@@ -181,6 +187,7 @@ for (const label of [
   "Effective Publication",
   "Package Distribution",
   "Consumer Integration",
+  "Migration Planning",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
 }
@@ -354,6 +361,11 @@ assert.ok(releaseImpactPage.includes("Release change intelligence & impact analy
 assert.ok(releaseImpactBrowserService.includes("validSession") && releaseImpactBrowserService.includes('content-type'), "RDL-021 browser client must validate trusted session shape and reject SPA fallback responses");
 assert.ok(releaseImpactRepository.includes("rdl-release-impact/v1") && releaseImpactRepository.includes("consumer_release_state") && releaseImpactMigration.includes("release_change_analysis"), "RDL-021 must compare immutable releases and assess downstream consumer impact");
 assert.ok(rdl021Test.includes("release change intelligence and impact analysis contract"), "RDL-021 must provide a deterministic contract test");
+assert.ok(app.includes('path="/migration"') && shell.includes("Migration Planning"), "RDL-022 migration planning route must be discoverable");
+assert.ok(migrationPlanningPage.includes("Migration planning & controlled adoption") && migrationPlanningPage.includes("Read-only migration demonstration") && migrationPlanningPage.includes("Explicit activation only"), "RDL-022 UX must expose fail-closed controlled adoption semantics");
+assert.ok(migrationPlanningBrowserService.includes("validSession") && migrationPlanningBrowserService.includes('content-type'), "RDL-022 browser client must validate session shape and reject SPA fallback responses");
+assert.ok(migrationPlanningRepository.includes("transition_release_migration_plan") && migrationPlanningMigration.includes("approved before staging") && migrationPlanningMigration.includes("staged before activation"), "RDL-022 must enforce approval, readiness, staging and explicit activation");
+assert.ok(rdl022Test.includes("migration planning and controlled adoption contract"), "RDL-022 must provide a deterministic contract test");
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");
 assert.ok(shell.includes("GlobalRdlSearch") && shell.includes("RdlScopeSelector"), "RDL-009 global search and scope selector must be present in the application shell");

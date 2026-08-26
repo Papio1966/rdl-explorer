@@ -180,6 +180,21 @@ test("release impact analysis remains advisory and explains breaking changes", a
   await expect(page.getByRole("heading", { name: "Migration decision support" })).toBeVisible();
 });
 
+
+
+test("migration planning remains fail-closed and activation stays explicit", async ({ page }) => {
+  await page.goto("/migration");
+  await expect(page.getByRole("heading", { name: "Migration planning & controlled adoption" })).toBeVisible();
+  await expect(page.getByText("Read-only migration demonstration", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Impacted entity checklist" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Approval gate" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Approve migration plan" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Stage target release" })).toBeDisabled();
+  await expect(page.getByRole("heading", { name: "Explicit activation only" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Activate target release" })).toBeDisabled();
+  await expect(page.getByText(/draft → in review → approved → staged → activated/i)).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 

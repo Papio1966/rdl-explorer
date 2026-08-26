@@ -44,6 +44,9 @@ jobs:
       - name: Run RDL-021 release impact contract
         run: npm run test:rdl-021
 
+      - name: Run RDL-022 migration planning contract
+        run: npm run test:rdl-022
+
       - name: Run regression suite
         run: npm run test:regression
 

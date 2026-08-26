@@ -96,3 +96,7 @@ Defines the consumer subscription, transactional release-notification/outbox, ac
 ## RDL-021 — Release Change Intelligence & Impact Analysis ✅
 
 Adds exact published-release comparison, semantic added/removed/modified/unchanged deltas, advisory breaking-change classification, downstream pinned-consumer impact, governed release notes, immutable SHA-256 analysis records and a fail-closed `/impact` experience. Analysis informs explicit migration decisions and never auto-migrates or auto-activates a project or consumer.
+
+## RDL-022 — Migration Planning & Controlled Adoption ✅
+
+Turn RDL-021 impact intelligence into governed adoption plans. Plans are tied to exact source and target releases, carry an impacted-entity remediation checklist, ownership, due dates, readiness, approval, staging and explicit activation. No publication or analysis can auto-migrate a project or consumer.
