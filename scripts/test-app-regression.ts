@@ -144,6 +144,11 @@ const controlTowerBrowserService = read("src/rdl/controlTowerService.ts");
 const controlTowerRepository = read("server/rdl/EnterpriseStandardsControlTowerRepository.ts");
 const controlTowerMigration = read("database/migrations/014_create_enterprise_standards_control_tower.sql");
 const rdl023Test = read("scripts/test-rdl-023-control-tower.ts");
+const workQueuePage = read("src/pages/RdlWorkQueuePage.tsx");
+const workQueueBrowserService = read("src/rdl/workQueueService.ts");
+const workQueueRepository = read("server/rdl/EnterpriseWorkQueueRepository.ts");
+const workQueueMigration = read("database/migrations/015_create_enterprise_notifications_work_queue.sql");
+const rdl024Test = read("scripts/test-rdl-024-work-queue.ts");
 
 const routes = [
   "/classes/tag",
@@ -170,6 +175,7 @@ const routes = [
   "/integration",
   "/migration",
   "/control-tower",
+  "/work-queue",
 ];
 
 for (const route of routes) {
@@ -194,6 +200,7 @@ for (const label of [
   "Package Distribution",
   "Consumer Integration",
   "Migration Planning",
+  "My Work Queue",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
 }
@@ -377,6 +384,11 @@ assert.ok(controlTowerPage.includes("Enterprise standards dashboard & control to
 assert.ok(controlTowerBrowserService.includes("validDashboard") && controlTowerBrowserService.includes("content-type") && controlTowerBrowserService.includes("rdl-enterprise-control-tower/v1"), "RDL-023 browser client must validate response shape and reject SPA fallback responses");
 assert.ok(controlTowerRepository.includes("enterprise_standards_control_tower_kpi") && controlTowerMigration.includes("read-only") && controlTowerMigration.includes("enterprise_standards_governance_queue"), "RDL-023 must aggregate existing governed lifecycle state without creating a second system of record");
 assert.ok(rdl023Test.includes("enterprise standards dashboard and control tower contract"), "RDL-023 must provide a deterministic contract test");
+assert.ok(app.includes('path="/work-queue"') && shell.includes("My Work Queue"), "RDL-024 work queue route must be discoverable");
+assert.ok(workQueuePage.includes("Enterprise notifications & work queue") && workQueuePage.includes("Read-only work queue demonstration") && workQueuePage.includes("Personal inbox, not an approval engine"), "RDL-024 UX must expose fail-closed operational orchestration semantics");
+assert.ok(workQueueBrowserService.includes("validSession") && workQueueBrowserService.includes("validPayload") && workQueueBrowserService.includes("content-type"), "RDL-024 browser client must validate response/session shape and reject SPA fallback responses");
+assert.ok(workQueueRepository.includes("enterprise_work_queue_summary") && workQueueMigration.includes("enterprise_work_item_event") && workQueueMigration.includes("sla_state"), "RDL-024 must provide durable assignment history plus derived SLA/aging signals");
+assert.ok(rdl024Test.includes("enterprise notifications and work queue contract"), "RDL-024 must provide a deterministic contract test");
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");
 assert.ok(shell.includes("GlobalRdlSearch") && shell.includes("RdlScopeSelector"), "RDL-009 global search and scope selector must be present in the application shell");

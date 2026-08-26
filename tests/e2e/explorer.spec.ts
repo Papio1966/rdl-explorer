@@ -208,6 +208,18 @@ test("enterprise standards control tower is fail-closed and drills through to go
   await expect(page.getByRole("heading", { name: "Control tower principles" })).toBeVisible();
 });
 
+test("enterprise work queue is fail-closed and preserves governed workflow ownership", async ({ page }) => {
+  await page.goto("/work-queue");
+  await expect(page.getByRole("heading", { name: "Enterprise notifications & work queue" })).toBeVisible();
+  await expect(page.getByText("Read-only work queue demonstration", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "My workload" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Reviewer inbox" })).toBeVisible();
+  const queue = page.getByRole("table", { name: "Enterprise standards reviewer work queue" });
+  await expect(queue.getByRole("link", { name: "Open governed workflow" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Operational workflow" })).toBeVisible();
+  await expect(page.getByText(/never auto-approve/i).first()).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 

@@ -109,3 +109,7 @@ Turn RDL-021 impact intelligence into governed adoption plans. Plans are tied to
 - Migration readiness, blocked/overdue remediation and breaking-action indicators.
 - Trusted read-only API and fail-closed browser route at `/control-tower`.
 - Drill-through to authoritative governance/adoption workflows; no duplicated mutable state.
+
+## RDL-024 — Enterprise Notifications & Work Queue — Implementation sprint
+
+Adds a durable reviewer/approver work queue around the governed standards lifecycle. Work items support assignment, acknowledgement, start/completion, SLA/aging indicators, reminders, escalation and append-only operational history. Every item drills through to the workflow that owns the actual governance decision. The work queue never auto-approves, publishes, stages, activates or migrates governed state.

@@ -56,7 +56,9 @@
     "db:test:rdl-022": "bash scripts/db-test-rdl-022.sh",
     "test:rdl-022": "tsx scripts/test-rdl-022-migration-adoption.ts",
     "db:test:rdl-023": "bash scripts/db-test-rdl-023.sh",
-    "test:rdl-023": "tsx scripts/test-rdl-023-control-tower.ts"
+    "test:rdl-023": "tsx scripts/test-rdl-023-control-tower.ts",
+    "db:test:rdl-024": "bash scripts/db-test-rdl-024.sh",
+    "test:rdl-024": "tsx scripts/test-rdl-024-work-queue.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",

@@ -573,3 +573,13 @@ The control tower is an operational projection, not a new source of truth. Postg
 The server boundary is `EnterpriseStandardsControlTowerRepository` → `EnterpriseStandardsControlTowerService` → `/api/control-tower/*`. Live access requires the trusted signed governance identity already used by the platform. The browser validates both session and dashboard response shape and rejects HTML/SPA fallback responses.
 
 The dashboard exposes four management perspectives: portfolio KPIs, governance/adoption queue, published release health, and migration readiness. Each actionable queue item links to the authoritative workflow (`/extensions`, `/integration`, or `/migration`). The control tower itself performs no write transition and cannot auto-approve, auto-stage, auto-activate or auto-migrate.
+
+## RDL-024 — Enterprise Notifications & Work Queue
+
+RDL-024 adds an operational attention layer above the governed workflows. `rdl.enterprise_work_item` stores assignment and operational status while `rdl.enterprise_work_item_event` provides append-only history. These records do not replace extension, publication, integration, impact or migration state; each work item retains a `source_type`, `source_record_key` and `drill_through_path` back to the authoritative workflow.
+
+`rdl.enterprise_work_queue_summary` derives age and SLA status from work-item timestamps. Reminder and escalation functions only update operational attention metadata. They cannot approve a standards extension, publish a release, stage/activate a package, or migrate a project.
+
+The server boundary is `EnterpriseWorkQueueRepository` → `EnterpriseWorkQueueService` → `/api/work-queue/*`. Reviewer inbox access requires the trusted signed governance reviewer role. Team-level assignment and reminder/escalation require the additional `rdl-work-queue-coordinator` role. Optimistic `expected_version` checks protect concurrent operational updates.
+
+The browser route `/work-queue` validates JSON content type, session shape and payload shape. Any unauthorized, malformed or SPA-fallback response produces a clearly labelled read-only demonstration instead of inferred live access.
