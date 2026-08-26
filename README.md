@@ -126,3 +126,7 @@ RDL-026 adds `/ai-trust`, append-only answer feedback, versioned evaluation case
 ### Enterprise identity (RDL-027)
 
 Production identity is designed for an enterprise OIDC gateway or platform identity layer. The gateway validates the external identity token and forwards only short-lived signed normalized claims. RDL Explorer stores user/role/group administration state and exposes `/identity-admin`; it does not implement or expose an identity provider secret in the browser.
+
+### Enterprise organization isolation (RDL-028)
+
+`/tenant-admin` introduces the organization/tenant boundary for enterprise-private standards state. A selected organization is never trusted by itself: live APIs require trusted enterprise SSO, active organization membership and tenant authorization, and private resource ownership is asserted server-side. Public/industry RDL remains globally readable by design.

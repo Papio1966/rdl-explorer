@@ -402,3 +402,18 @@ RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state.
 - **RDL-ID-008 — Fail closed** — Missing, stale, malformed or unsigned enterprise SSO assertions shall never result in authenticated application state.
 - **RDL-ID-009 — No implicit privilege** — Authentication shall prove identity only; governance authority shall require resolved application roles.
 - **RDL-ID-010 — Controlled bootstrap** — Initial identity administrators may be supplied through explicit deployment configuration until centrally managed assignments exist.
+
+## RDL-028 — Tenant / Organization Isolation & Enterprise Configuration requirements
+
+- **RDL-TEN-001 — Explicit organization boundary** — Enterprise-private RDL state shall be owned by an explicit organization key; public/industry reference RDL may remain global.
+- **RDL-TEN-002 — Membership before data** — A tenant-aware request shall establish an active enterprise identity and active organization membership before returning tenant-private state.
+- **RDL-TEN-003 — Selector is not authority** — `x-rdl-organization-key` is a requested scope only. The server shall validate membership and roles; a browser-supplied organization key alone grants no access.
+- **RDL-TEN-004 — Single private owner** — A private resource binding shall have one organization owner. The same resource type/key cannot be bound to two organizations.
+- **RDL-TEN-005 — Cross-tenant denial** — Tenant-bound resource access shall fail closed when the requested organization differs from the recorded owner.
+- **RDL-TEN-006 — Tenant roles** — Tenant-scoped role assignments shall be distinct from global enterprise identity roles and shall be independently revocable.
+- **RDL-TEN-007 — Enterprise configuration** — Organization configuration shall be explicit, auditable and tenant scoped.
+- **RDL-TEN-008 — Separation of duties** — Tenant administrators shall not remove their own active membership or grant/revoke their own tenant-admin role through normal administration.
+- **RDL-TEN-009 — Append-only audit** — Organization, membership, tenant-role, configuration and resource-binding administration events shall be append-only.
+- **RDL-TEN-010 — AI evidence boundary** — Private AI advisory/evaluation records may be tenant-bound and must pass the same ownership assertion before tenant-aware consumption.
+- **RDL-TEN-011 — Workflow migration contract** — Existing globally readable industry RDL remains global; enterprise-private workflows migrate onto the tenant binding contract without changing native RDL identity.
+- **RDL-TEN-012 — Explicit denial tests** — Database acceptance tests shall prove successful same-tenant access, cross-tenant denial and prevention of duplicate private ownership in a self-contained transaction.

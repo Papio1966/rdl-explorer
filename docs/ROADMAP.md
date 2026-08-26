@@ -126,3 +126,7 @@ RDL-026 makes AI quality measurable before broader expansion. It adds append-onl
 ## RDL-027 — Enterprise SSO, User Identity & Role Administration
 
 RDL-027 introduces the production identity boundary for RDL Explorer. Enterprise authentication is delegated to an OIDC-capable gateway or platform identity layer; RDL Explorer consumes only signed normalized claims, records enterprise user profiles, resolves direct and group-derived application roles, and exposes a dedicated `/identity-admin` administration experience. Identity administration is auditable and separation-of-duties rules prevent self-grant of identity-admin authority and self-disablement. Existing workflow authorization remains authoritative while services are progressively migrated to centralized role resolution.
+
+## RDL-028 — Tenant / Organization Isolation & Enterprise Configuration
+
+RDL-028 establishes the reusable organization isolation boundary needed for enterprise and SaaS deployment. It introduces organizations, active membership, tenant-scoped roles, enterprise configuration, one-owner private resource bindings, append-only tenant administration history and explicit database-level cross-tenant denial. Public/industry RDL remains intentionally global. Enterprise-private contexts, extensions, releases, consumers, migration/work items and AI records can be bound to one organization and consumed through tenant-aware services. The `/tenant-admin` experience fails closed to demonstration mode without trusted SSO and active tenant authorization.

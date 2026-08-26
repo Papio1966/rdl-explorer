@@ -64,7 +64,9 @@
     "db:test:rdl-026": "bash scripts/db-test-rdl-026.sh",
     "test:rdl-026": "tsx scripts/test-rdl-026-ai-trust-controls.ts",
     "db:test:rdl-027": "bash scripts/db-test-rdl-027.sh",
-    "test:rdl-027": "tsx scripts/test-rdl-027-enterprise-identity.ts"
+    "test:rdl-027": "tsx scripts/test-rdl-027-enterprise-identity.ts",
+    "db:test:rdl-028": "bash scripts/db-test-rdl-028.sh",
+    "test:rdl-028": "tsx scripts/test-rdl-028-tenant-isolation.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",
