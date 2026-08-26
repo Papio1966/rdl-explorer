@@ -1,0 +1,4 @@
+import { beginApiRequest, completeApiRequest } from "../_runtime.ts";
+import { queryValue } from "../governance/_shared.ts";
+import { authenticatedExtensionContext, handleApiError, type ApiRequest, type ApiResponse } from "./_shared.ts";
+export default async function handler(request:ApiRequest,response:ApiResponse){const context=beginApiRequest(request,response,"extensions.preview");if(request.method!=="GET"){completeApiRequest(context,405);response.status(405).json({error:"Method not allowed."});return;}try{const {identity,service}=authenticatedExtensionContext(request,context);const id=Number(queryValue(request.query?.id));const preview=await service.preview(id);completeApiRequest(context,200,{reviewer:identity.reviewer,extensionChangeId:id,conflictCount:preview.conflicts.length});response.status(200).json({reviewer:identity.reviewer,preview});}catch(error){handleApiError(response,error,context);}}

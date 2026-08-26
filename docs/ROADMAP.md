@@ -77,3 +77,6 @@ After the core multi-RDL platform is proven:
 - Publisher capabilities;
 - APIs/OEM integration;
 - DataGate package handoff and requirement-to-validation traceability.
+
+### RDL-017 — Enterprise Extension Authoring & Governance — Complete
+Adds enterprise extension drafting, authenticated submit/review decisions, conflict detection, effective preview, append-only audit history, optimistic concurrency and read-only demonstration UX.

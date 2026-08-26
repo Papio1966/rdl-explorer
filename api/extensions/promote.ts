@@ -1,0 +1,5 @@
+import { beginApiRequest, completeApiRequest } from "../_runtime.ts";
+import { parseBody } from "../governance/_shared.ts";
+import { authenticatedExtensionContext, handleApiError, type ApiRequest, type ApiResponse } from "./_shared.ts";
+type Body={extensionChangeId?:number;targetContextKey?:string;rationale?:string};
+export default async function handler(request:ApiRequest,response:ApiResponse){const context=beginApiRequest(request,response,"extensions.promote");if(request.method!=="POST"){completeApiRequest(context,405);response.status(405).json({error:"Method not allowed."});return;}try{const {identity,service}=authenticatedExtensionContext(request,context);const body=parseBody<Body>(request.body);const item=await service.promote(identity,{extensionChangeId:Number(body.extensionChangeId),targetContextKey:String(body.targetContextKey??""),rationale:String(body.rationale??"")});completeApiRequest(context,201,{reviewer:identity.reviewer,sourceExtensionChangeId:Number(body.extensionChangeId),extensionChangeId:item.extensionChangeId});response.status(201).json({reviewer:identity.reviewer,item});}catch(error){handleApiError(response,error,context);}}

@@ -67,7 +67,7 @@ export function handleApiError(response: ApiResponse, error: unknown, context?: 
     response.status(400).json({ error: message });
     return;
   }
-  if (/version conflict/i.test(message)) {
+  if (/version conflict|extension conflict|pending extension/i.test(message)) {
     if (context) logRequest("warn", "governance.version_conflict", context, { statusCode: 409 });
     record(409);
     response.status(409).json({ error: message });

@@ -5,6 +5,10 @@ function read(path: string) {
   return readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 }
 
+const extensionsPage = readFileSync("src/pages/RdlExtensionsPage.tsx", "utf8");
+const extensionService = readFileSync("server/rdl/EnterpriseExtensionService.ts", "utf8");
+const extensionMigration = readFileSync("database/migrations/008_create_enterprise_extension_authoring_governance.sql", "utf8");
+
 const app = read("src/App.tsx");
 const shell = read("src/components/AppShell.tsx");
 const assistantApi = read("api/assistant.ts");
@@ -301,6 +305,9 @@ assert.ok(productionDeployment.includes("distributed rate limit") && productionD
 assert.ok(rdl014Test.includes("production deployment and runtime hardening contract") && rdl014Test.includes("FixedWindowRateLimiter"), "RDL-014 contract test must cover deployment/runtime hardening behavior");
 assert.ok(requirements.includes("RDL-OPS-001") && requirements.includes("RDL-OPS-008"), "Requirements must capture RDL-014 operational hardening constraints");
 
+assert.ok(app.includes('path="/extensions"') && shell.includes("Extension Governance"), "RDL-017 extension governance route must be discoverable");
+assert.ok(extensionsPage.includes("Extension authoring & governance") && extensionsPage.includes("Effective preview") && extensionsPage.includes("Read-only demonstration mode"), "RDL-017 UX must expose governed extension authoring and honest read-only fallback");
+assert.ok(extensionService.includes("Extension conflict must be resolved before approval") && extensionMigration.includes("context_extension_review_event") && extensionMigration.includes("review_version"), "RDL-017 must enforce conflicts, audit history and optimistic versioning");
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");
 assert.ok(shell.includes("GlobalRdlSearch") && shell.includes("RdlScopeSelector"), "RDL-009 global search and scope selector must be present in the application shell");

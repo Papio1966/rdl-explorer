@@ -158,3 +158,6 @@ npm run generate:rdl-governance
 ## RDL-016 enterprise hierarchy
 
 Migration `007_create_enterprise_rdl_hierarchy.sql` adds Company, Asset and Project/CIS contexts, exact package pins, governed extension changes and immutable effective-context publication records. Run `npm run db:migrate` and `npm run db:test:rdl-016`. Active project package pins are intentionally immutable; create a new context/version to adopt a newer upstream standard.
+
+### Migration 008 — RDL-017 enterprise extension authoring
+Adds extension draft/review lifecycle fields, append-only review events, optimistic governance transitions, conflict detection and extension governance queue view. Run `npm run db:migrate` then `npm run db:test:rdl-017`.
