@@ -139,6 +139,11 @@ const migrationPlanningBrowserService = read("src/rdl/migrationPlanningService.t
 const migrationPlanningRepository = read("server/rdl/MigrationPlanningRepository.ts");
 const migrationPlanningMigration = read("database/migrations/013_create_migration_planning_controlled_adoption.sql");
 const rdl022Test = read("scripts/test-rdl-022-migration-adoption.ts");
+const controlTowerPage = read("src/pages/RdlControlTowerPage.tsx");
+const controlTowerBrowserService = read("src/rdl/controlTowerService.ts");
+const controlTowerRepository = read("server/rdl/EnterpriseStandardsControlTowerRepository.ts");
+const controlTowerMigration = read("database/migrations/014_create_enterprise_standards_control_tower.sql");
+const rdl023Test = read("scripts/test-rdl-023-control-tower.ts");
 
 const routes = [
   "/classes/tag",
@@ -164,6 +169,7 @@ const routes = [
   "/distribution",
   "/integration",
   "/migration",
+  "/control-tower",
 ];
 
 for (const route of routes) {
@@ -366,6 +372,11 @@ assert.ok(migrationPlanningPage.includes("Migration planning & controlled adopti
 assert.ok(migrationPlanningBrowserService.includes("validSession") && migrationPlanningBrowserService.includes('content-type'), "RDL-022 browser client must validate session shape and reject SPA fallback responses");
 assert.ok(migrationPlanningRepository.includes("transition_release_migration_plan") && migrationPlanningMigration.includes("approved before staging") && migrationPlanningMigration.includes("staged before activation"), "RDL-022 must enforce approval, readiness, staging and explicit activation");
 assert.ok(rdl022Test.includes("migration planning and controlled adoption contract"), "RDL-022 must provide a deterministic contract test");
+assert.ok(app.includes('path="/control-tower"') && shell.includes("Standards Control Tower"), "RDL-023 control tower route must be discoverable");
+assert.ok(controlTowerPage.includes("Enterprise standards dashboard & control tower") && controlTowerPage.includes("Read-only control tower demonstration") && controlTowerPage.includes("Operational control plane, not a second system of record"), "RDL-023 UX must expose fail-closed read-only aggregation semantics");
+assert.ok(controlTowerBrowserService.includes("validDashboard") && controlTowerBrowserService.includes("content-type") && controlTowerBrowserService.includes("rdl-enterprise-control-tower/v1"), "RDL-023 browser client must validate response shape and reject SPA fallback responses");
+assert.ok(controlTowerRepository.includes("enterprise_standards_control_tower_kpi") && controlTowerMigration.includes("read-only") && controlTowerMigration.includes("enterprise_standards_governance_queue"), "RDL-023 must aggregate existing governed lifecycle state without creating a second system of record");
+assert.ok(rdl023Test.includes("enterprise standards dashboard and control tower contract"), "RDL-023 must provide a deterministic contract test");
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");
 assert.ok(shell.includes("GlobalRdlSearch") && shell.includes("RdlScopeSelector"), "RDL-009 global search and scope selector must be present in the application shell");

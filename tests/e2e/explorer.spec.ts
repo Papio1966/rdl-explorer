@@ -195,6 +195,19 @@ test("migration planning remains fail-closed and activation stays explicit", asy
   await expect(page.getByText(/draft → in review → approved → staged → activated/i)).toBeVisible();
 });
 
+test("enterprise standards control tower is fail-closed and drills through to governed workflows", async ({ page }) => {
+  await page.goto("/control-tower");
+  await expect(page.getByRole("heading", { name: "Enterprise standards dashboard & control tower" })).toBeVisible();
+  await expect(page.getByText("Read-only control tower demonstration", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Portfolio health" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Governance & adoption queue" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Published release health" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Migration readiness" })).toBeVisible();
+  const queue = page.getByRole("table", { name: "Enterprise standards governance and adoption queue" });
+  await expect(queue.getByRole("link", { name: "Open workflow" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Control tower principles" })).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 

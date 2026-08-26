@@ -1,0 +1,33 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+
+const read = (path: string) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+const migration = read("database/migrations/014_create_enterprise_standards_control_tower.sql");
+const dbTest = read("database/sql/test_rdl_023_control_tower.sql");
+const repository = read("server/rdl/EnterpriseStandardsControlTowerRepository.ts");
+const service = read("server/rdl/EnterpriseStandardsControlTowerService.ts");
+const api = read("api/control-tower/dashboard.ts");
+const apiShared = read("api/control-tower/_shared.ts");
+const browser = read("src/rdl/controlTowerService.ts");
+const page = read("src/pages/RdlControlTowerPage.tsx");
+const app = read("src/App.tsx");
+const shell = read("src/components/AppShell.tsx");
+const e2e = read("tests/e2e/explorer.spec.ts");
+const a11y = read("tests/e2e/accessibility.spec.ts");
+
+assert.ok(migration.includes("enterprise_standards_control_tower_kpi") && migration.includes("enterprise_standards_governance_queue"));
+assert.ok(migration.includes("enterprise_standards_release_health") && migration.includes("enterprise_standards_adoption_summary"));
+assert.ok(!migration.includes("CREATE TABLE"), "RDL-023 control tower must aggregate existing authoritative state rather than create duplicate lifecycle tables.");
+assert.ok(dbTest.includes("to_regclass") && !dbTest.includes("INSERT INTO"), "RDL-023 DB acceptance test must be business-data independent and non-mutating.");
+assert.ok(repository.includes("enterprise_standards_control_tower_kpi") && repository.includes("release_migration_plan_summary"));
+assert.ok(service.includes('"healthy" | "attention" | "critical"') && service.includes("blocked_migration_plan_count"));
+assert.ok(api.includes("authenticatedControlTowerContext") && apiShared.includes("GOVERNANCE_REVIEWER_ROLE"), "Enterprise dashboard data must remain behind the trusted governance identity boundary.");
+assert.ok(browser.includes("validSession") && browser.includes("validDashboard") && browser.includes("content-type"), "Browser client must fail closed on malformed or SPA fallback API responses.");
+assert.ok(browser.includes('rdl-enterprise-control-tower/v1'));
+assert.ok(page.includes("Enterprise standards dashboard & control tower") && page.includes("Read-only control tower demonstration"));
+assert.ok(page.includes("Operational control plane, not a second system of record") && page.includes("No automatic adoption"));
+assert.ok(page.includes('tabIndex={0}') && page.includes("Open workflow"), "Control tower tables must be keyboard focusable and preserve drill-through.");
+assert.ok(app.includes('path="/control-tower"') && shell.includes("Standards Control Tower"));
+assert.ok(e2e.includes("enterprise standards control tower is fail-closed and drills through to governed workflows"));
+assert.ok(a11y.includes('"/control-tower"'));
+console.log("PASS RDL-023 enterprise standards dashboard and control tower contract");

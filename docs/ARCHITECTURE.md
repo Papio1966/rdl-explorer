@@ -565,3 +565,11 @@ RDL-021 sits above immutable publication/distribution. It compares two exact `ef
 ## RDL-022 — Migration planning and controlled adoption
 
 RDL-022 sits between release-impact intelligence and downstream activation. A `release_migration_plan` references two exact immutable releases and an adoption subject (`consumer` or `project`). `release_migration_action` records the remediation checklist, while `release_migration_history` is append-only audit evidence. PostgreSQL transition functions enforce optimistic concurrency, approval-before-staging, readiness and checklist completion before staging, and staged-before-activation. The browser is read-only without a valid `rdl-package-consumer` session; approval and activation require the trusted `rdl-migration-approver` role. No route can infer authentication from an SPA fallback because session clients require JSON content type and validate response shape.
+
+## RDL-023 — Enterprise Standards Control Tower
+
+The control tower is an operational projection, not a new source of truth. PostgreSQL views aggregate the existing governed lifecycle tables and views introduced in RDL-016 through RDL-022. No duplicate lifecycle tables are created for dashboard state.
+
+The server boundary is `EnterpriseStandardsControlTowerRepository` → `EnterpriseStandardsControlTowerService` → `/api/control-tower/*`. Live access requires the trusted signed governance identity already used by the platform. The browser validates both session and dashboard response shape and rejects HTML/SPA fallback responses.
+
+The dashboard exposes four management perspectives: portfolio KPIs, governance/adoption queue, published release health, and migration readiness. Each actionable queue item links to the authoritative workflow (`/extensions`, `/integration`, or `/migration`). The control tower itself performs no write transition and cannot auto-approve, auto-stage, auto-activate or auto-migrate.
