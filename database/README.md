@@ -169,3 +169,6 @@ Migration `009_create_effective_standard_publication.sql` adds immutable `rdl.ef
 ### RDL-019 distribution model
 
 Migration `010_create_published_package_distribution.sql` adds consumer-facing lifecycle and compatibility metadata for immutable effective-standard releases. Run `npm run db:test:rdl-019` after migration. The distribution API must be used by downstream systems; internal RDL tables are not a supported integration contract.
+
+### RDL-020 consumer integration
+Migration `011_create_consumer_integration_notification.sql` adds consumer subscriptions, release notification/outbox records, explicit consumer release state and idempotent pull receipts. Run `npm run db:test:rdl-020` after migration.

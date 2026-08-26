@@ -157,6 +157,18 @@ test("published package distribution remains fail-closed and release pinning is 
   await expect(page.getByText(/Consumers pin a release identifier/i)).toBeVisible();
 });
 
+test("consumer integration remains fail-closed and activation is explicit", async ({ page }) => {
+  await page.goto("/integration");
+  await expect(page.getByRole("heading", { name: "Consumer integration & change notification" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Notify, pull, stage, activate" })).toBeVisible();
+  await expect(page.getByText("Read-only integration demonstration", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Release inbox" })).toBeVisible();
+  await expect(page.getByText("project-alpha-effective · 1.1.0", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Stage package" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Activate release" })).toBeDisabled();
+  await expect(page.getByRole("heading", { name: "Idempotent pull contract" })).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 

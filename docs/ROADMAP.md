@@ -88,3 +88,7 @@ Delivered parent-versus-effective comparison, change-impact filtering, immutable
 ## RDL-019 — Published Package Distribution & Consumption API ✅
 
 Provides a stable, versioned consumption boundary for immutable effective-standard releases. Adds a release catalogue, manifest, effective-entity retrieval, downloadable `rdl-distribution-package/v1` package, SHA-256/ETag integrity metadata, explicit consumer compatibility, release pinning, and separate deprecation/supersession metadata. Consumer access uses a dedicated trusted `rdl-package-consumer` role and never requires direct SQL access.
+
+## RDL-020 — Consumer Integration Contract & Change Notification ✅
+
+Defines the consumer subscription, transactional release-notification/outbox, acknowledgement, idempotent pull/staging and explicit activation lifecycle. The preferred integration pattern is push notification, pull immutable content. Adds a DataGate reference contract without direct SQL coupling or automatic downstream activation.

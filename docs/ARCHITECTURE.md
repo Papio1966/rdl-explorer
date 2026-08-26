@@ -530,3 +530,30 @@ RDL-019 separates immutable publication from downstream distribution. `rdl.effec
 The read-only distribution API is authenticated through the trusted gateway/BFF using the dedicated `rdl-package-consumer` role. It exposes a catalogue, manifest, filtered effective entities and an immutable `rdl-distribution-package/v1` JSON package. Browser clients reject non-JSON/SPA fallback responses and remain in an explicitly labelled demonstration mode when no valid consumer session exists.
 
 Consumers must pin an exact release ID/version. “Latest” is discovery metadata only and must never silently migrate a consumer. A superseding release is an explicit new immutable release. This is the intended future DataGate integration boundary: discover → review → pin → retrieve → verify → activate, with no direct SQL coupling.
+
+## RDL-020 — Consumer integration and change notification
+
+RDL-020 adds the integration lifecycle above the RDL-019 immutable distribution API:
+
+```text
+RDL Explorer publish
+      |
+      v
+transactional release notification
+      |
+      v
+consumer acknowledgement
+      |
+      v
+pull exact release -> verify SHA-256
+      |
+      v
+stage (idempotent request key)
+      |
+      v
+explicit consumer activation
+```
+
+`rdl.consumer_subscription` scopes release discovery. `rdl.release_notification` is an idempotent transactional notification/outbox record. `rdl.consumer_pull_receipt` records retry-safe pull/staging identity, while `rdl.consumer_release_state` prevents activation from skipping staging. Notification and publication never modify the consumer's active standard.
+
+The same contract is the DataGate reference boundary: RDL Explorer announces; DataGate pulls, verifies, stages and activates under DataGate governance. There is no cross-product database access.

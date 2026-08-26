@@ -313,3 +313,14 @@ RDL-001 is complete when:
 - **RDL-DIST-006 — Lifecycle metadata** — Deprecation and supersession shall be represented separately from immutable release content; supersession shall identify an explicit replacement release.
 - **RDL-DIST-007 — Consumer authorization** — Live distribution APIs shall fail closed without a trusted `rdl-package-consumer` identity.
 - **RDL-DIST-008 — No direct SQL coupling** — DataGate and other consumers shall use the distribution contract rather than RDL Explorer database tables.
+
+## RDL-020 — Consumer integration and change notification requirements
+
+- **RDL-INT-001 — Notify then pull** — Publishing an immutable release shall create a consumer notification without transferring mutable authoring state.
+- **RDL-INT-002 — Subscription scope** — Consumers shall subscribe to all or selected enterprise contexts through a versioned consumer-integration contract.
+- **RDL-INT-003 — Explicit acknowledgement** — Consumers shall be able to acknowledge release discovery independently from package activation.
+- **RDL-INT-004 — Idempotent pull/stage** — Consumer staging shall use a stable request key so retries do not duplicate pull receipts or silently select another release.
+- **RDL-INT-005 — Integrity before activation** — Staging shall record the package SHA-256 associated with the exact release.
+- **RDL-INT-006 — No auto-activation** — A release shall be staged before activation; publication or notification shall never auto-activate a consumer.
+- **RDL-INT-007 — Lifecycle notifications** — Published, deprecated and superseded lifecycle events shall be represented explicitly and idempotently.
+- **RDL-INT-008 — DataGate boundary** — DataGate shall consume through the notification/distribution contracts with no direct SQL coupling.

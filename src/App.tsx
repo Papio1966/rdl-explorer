@@ -55,6 +55,7 @@ const RdlHierarchyPage = lazyNamed(() => import("./pages/RdlHierarchyPage"), "Rd
 const RdlExtensionsPage = lazyNamed(() => import("./pages/RdlExtensionsPage"), "RdlExtensionsPage");
 const RdlPublicationPage = lazyNamed(() => import("./pages/RdlPublicationPage"), "RdlPublicationPage");
 const RdlDistributionPage = lazyNamed(() => import("./pages/RdlDistributionPage"), "RdlDistributionPage");
+const RdlConsumerIntegrationPage = lazyNamed(() => import("./pages/RdlConsumerIntegrationPage"), "RdlConsumerIntegrationPage");
 
 function RouteFallback() {
   return (
@@ -86,6 +87,7 @@ export default function App() {
             <Route path="/extensions" element={<RdlExtensionsPage />} />
             <Route path="/publication" element={<RdlPublicationPage />} />
             <Route path="/distribution" element={<RdlDistributionPage />} />
+            <Route path="/integration" element={<RdlConsumerIntegrationPage />} />
             <Route path="/inspect/documents" element={<DocumentSchemaInspectionPage />} />
             <Route path="/inspect/standards" element={<SourceStandardsInspectionPage />} />
             <Route path="/classes/tag" element={<TagClassesPage />} />
