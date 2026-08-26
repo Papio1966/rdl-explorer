@@ -583,3 +583,8 @@ RDL-024 adds an operational attention layer above the governed workflows. `rdl.e
 The server boundary is `EnterpriseWorkQueueRepository` → `EnterpriseWorkQueueService` → `/api/work-queue/*`. Reviewer inbox access requires the trusted signed governance reviewer role. Team-level assignment and reminder/escalation require the additional `rdl-work-queue-coordinator` role. Optimistic `expected_version` checks protect concurrent operational updates.
 
 The browser route `/work-queue` validates JSON content type, session shape and payload shape. Any unauthorized, malformed or SPA-fallback response produces a clearly labelled read-only demonstration instead of inferred live access.
+
+
+## RDL-025 — AI-assisted Standards Intelligence
+
+RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state. Live enterprise evidence requires a trusted `rdl-ai-standards-analyst` identity. AI outputs cite evidence identifiers and cannot approve extensions, publish releases, approve/stage/activate migrations, or migrate projects/consumers. Advisory runs may be immutably audited without becoming governance decisions.

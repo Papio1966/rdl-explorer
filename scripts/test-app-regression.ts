@@ -176,6 +176,7 @@ const routes = [
   "/migration",
   "/control-tower",
   "/work-queue",
+  "/ai-intelligence",
 ];
 
 for (const route of routes) {

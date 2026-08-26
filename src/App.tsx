@@ -60,6 +60,7 @@ const RdlReleaseImpactPage = lazyNamed(() => import("./pages/RdlReleaseImpactPag
 const RdlMigrationPlanningPage = lazyNamed(() => import("./pages/RdlMigrationPlanningPage"), "RdlMigrationPlanningPage");
 const RdlControlTowerPage = lazyNamed(() => import("./pages/RdlControlTowerPage"), "RdlControlTowerPage");
 const RdlWorkQueuePage = lazyNamed(() => import("./pages/RdlWorkQueuePage"), "RdlWorkQueuePage");
+const RdlAiStandardsIntelligencePage = lazyNamed(() => import("./pages/RdlAiStandardsIntelligencePage"), "RdlAiStandardsIntelligencePage");
 
 function RouteFallback() {
   return (
@@ -96,6 +97,7 @@ export default function App() {
             <Route path="/migration" element={<RdlMigrationPlanningPage />} />
             <Route path="/control-tower" element={<RdlControlTowerPage />} />
             <Route path="/work-queue" element={<RdlWorkQueuePage />} />
+            <Route path="/ai-intelligence" element={<RdlAiStandardsIntelligencePage />} />
             <Route path="/inspect/documents" element={<DocumentSchemaInspectionPage />} />
             <Route path="/inspect/standards" element={<SourceStandardsInspectionPage />} />
             <Route path="/classes/tag" element={<TagClassesPage />} />
