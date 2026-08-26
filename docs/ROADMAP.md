@@ -64,3 +64,7 @@ After the core multi-RDL platform is proven:
 - Publisher capabilities;
 - APIs/OEM integration;
 - DataGate package handoff and requirement-to-validation traceability.
+
+## RDL-014 — Production Deployment & Runtime Hardening
+
+**Status: complete.** Harden the RDL-013 production PostgreSQL/API runtime with request correlation IDs, structured operational logging, strict production configuration validation, defensive governance rate limiting, liveness/readiness operational contracts, graceful pool shutdown support and production deployment guidance. No RDL domain model or browser governance semantics change in this sprint.

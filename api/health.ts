@@ -1,6 +1,12 @@
-export type HealthResponse = { status(code: number): HealthResponse; json(value: unknown): void; setHeader?(name: string, value: string | number): void };
+import { beginApiRequest, completeApiRequest, type RuntimeRequest, type RuntimeResponse } from "./_runtime.ts";
 
-export default async function handler(_request: unknown, response: HealthResponse) {
-  response.setHeader?.("Cache-Control", "no-store");
-  response.status(200).json({ ok: true, service: "rdl-explorer", check: "liveness" });
+export default async function handler(request: RuntimeRequest, response: RuntimeResponse) {
+  const context = beginApiRequest(request, response, "health");
+  completeApiRequest(context, 200);
+  response.status(200).json({
+    ok: true,
+    service: "rdl-explorer",
+    check: "liveness",
+    release: process.env.RDL_RELEASE_ID?.trim() || undefined,
+  });
 }

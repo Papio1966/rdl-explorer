@@ -1,8 +1,8 @@
-# CFIHOS Explorer — Operations & Maintenance Guide
+# RDL Explorer — Operations & Maintenance Guide
 
 ## 1. Purpose
 
-This guide defines the operational procedures for installing, configuring, deploying, maintaining, monitoring and recovering CFIHOS Explorer. It is intended for the application owner, technical maintainer, CFIHOS/data steward, AI service owner and GitHub/Vercel administrator.
+This guide defines the operational procedures for installing, configuring, deploying, maintaining, monitoring and recovering RDL Explorer. It is intended for the application owner, technical maintainer, CFIHOS/data steward, AI service owner and GitHub/Vercel administrator.
 
 CFIHOS Explorer is currently a pre-production/UAT React + TypeScript application built around the CFIHOS 2.0 CORE Reference Data Library. The browser consumes a generated JSON snapshot of the official workbook; it does not parse XLSX at runtime.
 
@@ -381,3 +381,8 @@ The application identifies its active data source as the reviewed CFIHOS 2.0 sna
 Pilot feedback is currently routed to `alessandro@papioconsulting.eu`. Users should not include confidential project information, credentials, API keys or other secrets in feedback email. Replace this address with the planned functional RDL Explorer inbox when that service is available.
 
 Before expanding the pilot audience, confirm the deployment access model, Vercel environment variables, OpenAI usage/cost controls and the support/escalation route appropriate to that audience.
+
+
+## RDL production governance runtime
+
+For the database-backed governance service, follow `docs/PRODUCTION_DEPLOYMENT.md`. Production promotion must validate correlation IDs, structured logging, fail-closed runtime configuration, database readiness, reviewer authentication and gateway-level distributed rate limiting. The browser must never receive PostgreSQL credentials or the governance signing secret.

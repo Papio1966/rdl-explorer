@@ -36,7 +36,9 @@
     "db:test:rdl-011": "bash scripts/db-test-rdl-011.sh",
     "test:rdl-012": "tsx scripts/test-rdl-012-service-boundary.ts",
     "test:rdl-013": "tsx scripts/test-rdl-013-runtime.ts",
-    "db:test:rdl-013": "tsx scripts/db-test-rdl-013.ts"
+    "db:test:rdl-013": "tsx scripts/db-test-rdl-013.ts",
+    "test:rdl-014": "tsx scripts/test-rdl-014-runtime-hardening.ts",
+    "validate:production-env": "tsx scripts/validate-production-env.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",
