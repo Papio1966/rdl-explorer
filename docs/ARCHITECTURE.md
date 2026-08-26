@@ -602,3 +602,18 @@ RDL Explorer does not become an identity provider. A production deployment uses 
 `rdl.enterprise_identity_user`, `rdl.enterprise_role_assignment` and `rdl.enterprise_group_role_mapping` provide the application identity/authorization model. `rdl.enterprise_identity_audit_event` is append-only. `EnterpriseIdentityRepository` and `EnterpriseIdentityService` sit behind `/api/identity/*`; `/identity-admin` is fail-closed and falls back to a clearly labelled demonstration when live identity administration is unavailable.
 
 RDL-027 intentionally preserves existing workflow-specific authorization while establishing centralized role resolution. Later hardening can migrate governance services from legacy signed governance assertions to the enterprise identity session without changing domain-service semantics.
+
+## RDL-028 tenant / organization isolation boundary
+
+RDL Explorer separates **global reference RDL** from **enterprise-private operational state**. Industry dictionaries and published public RDL packages may be globally readable; Company, Asset, Project/CIS, consumer, migration, work-queue and private AI records are eligible for one-owner organization binding.
+
+A tenant-aware request follows this sequence:
+
+1. validate the signed enterprise SSO identity established by RDL-027;
+2. read the requested `x-rdl-organization-key` only as a scope selector;
+3. verify that the normalized enterprise subject has active membership in an active organization;
+4. resolve tenant-scoped roles separately from global identity roles;
+5. before consuming a private resource, assert its recorded organization ownership with `rdl.assert_tenant_resource_access`;
+6. deny a different organization before returning the private record.
+
+The tenant selector is therefore never trusted as authorization. Resource bindings are unique by `(resource_type, resource_key)`, preventing ambiguous dual ownership. Tenant administration events are append-only. RDL-028 is the foundation for progressively moving existing enterprise-private APIs behind the same scope boundary; globally readable industry/reference browsing is intentionally unchanged.

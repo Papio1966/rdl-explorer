@@ -62,6 +62,9 @@ jobs:
       - name: Run RDL-027 enterprise identity contract
         run: npm run test:rdl-027
 
+      - name: Run RDL-028 tenant isolation contract
+        run: npm run test:rdl-028
+
       - name: Run regression suite
         run: npm run test:regression
 

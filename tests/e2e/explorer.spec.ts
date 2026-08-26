@@ -240,6 +240,15 @@ test("AI trust and evaluation is fail-closed and measurable", async ({ page }) =
 });
 
 
+test("tenant administration is fail-closed and exposes explicit isolation boundaries", async ({ page }) => {
+  await page.goto("/tenant-admin");
+  await expect(page.getByRole("heading", { name: "Organization isolation & configuration" })).toBeVisible();
+  await expect(page.getByText("Read-only tenant demonstration", { exact: true })).toBeVisible();
+  await expect(page.getByText("Cross-tenant access is denied, not filtered after retrieval.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Organization member directory" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Tenant-bound private resources" })).toBeVisible();
+});
+
 test("enterprise identity administration is fail-closed and separates authentication from privilege", async ({ page }) => {
   await page.goto("/identity-admin");
   await expect(page.getByRole("heading", { name: "Identity & access administration" })).toBeVisible();

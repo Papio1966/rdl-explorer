@@ -216,3 +216,7 @@ Migration `017_create_ai_evaluation_feedback_trust_controls.sql` adds append-onl
 ## RDL-027 enterprise identity and role administration
 
 Migration `018_create_enterprise_identity_role_administration.sql` adds normalized enterprise users, direct role assignments, group-to-role mappings, an append-only identity audit trail, and the `rdl.enterprise_identity_directory` read projection. Run `npm run db:test:rdl-027` after migration. The acceptance test creates all required business fixtures inside its own transaction and ends with `ROLLBACK`.
+
+### RDL-028 organization isolation
+
+Migration `019_create_tenant_organization_isolation.sql` adds enterprise organizations, memberships, tenant roles, organization configuration, one-owner private-resource bindings and append-only tenant audit history. `rdl.assert_tenant_resource_access()` is the fail-closed ownership assertion used by tenant-aware services. Run `npm run db:test:rdl-028` to verify same-tenant access, cross-tenant denial and duplicate-owner prevention using transaction-local fixtures.

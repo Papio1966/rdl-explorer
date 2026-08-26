@@ -179,6 +179,7 @@ const routes = [
   "/ai-intelligence",
   "/ai-trust",
   "/identity-admin",
+  "/tenant-admin",
 ];
 
 for (const route of routes) {
