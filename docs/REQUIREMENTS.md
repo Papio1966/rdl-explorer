@@ -243,3 +243,14 @@ RDL-001 is complete when:
 - **RDL-RUNTIME-008** — Local CLI `psql` tooling may remain for migrations and historical parity tests, but production request handling shall not depend on spawning `psql`.
 - **RDL-RUNTIME-009** — TLS behavior, pool size, idle timeout and connection timeout shall be deployment-configurable through server environment variables with safe local defaults.
 - **RDL-RUNTIME-010** — A database-backed integration test shall verify connectivity to the existing `rdl_explorer` schema without mutating governed data.
+
+## RDL-014 — Production Deployment & Runtime Hardening
+
+- **RDL-OPS-001 — Correlation identity** — Hardened API responses shall expose a safe `X-Request-ID`; a valid trusted incoming request ID may be preserved and unsafe/missing values shall be replaced with a generated identifier.
+- **RDL-OPS-002 — Structured logging** — Production API operations shall emit structured request events containing correlation, route, method, duration and status without logging secrets, credentials or signed governance material.
+- **RDL-OPS-003 — Fail-closed production configuration** — Production readiness/governance operations shall reject missing localhost-default database configuration and insufficient governance signing secrets.
+- **RDL-OPS-004 — Defensive governance rate limit** — Authenticated governance endpoints shall apply a configurable per-runtime reviewer rate limit and return HTTP 429 with `Retry-After` when exceeded.
+- **RDL-OPS-005 — Distributed control boundary** — Documentation shall state that the in-memory limiter is not a substitute for distributed gateway/WAF rate limiting in horizontally scaled/serverless production.
+- **RDL-OPS-006 — Liveness/readiness separation** — Liveness shall remain independent of PostgreSQL while readiness shall validate production runtime configuration and database connectivity.
+- **RDL-OPS-007 — Graceful pool closure** — Long-lived Node runtime deployments shall have an explicit shutdown hook capable of draining the PostgreSQL pool.
+- **RDL-OPS-008 — Secret boundary** — Database URLs, governance signing secrets and provider API keys shall remain server-side and shall not be returned in operational responses or structured logs.

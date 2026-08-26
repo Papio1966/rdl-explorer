@@ -422,3 +422,30 @@ The pool is a server-runtime singleton. It owns connection reuse, connection tim
 Liveness (`/api/health`) proves that the server process can answer requests without depending on PostgreSQL. Readiness (`/api/readiness`) verifies PostgreSQL connectivity and reports non-sensitive pool counters. This separation allows an orchestrator to distinguish an alive process from one that is not ready to serve database-backed traffic.
 
 `PgJsonClient.transaction(...)` establishes the runtime transaction boundary for later multi-step enterprise operations. Structured `DatabaseRuntimeError` instances preserve a database error code server-side while API handlers continue to return controlled messages rather than raw connection details.
+
+## RDL-014 production deployment and runtime hardening
+
+RDL-014 adds an operational layer around the RDL-012/013 governance service without changing its domain semantics:
+
+```text
+Trusted gateway / BFF
+        |
+        v
+Request context (X-Request-ID)
+        |
+        +--> structured operational log
+        |
+        v
+Governance authentication
+        |
+        +--> defensive reviewer rate limiter
+        |
+        v
+GovernanceService -> CrossRdlGovernanceRepository -> PgJsonClient -> PostgreSQL
+```
+
+Production configuration is validated fail-closed. Local development can continue to use the explicit localhost database fallback, but a production deployment must provide a non-local `RDL_DATABASE_URL` and a governance signing secret of sufficient length. Readiness checks this operational contract before reporting ready.
+
+The governance rate limiter is intentionally a defence-in-depth control inside one runtime instance. It does not claim distributed enforcement across serverless isolates. A production identity gateway/WAF/API platform remains responsible for globally coordinated abuse protection and for stripping client-supplied governance identity headers before injecting trusted signed values.
+
+Every hardened API request has a correlation ID and emits structured JSON operational events. Logging is designed around non-sensitive identifiers and status metadata; secrets and signed identity material remain outside the log contract. Long-lived Node deployments can install the shared shutdown handler to drain the PostgreSQL pool on termination signals, while serverless deployments continue to reuse the singleton pool for the lifetime of a warm isolate.

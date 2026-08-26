@@ -89,6 +89,14 @@ const governanceApiShared = read("api/governance/_shared.ts");
 const healthApi = read("api/health.ts");
 const readinessApi = read("api/readiness.ts");
 const rdl013Test = read("scripts/test-rdl-013-runtime.ts");
+const requestContextRuntime = read("server/runtime/RequestContext.ts");
+const structuredLogger = read("server/runtime/StructuredLogger.ts");
+const rateLimiterRuntime = read("server/runtime/RateLimiter.ts");
+const runtimeEnvironment = read("server/runtime/environment.ts");
+const shutdownRuntime = read("server/runtime/shutdown.ts");
+const apiRuntime = read("api/_runtime.ts");
+const productionDeployment = read("docs/PRODUCTION_DEPLOYMENT.md");
+const rdl014Test = read("scripts/test-rdl-014-runtime-hardening.ts");
 
 const routes = [
   "/classes/tag",
@@ -252,6 +260,15 @@ assert.ok(healthApi.includes('check: "liveness"') && readinessApi.includes('chec
 assert.ok(envExample.includes("RDL_DATABASE_POOL_MAX") && envExample.includes("RDL_DATABASE_SSL_REJECT_UNAUTHORIZED"), "RDL-013 must document pool and TLS runtime configuration");
 assert.ok(rdl013Test.includes("DatabaseRuntimeError") && rdl013Test.includes("poolStats"), "RDL-013 runtime test must cover structured errors and pool telemetry");
 assert.ok(requirements.includes("RDL-RUNTIME-001") && requirements.includes("RDL-RUNTIME-010"), "Requirements must capture RDL-013 production runtime constraints");
+assert.ok(packageJson.includes('"test:rdl-014"') && packageJson.includes('"validate:production-env"'), "RDL-014 must expose runtime-hardening and production-environment validation commands");
+assert.ok(requestContextRuntime.includes("X-Request-ID") || apiRuntime.includes("X-Request-ID"), "RDL-014 must establish correlation IDs for hardened API requests");
+assert.ok(structuredLogger.includes("JSON.stringify") && structuredLogger.includes("requestId") && structuredLogger.includes("durationMs"), "RDL-014 must emit structured correlation-aware operational logs");
+assert.ok(rateLimiterRuntime.includes("FixedWindowRateLimiter") && governanceApiShared.includes("GovernanceRateLimitError") && governanceApiShared.includes("Retry-After"), "RDL-014 must apply defensive governance rate limiting");
+assert.ok(runtimeEnvironment.includes("RDL_GOVERNANCE_AUTH_SECRET") && runtimeEnvironment.includes("RDL_DATABASE_URL") && readinessApi.includes("assertRuntimeEnvironment"), "RDL-014 production readiness must fail closed on unsafe runtime configuration");
+assert.ok(shutdownRuntime.includes("closeRdlDatabaseClient") && shutdownRuntime.includes("SIGTERM"), "RDL-014 must provide graceful PostgreSQL pool shutdown for long-lived runtimes");
+assert.ok(productionDeployment.includes("distributed rate limit") && productionDeployment.includes("X-Request-ID") && productionDeployment.includes("secret"), "RDL-014 deployment guide must document distributed controls, correlation and secret handling");
+assert.ok(rdl014Test.includes("production deployment and runtime hardening contract") && rdl014Test.includes("FixedWindowRateLimiter"), "RDL-014 contract test must cover deployment/runtime hardening behavior");
+assert.ok(requirements.includes("RDL-OPS-001") && requirements.includes("RDL-OPS-008"), "Requirements must capture RDL-014 operational hardening constraints");
 
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");
