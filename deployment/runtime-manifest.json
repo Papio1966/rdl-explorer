@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "service": "rdl-explorer",
+  "runtime": "nodejs22",
+  "application": {
+    "staticDirectory": "dist",
+    "apiDirectory": "api",
+    "serverDirectory": "server"
+  },
+  "probes": {
+    "liveness": "/api/health",
+    "readiness": "/api/readiness",
+    "version": "/api/version"
+  },
+  "observability": {
+    "metrics": "/api/metrics",
+    "requestIdHeader": "X-Request-ID",
+    "logFormat": "json"
+  },
+  "requiredProductionEnvironment": [
+    "RDL_DATABASE_URL",
+    "RDL_GOVERNANCE_AUTH_SECRET"
+  ],
+  "recommendedBuildEnvironment": [
+    "RDL_RELEASE_ID",
+    "RDL_COMMIT_SHA",
+    "RDL_BUILD_VERSION",
+    "RDL_BUILD_TIMESTAMP"
+  ]
+}

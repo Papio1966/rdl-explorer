@@ -386,3 +386,19 @@ Before expanding the pilot audience, confirm the deployment access model, Vercel
 ## RDL production governance runtime
 
 For the database-backed governance service, follow `docs/PRODUCTION_DEPLOYMENT.md`. Production promotion must validate correlation IDs, structured logging, fail-closed runtime configuration, database readiness, reviewer authentication and gateway-level distributed rate limiting. The browser must never receive PostgreSQL credentials or the governance signing secret.
+
+## RDL-015 deployment automation and observability
+
+Production releases should carry `RDL_RELEASE_ID`, `RDL_COMMIT_SHA`, `RDL_BUILD_VERSION` and `RDL_BUILD_TIMESTAMP` where the deployment platform supports them. Operators can confirm the active release with `GET /api/version`.
+
+The build pipeline creates `artifacts/rdl-explorer-deployment.tgz` using `npm run package:deployment`. Treat this archive as an immutable release candidate and prefer promoting the same accepted artifact from Preview/UAT to Production rather than rebuilding from source between environments.
+
+After deployment run:
+
+```bash
+npm run smoke:deployment -- https://<deployment-host>
+```
+
+`GET /api/metrics` provides process-local request/error/latency aggregates for diagnostics. Do not use these in-memory values as the authoritative cross-instance production dashboard. Export or aggregate telemetry through the hosting platform or an external monitoring service.
+
+For promotion and rollback procedure, see `docs/DEPLOYMENT_RUNBOOK.md`.

@@ -449,3 +449,35 @@ Production configuration is validated fail-closed. Local development can continu
 The governance rate limiter is intentionally a defence-in-depth control inside one runtime instance. It does not claim distributed enforcement across serverless isolates. A production identity gateway/WAF/API platform remains responsible for globally coordinated abuse protection and for stripping client-supplied governance identity headers before injecting trusted signed values.
 
 Every hardened API request has a correlation ID and emits structured JSON operational events. Logging is designed around non-sensitive identifiers and status metadata; secrets and signed identity material remain outside the log contract. Long-lived Node deployments can install the shared shutdown handler to drain the PostgreSQL pool on termination signals, while serverless deployments continue to reuse the singleton pool for the lifetime of a warm isolate.
+
+## RDL-015 deployment automation and observability
+
+RDL-015 adds a release/operations layer without changing RDL or governance semantics:
+
+```text
+Source commit
+   |
+   v
+CI gates -> browser build -> deployment archive
+                         |
+                         +--> runtime manifest
+                         +--> release metadata
+                         v
+                   Preview / UAT
+                         |
+                   smoke + approval
+                         v
+                     Production
+                         |
+            +------------+------------+
+            |            |            |
+          health       version      metrics
+            |                         |
+         readiness                    +--> hosting/telemetry aggregation
+```
+
+`/api/version` exposes non-secret release metadata so operators can prove which source/build is running. `/api/metrics` exposes process-local request/error/latency aggregates for diagnostics. Because serverless or horizontally scaled deployments have multiple runtime instances, these in-memory aggregates are explicitly not treated as a global monitoring system; production aggregation belongs in the hosting or observability platform.
+
+The deployment archive is platform-neutral at the RDL Explorer contract level. It contains the built static application, API/server runtime sources, locked package metadata and `deployment/runtime-manifest.json`. Platform adapters such as the current Vercel configuration may consume the same contract without moving identity, governance or PostgreSQL boundaries into browser code.
+
+The post-deployment smoke test verifies liveness, database-backed readiness, version metadata, correlation IDs and fail-closed unauthenticated governance access. Rollback restores the previous known-good immutable release and reruns the same smoke contract.

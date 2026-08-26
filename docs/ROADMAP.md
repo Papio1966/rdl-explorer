@@ -50,7 +50,16 @@
 
 ## RDL-013 — Production Server Runtime & PostgreSQL Driver
 
-**Status: implementation sprint.** Replace production governance API `psql` process spawning with a managed Node PostgreSQL pool, structured database/runtime errors, explicit transaction support, configurable TLS/pool settings, and separate liveness/readiness endpoints. Preserve all RDL-012 browser and governance API semantics.
+**Status: complete.** Replace production governance API `psql` process spawning with a managed Node PostgreSQL pool, structured database/runtime errors, explicit transaction support, configurable TLS/pool settings, and separate liveness/readiness endpoints. Preserve all RDL-012 browser and governance API semantics.
+
+## RDL-014 — Production Deployment & Runtime Hardening
+
+**Status: complete.** Harden the RDL-013 production PostgreSQL/API runtime with request correlation IDs, structured operational logging, strict production configuration validation, defensive governance rate limiting, liveness/readiness operational contracts, graceful pool shutdown support and production deployment guidance. No RDL domain model or browser governance semantics change in this sprint.
+
+
+## RDL-015 — Deployment Automation & Observability
+
+**Status: implementation sprint.** Package the hardened runtime into a CI-produced deployable artifact, expose release/build metadata, add process-local diagnostic metrics, define environment promotion and rollback contracts, and provide automated post-deployment smoke testing without changing RDL or governance semantics.
 
 ## Later enterprise roadmap
 
@@ -64,7 +73,3 @@ After the core multi-RDL platform is proven:
 - Publisher capabilities;
 - APIs/OEM integration;
 - DataGate package handoff and requirement-to-validation traceability.
-
-## RDL-014 — Production Deployment & Runtime Hardening
-
-**Status: complete.** Harden the RDL-013 production PostgreSQL/API runtime with request correlation IDs, structured operational logging, strict production configuration validation, defensive governance rate limiting, liveness/readiness operational contracts, graceful pool shutdown support and production deployment guidance. No RDL domain model or browser governance semantics change in this sprint.
