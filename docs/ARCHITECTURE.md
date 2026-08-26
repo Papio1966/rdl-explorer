@@ -481,3 +481,34 @@ CI gates -> browser build -> deployment archive
 The deployment archive is platform-neutral at the RDL Explorer contract level. It contains the built static application, API/server runtime sources, locked package metadata and `deployment/runtime-manifest.json`. Platform adapters such as the current Vercel configuration may consume the same contract without moving identity, governance or PostgreSQL boundaries into browser code.
 
 The post-deployment smoke test verifies liveness, database-backed readiness, version metadata, correlation IDs and fail-closed unauthenticated governance access. Rollback restores the previous known-good immutable release and reruns the same smoke contract.
+
+## RDL-016 — Enterprise hierarchy and effective-context composition
+
+RDL-016 materializes the enterprise layering principle already present in the target architecture.
+
+```text
+L1 Industry package (immutable authority)
+        |
+        v
+L2 Company context + governed extensions
+        |
+        v
+L3 Asset context + governed extensions
+        |
+        v
+L4 Project / CIS context + governed extensions
+        |
+        +-- exact package pins
+        +-- approved adds / overrides / retirements
+        v
+Immutable effective package publication
+        |
+        v
+DataGate / downstream consumers
+```
+
+`rdl.enterprise_context` represents the Company → Asset → Project parent chain. `rdl.context_package_pin` records exact package versions and precedence. `rdl.context_extension_change` stores explicit governed additions, overrides and retirements without changing the upstream package. `rdl.effective_context_publication` records an immutable effective-package reference plus composition manifest and SHA-256.
+
+An active project context is frozen: its package pins cannot be updated or deleted. If Company, Asset or Industry standards evolve, an active project does not auto-migrate. A new project/context version must be composed and governed explicitly.
+
+Project-originated extensions may later be promoted to Asset, Company or upstream standards governance. Promotion creates a new governed layer/version; it never rewrites the package against which the project was executed.

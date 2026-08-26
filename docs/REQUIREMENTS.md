@@ -267,3 +267,16 @@ RDL-001 is complete when:
 - **RDL-DEPLOY-008 — CI deployment gate** — Pull-request/main CI shall execute the RDL-015 contract and produce the deployment artifact only after build validation succeeds.
 - **RDL-DEPLOY-009 — No domain-semantic change** — Deployment automation and observability shall not alter RDL identity, governance transitions, reviewer authorization or browser/database security boundaries.
 - **RDL-DEPLOY-010 — Build metadata secrecy** — Version/metrics endpoints shall expose operational metadata only and shall never return database credentials, signing secrets or identity assertions.
+
+## RDL-016 — Enterprise RDL Hierarchy & Extension Governance
+
+- **RDL-HIER-001 — Explicit four-layer model** — The enterprise model shall distinguish Industry RDL, Company RDL, Asset RDL and Project/CIS RDL contexts rather than flattening them into one mutable standard.
+- **RDL-HIER-002 — Parent chain** — Company contexts shall be roots; Asset contexts shall have a Company parent; Project contexts shall have an Asset parent.
+- **RDL-HIER-003 — Upstream immutability** — Company, Asset and Project extensions shall reference exact upstream packages and shall not mutate source-authoritative Industry RDL content.
+- **RDL-HIER-004 — Exact package pinning** — A governed context shall retain exact package identifiers and precedence for every composed layer.
+- **RDL-HIER-005 — Frozen active projects** — Package pins for an active Project/CIS context shall be immutable; upstream standard changes shall require a new context/version rather than automatic migration.
+- **RDL-HIER-006 — Explicit extension changes** — Adds, overrides and retirements shall be first-class governed records retaining layer, entity identity, rationale and provenance.
+- **RDL-HIER-007 — Effective publication** — A published effective context shall record an immutable package reference, composition manifest and SHA-256 for downstream reproducibility.
+- **RDL-HIER-008 — Promotion without rewrite** — A Project extension may later be promoted to Asset, Company or upstream governance, but promotion shall create a new governed version and shall not rewrite the frozen project baseline.
+- **RDL-HIER-009 — Provenance in UX** — The hierarchy UX shall explain the origin and governance status of every layer and shall label demonstration enterprise layers honestly.
+- **RDL-HIER-010 — DataGate boundary** — Effective packages shall be suitable for later publication to DataGate without direct database coupling; RDL Explorer remains the standards publisher and DataGate remains the consumer.

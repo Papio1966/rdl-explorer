@@ -106,6 +106,10 @@ const deploymentRunbook = read("docs/DEPLOYMENT_RUNBOOK.md");
 const deploymentPackager = read("scripts/package-deployment.sh");
 const deploymentSmoke = read("scripts/smoke-deployment.ts");
 const rdl015Test = read("scripts/test-rdl-015-deployment-observability.ts");
+const enterpriseHierarchyMigration = read("database/migrations/007_create_enterprise_rdl_hierarchy.sql");
+const enterpriseHierarchyRepository = read("server/rdl/EnterpriseRdlHierarchyRepository.ts");
+const enterpriseHierarchyPage = read("src/pages/RdlHierarchyPage.tsx");
+const rdl016Test = read("database/sql/test_rdl_016_enterprise_hierarchy.sql");
 
 const routes = [
   "/classes/tag",
@@ -126,6 +130,7 @@ const routes = [
   "/search",
   "/intelligence",
   "/governance",
+  "/hierarchy",
 ];
 
 for (const route of routes) {
@@ -145,6 +150,7 @@ for (const label of [
   "RDL Catalogue",
   "Cross-RDL Intelligence",
   "Mapping Governance",
+  "Enterprise RDL Hierarchy",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
 }
@@ -276,6 +282,13 @@ assert.ok(deploymentPackager.includes("rdl-explorer-deployment.tgz") && deployme
 assert.ok(deploymentRunbook.includes("Environment promotion model") && deploymentRunbook.includes("Rollback"), "RDL-015 must document promotion and rollback");
 assert.ok(rdl015Test.includes("deployment automation and observability contract"), "RDL-015 must provide a deterministic deployment/observability contract test");
 assert.ok(requirements.includes("RDL-DEPLOY-001") && requirements.includes("RDL-DEPLOY-010"), "Requirements must capture RDL-015 deployment and observability constraints");
+assert.ok(packageJson.includes('"db:test:rdl-016"'), "RDL-016 must expose an enterprise hierarchy database acceptance test");
+assert.ok(enterpriseHierarchyMigration.includes("enterprise_context") && enterpriseHierarchyMigration.includes("context_package_pin") && enterpriseHierarchyMigration.includes("effective_context_publication"), "RDL-016 must persist enterprise contexts, exact package pins and immutable effective publications");
+assert.ok(enterpriseHierarchyMigration.includes("active contexts are immutable") && enterpriseHierarchyMigration.includes("context_lineage"), "RDL-016 must freeze active context pins and provide deterministic lineage");
+assert.ok(enterpriseHierarchyRepository.includes("class EnterpriseRdlHierarchyRepository") && enterpriseHierarchyRepository.includes("getComposition"), "RDL-016 must provide a server-side effective-context composition repository");
+assert.ok(enterpriseHierarchyPage.includes("Four-layer enterprise hierarchy") && enterpriseHierarchyPage.includes("does not auto-migrate") && enterpriseHierarchyPage.includes("Governance boundary"), "RDL-016 UX must explain enterprise layering, frozen projects and demonstration provenance honestly");
+assert.ok(rdl016Test.includes("company -> asset -> project lineage") && rdl016Test.includes("active project package pin mutation was not blocked"), "RDL-016 database test must prove hierarchy and active-project pin immutability");
+assert.ok(requirements.includes("RDL-HIER-001") && requirements.includes("RDL-HIER-010"), "Requirements must capture RDL-016 enterprise hierarchy and extension-governance constraints");
 assert.ok(rdl013Test.includes("DatabaseRuntimeError") && rdl013Test.includes("poolStats"), "RDL-013 runtime test must cover structured errors and pool telemetry");
 assert.ok(requirements.includes("RDL-RUNTIME-001") && requirements.includes("RDL-RUNTIME-010"), "Requirements must capture RDL-013 production runtime constraints");
 assert.ok(packageJson.includes('"test:rdl-014"') && packageJson.includes('"validate:production-env"'), "RDL-014 must expose runtime-hardening and production-environment validation commands");

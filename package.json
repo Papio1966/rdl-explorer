@@ -41,7 +41,8 @@
     "validate:production-env": "tsx scripts/validate-production-env.ts",
     "test:rdl-015": "tsx scripts/test-rdl-015-deployment-observability.ts",
     "package:deployment": "bash scripts/package-deployment.sh",
-    "smoke:deployment": "tsx scripts/smoke-deployment.ts"
+    "smoke:deployment": "tsx scripts/smoke-deployment.ts",
+    "db:test:rdl-016": "bash scripts/db-test-rdl-016.sh"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",
