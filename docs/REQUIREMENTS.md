@@ -289,3 +289,16 @@ RDL-001 is complete when:
 - **RDL-EXT-005** Users SHALL be able to preview inherited and proposed effective state before publication.
 - **RDL-EXT-006** Live extension writes SHALL require the signed `rdl-extension-reviewer` role; unauthenticated browser use SHALL remain read-only.
 - **RDL-EXT-007** Promotion SHALL create a new governed extension at the target layer and SHALL NOT rewrite a frozen Project/CIS baseline.
+
+## RDL-018 — Effective Standard Comparison & Publication
+
+- **RDL-PUB-001** — The platform shall compare a governed enterprise context with its inherited baseline before publication.
+- **RDL-PUB-002** — Comparison shall distinguish added, overridden and retired extension effects and retain source-layer provenance.
+- **RDL-PUB-003** — Publication shall fail closed while unresolved draft, candidate or in-review extensions exist in the context lineage.
+- **RDL-PUB-004** — A published effective standard shall contain exact context lineage, package pins and governed extension identifiers.
+- **RDL-PUB-005** — Published effective-standard artifacts shall be immutable.
+- **RDL-PUB-006** — Each publication shall have a release key, release version and SHA-256 composition fingerprint.
+- **RDL-PUB-007** — The platform shall provide a machine-consumable JSON publication artifact with explicit schema version.
+- **RDL-PUB-008** — Publication authority shall be derived only from the trusted signed governance identity boundary.
+- **RDL-PUB-009** — Browser publication UX shall remain read-only when the publication API is unavailable, unauthorized, malformed or replaced by an SPA fallback response.
+- **RDL-PUB-010** — Publication provenance shall be sufficient to reproduce and verify the effective standard without modifying upstream RDL packages or frozen project baselines.

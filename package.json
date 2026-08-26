@@ -44,7 +44,9 @@
     "smoke:deployment": "tsx scripts/smoke-deployment.ts",
     "db:test:rdl-016": "bash scripts/db-test-rdl-016.sh",
     "db:test:rdl-017": "bash scripts/db-test-rdl-017.sh",
-    "test:rdl-017": "tsx scripts/test-rdl-017-extension-governance.ts"
+    "test:rdl-017": "tsx scripts/test-rdl-017-extension-governance.ts",
+    "db:test:rdl-018": "bash scripts/db-test-rdl-018.sh",
+    "test:rdl-018": "tsx scripts/test-rdl-018-effective-publication.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",
