@@ -47,6 +47,9 @@ jobs:
       - name: Run RDL-022 migration planning contract
         run: npm run test:rdl-022
 
+      - name: Run RDL-023 enterprise control tower contract
+        run: npm run test:rdl-023
+
       - name: Run regression suite
         run: npm run test:regression
 

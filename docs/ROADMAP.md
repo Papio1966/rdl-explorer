@@ -100,3 +100,12 @@ Adds exact published-release comparison, semantic added/removed/modified/unchang
 ## RDL-022 — Migration Planning & Controlled Adoption ✅
 
 Turn RDL-021 impact intelligence into governed adoption plans. Plans are tied to exact source and target releases, carry an impacted-entity remediation checklist, ownership, due dates, readiness, approval, staging and explicit activation. No publication or analysis can auto-migrate a project or consumer.
+
+## RDL-023 — Enterprise Standards Dashboard & Control Tower — Delivered
+
+- Enterprise portfolio health KPIs across governed standards lifecycle state.
+- Consolidated extension-review, consumer-notification and migration-plan queue.
+- Published release health with consumer discovery/staging/activation signals.
+- Migration readiness, blocked/overdue remediation and breaking-action indicators.
+- Trusted read-only API and fail-closed browser route at `/control-tower`.
+- Drill-through to authoritative governance/adoption workflows; no duplicated mutable state.

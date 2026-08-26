@@ -180,3 +180,14 @@ Migration `012_create_release_change_intelligence.sql` adds immutable release-to
 ## RDL-022 migration planning
 
 Migration `013_create_migration_planning_controlled_adoption.sql` adds governed release migration plans, remediation actions and append-only history. Run `npm run db:test:rdl-022` after migration to verify approval/readiness/staging/activation gates.
+
+### RDL-023 control tower projections
+
+Migration `014_create_enterprise_standards_control_tower.sql` adds read-only operational views over existing governed state:
+
+- `rdl.enterprise_standards_control_tower_kpi`
+- `rdl.enterprise_standards_governance_queue`
+- `rdl.enterprise_standards_release_health`
+- `rdl.enterprise_standards_adoption_summary`
+
+The migration deliberately creates no new mutable dashboard tables. `npm run db:test:rdl-023` is data-independent and can run when the database contains zero business records.

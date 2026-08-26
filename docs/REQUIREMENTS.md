@@ -348,3 +348,16 @@ RDL-001 is complete when:
 - **RDL-MIG-006** — Migration transitions shall use optimistic version checks and append-only audit history.
 - **RDL-MIG-007** — Browser behavior shall fail closed on unavailable, unauthorized, malformed or non-JSON session responses.
 - **RDL-MIG-008** — Impact analysis remains advisory; RDL Explorer shall never auto-migrate a pinned project or auto-activate a downstream consumer.
+
+## RDL-023 — Enterprise Standards Dashboard & Control Tower
+
+RDL Explorer shall provide a read-only enterprise control tower over the governed standards lifecycle.
+
+- Aggregate portfolio KPIs from authoritative hierarchy, extension, publication, distribution, consumer, impact and migration state.
+- Present a consolidated governance/adoption queue with drill-through to the workflow that owns each decision.
+- Show published release health and consumer adoption state without duplicating lifecycle state.
+- Show migration readiness, blocked plans, overdue remediation and open breaking-change actions.
+- Protect live enterprise dashboard data behind the trusted governance identity boundary.
+- Fail closed in the browser for unavailable, unauthorized, non-JSON, malformed or SPA-fallback API responses.
+- Remain advisory/read-only: dashboard health signals must never approve extensions, migrate projects, stage packages or activate releases automatically.
+- Keep scrollable control-tower tables keyboard focusable and include the route in automated accessibility coverage.

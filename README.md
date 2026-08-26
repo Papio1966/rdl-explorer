@@ -105,3 +105,7 @@ feature/fix branch
 - Do not mutate authoritative baselines to represent local or contractual overrides.
 - Keep AI synthesis grounded in retrieved evidence and explicit context.
 - Keep the CFIHOS compatibility/regression path available while the generic architecture is introduced.
+
+### Enterprise standards control tower
+
+RDL-023 adds `/control-tower`, a read-only management view over standards governance, published releases, consumer adoption and migration readiness. Live data remains behind the trusted governance boundary; without a valid session the page shows clearly labelled demonstration data.
