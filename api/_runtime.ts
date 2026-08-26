@@ -1,4 +1,5 @@
 import type { HeaderBag } from "../server/auth/GovernanceIdentity.ts";
+import { recordRequestMetric } from "../server/observability/RuntimeMetrics.ts";
 import { createRequestContext, type RequestContext } from "../server/runtime/RequestContext.ts";
 import { logRequest } from "../server/runtime/StructuredLogger.ts";
 
@@ -21,6 +22,7 @@ export function beginApiRequest(
 }
 
 export function completeApiRequest(context: RequestContext, statusCode: number, fields: Record<string, unknown> = {}) {
+  recordRequestMetric(context, statusCode);
   logRequest(statusCode >= 500 ? "error" : statusCode >= 400 ? "warn" : "info", "api.request", context, {
     statusCode,
     ...fields,

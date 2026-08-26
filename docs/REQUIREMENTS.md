@@ -254,3 +254,16 @@ RDL-001 is complete when:
 - **RDL-OPS-006 — Liveness/readiness separation** — Liveness shall remain independent of PostgreSQL while readiness shall validate production runtime configuration and database connectivity.
 - **RDL-OPS-007 — Graceful pool closure** — Long-lived Node runtime deployments shall have an explicit shutdown hook capable of draining the PostgreSQL pool.
 - **RDL-OPS-008 — Secret boundary** — Database URLs, governance signing secrets and provider API keys shall remain server-side and shall not be returned in operational responses or structured logs.
+
+## RDL-015 — Deployment Automation & Observability
+
+- **RDL-DEPLOY-001 — Immutable release metadata** — A deployed runtime shall expose non-secret release, commit, version and environment metadata through a dedicated version endpoint when supplied by the deployment pipeline.
+- **RDL-DEPLOY-002 — Platform-neutral package** — CI shall create a deployment archive containing the built browser application, API/server runtime sources, locked package metadata and a platform-neutral runtime manifest.
+- **RDL-DEPLOY-003 — Deployment smoke contract** — A post-deployment smoke test shall verify liveness, readiness, version metadata, correlation IDs and fail-closed unauthenticated governance behavior.
+- **RDL-DEPLOY-004 — Operational metrics** — The runtime shall collect request count, error count, status distribution and latency aggregates without recording governance payloads or secrets.
+- **RDL-DEPLOY-005 — Distributed observability boundary** — Process-local metrics shall be labelled as diagnostic only; horizontally scaled/serverless production shall aggregate telemetry through the hosting platform or an external observability backend.
+- **RDL-DEPLOY-006 — Environment promotion** — Deployment documentation shall define Development, Preview/UAT and Production promotion with a preference for promoting the same immutable accepted artifact rather than rebuilding source between environments.
+- **RDL-DEPLOY-007 — Rollback runbook** — Operations documentation shall define rollback to the previous known-good release and require smoke verification after rollback.
+- **RDL-DEPLOY-008 — CI deployment gate** — Pull-request/main CI shall execute the RDL-015 contract and produce the deployment artifact only after build validation succeeds.
+- **RDL-DEPLOY-009 — No domain-semantic change** — Deployment automation and observability shall not alter RDL identity, governance transitions, reviewer authorization or browser/database security boundaries.
+- **RDL-DEPLOY-010 — Build metadata secrecy** — Version/metrics endpoints shall expose operational metadata only and shall never return database credentials, signing secrets or identity assertions.

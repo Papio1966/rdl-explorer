@@ -6,6 +6,7 @@ import { GovernanceService } from "../../server/rdl/GovernanceService.ts";
 import { FixedWindowRateLimiter } from "../../server/runtime/RateLimiter.ts";
 import { RuntimeConfigurationError, assertRuntimeEnvironment } from "../../server/runtime/environment.ts";
 import { logRequest } from "../../server/runtime/StructuredLogger.ts";
+import { recordRequestMetric } from "../../server/observability/RuntimeMetrics.ts";
 import type { RequestContext } from "../../server/runtime/RequestContext.ts";
 
 export type ApiRequest = { method?: string; body?: unknown; query?: Record<string, string | string[] | undefined>; headers?: HeaderBag };
@@ -31,42 +32,50 @@ export function authenticatedContext(request: ApiRequest, context?: RequestConte
 }
 
 export function handleApiError(response: ApiResponse, error: unknown, context?: RequestContext) {
+  const record = (statusCode: number) => { if (context) recordRequestMetric(context, statusCode); };
   if (error instanceof GovernanceRateLimitError) {
     response.setHeader?.("Retry-After", error.retryAfterSeconds);
     response.setHeader?.("X-RateLimit-Limit", error.limit);
     if (context) logRequest("warn", "governance.rate_limited", context, { statusCode: 429 });
+    record(429);
     response.status(429).json({ error: "Too many governance requests; try again shortly." });
     return;
   }
   if (error instanceof GovernanceAuthError) {
     if (context) logRequest("warn", "governance.auth_rejected", context, { statusCode: error.statusCode });
+    record(error.statusCode);
     response.status(error.statusCode).json({ error: error.message });
     return;
   }
   if (error instanceof RuntimeConfigurationError) {
     if (context) logRequest("error", "runtime.configuration_error", context, { statusCode: 503, errorCode: error.code });
+    record(503);
     response.status(503).json({ error: "The governance runtime is not configured for this environment." });
     return;
   }
   if (error instanceof DatabaseRuntimeError) {
     if (context) logRequest("error", "governance.database_error", context, { statusCode: 503, errorCode: error.code });
     else console.error("Governance database request failed", { code: error.code });
+    record(503);
     response.status(503).json({ error: "The governance database is temporarily unavailable." });
     return;
   }
   const message = error instanceof Error ? error.message : "Unexpected governance service error.";
   if (/required|unsupported|between|valid/i.test(message)) {
     if (context) logRequest("warn", "governance.validation_error", context, { statusCode: 400 });
+    record(400);
     response.status(400).json({ error: message });
     return;
   }
   if (/version conflict/i.test(message)) {
     if (context) logRequest("warn", "governance.version_conflict", context, { statusCode: 409 });
+    record(409);
     response.status(409).json({ error: message });
     return;
   }
   if (context) logRequest("error", "governance.api_error", context, { statusCode: 500 });
   else console.error("Governance API request failed", { message });
+  record(500);
   response.status(500).json({ error: "The governance service could not complete the request." });
 }
 

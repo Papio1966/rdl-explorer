@@ -117,3 +117,14 @@ After deployment verify:
 ## Rollback
 
 Rollback by redeploying the previous known-good application release. RDL-014 introduces no database migration, so application rollback does not require a database schema rollback.
+
+
+## RDL-015 release automation
+
+The CI build produces `artifacts/rdl-explorer-deployment.tgz` after the RDL-014/RDL-015 contracts, regression suite and production build pass. The package includes the static build, API/server runtime sources, locked npm metadata and the platform-neutral runtime manifest.
+
+Populate release metadata where supported: `RDL_RELEASE_ID`, `RDL_COMMIT_SHA`, `RDL_BUILD_VERSION` and `RDL_BUILD_TIMESTAMP`. `GET /api/version` exposes these non-secret values for deployment verification.
+
+After deployment run `npm run smoke:deployment -- https://<deployment-host>`. The smoke contract requires liveness and readiness to be healthy, confirms correlation/version metadata and verifies that unauthenticated governance access remains fail-closed.
+
+`GET /api/metrics` is intentionally process-local. Use it for diagnostics only; production multi-instance telemetry must be aggregated by the hosting platform or a dedicated observability backend. See `docs/DEPLOYMENT_RUNBOOK.md` for promotion and rollback.

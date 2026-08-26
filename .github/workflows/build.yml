@@ -26,11 +26,25 @@ jobs:
       - name: Run RDL-014 runtime hardening contract
         run: npm run test:rdl-014
 
+      - name: Run RDL-015 deployment and observability contract
+        run: npm run test:rdl-015
+
       - name: Run regression suite
         run: npm run test:regression
 
       - name: Build application
         run: npm run build
+
+      - name: Package deployment artifact
+        run: npm run package:deployment
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: rdl-explorer-deployment
+          path: artifacts/rdl-explorer-deployment.tgz
+          if-no-files-found: error
+          retention-days: 14
 
   e2e:
     name: Browser E2E and accessibility

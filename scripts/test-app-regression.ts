@@ -97,6 +97,15 @@ const shutdownRuntime = read("server/runtime/shutdown.ts");
 const apiRuntime = read("api/_runtime.ts");
 const productionDeployment = read("docs/PRODUCTION_DEPLOYMENT.md");
 const rdl014Test = read("scripts/test-rdl-014-runtime-hardening.ts");
+const buildMetadataRuntime = read("server/runtime/BuildMetadata.ts");
+const runtimeMetrics = read("server/observability/RuntimeMetrics.ts");
+const versionApi = read("api/version.ts");
+const metricsApi = read("api/metrics.ts");
+const deploymentManifest = read("deployment/runtime-manifest.json");
+const deploymentRunbook = read("docs/DEPLOYMENT_RUNBOOK.md");
+const deploymentPackager = read("scripts/package-deployment.sh");
+const deploymentSmoke = read("scripts/smoke-deployment.ts");
+const rdl015Test = read("scripts/test-rdl-015-deployment-observability.ts");
 
 const routes = [
   "/classes/tag",
@@ -258,6 +267,15 @@ assert.ok(databaseRuntime.includes("getRdlDatabaseClient") && databaseRuntime.in
 assert.ok(governanceApiShared.includes("getRdlDatabaseClient") && !governanceApiShared.includes("PsqlJsonClient"), "RDL-013 production governance API must not spawn psql");
 assert.ok(healthApi.includes('check: "liveness"') && readinessApi.includes('check: "readiness"') && readinessApi.includes("database.health"), "RDL-013 must separate liveness from database-backed readiness");
 assert.ok(envExample.includes("RDL_DATABASE_POOL_MAX") && envExample.includes("RDL_DATABASE_SSL_REJECT_UNAUTHORIZED"), "RDL-013 must document pool and TLS runtime configuration");
+assert.ok(packageJson.includes('"test:rdl-015"') && packageJson.includes('"package:deployment"') && packageJson.includes('"smoke:deployment"'), "RDL-015 must expose deployment, smoke and contract commands");
+assert.ok(buildMetadataRuntime.includes("RDL_RELEASE_ID") && buildMetadataRuntime.includes("RDL_COMMIT_SHA"), "RDL-015 must expose non-secret release metadata");
+assert.ok(runtimeMetrics.includes("averageDurationMs") && runtimeMetrics.includes("statusCodes") && runtimeMetrics.includes("errors"), "RDL-015 metrics must retain request latency/error/status aggregates");
+assert.ok(versionApi.includes("getBuildMetadata") && metricsApi.includes("getRuntimeMetrics"), "RDL-015 must expose version and metrics APIs");
+assert.ok(deploymentManifest.includes('"liveness"') && deploymentManifest.includes('"readiness"') && deploymentManifest.includes('"metrics"'), "RDL-015 runtime manifest must declare operational endpoints");
+assert.ok(deploymentPackager.includes("rdl-explorer-deployment.tgz") && deploymentSmoke.includes("/api/readiness"), "RDL-015 must package and smoke-test deployment artifacts");
+assert.ok(deploymentRunbook.includes("Environment promotion model") && deploymentRunbook.includes("Rollback"), "RDL-015 must document promotion and rollback");
+assert.ok(rdl015Test.includes("deployment automation and observability contract"), "RDL-015 must provide a deterministic deployment/observability contract test");
+assert.ok(requirements.includes("RDL-DEPLOY-001") && requirements.includes("RDL-DEPLOY-010"), "Requirements must capture RDL-015 deployment and observability constraints");
 assert.ok(rdl013Test.includes("DatabaseRuntimeError") && rdl013Test.includes("poolStats"), "RDL-013 runtime test must cover structured errors and pool telemetry");
 assert.ok(requirements.includes("RDL-RUNTIME-001") && requirements.includes("RDL-RUNTIME-010"), "Requirements must capture RDL-013 production runtime constraints");
 assert.ok(packageJson.includes('"test:rdl-014"') && packageJson.includes('"validate:production-env"'), "RDL-014 must expose runtime-hardening and production-environment validation commands");
