@@ -42,7 +42,9 @@
     "test:rdl-015": "tsx scripts/test-rdl-015-deployment-observability.ts",
     "package:deployment": "bash scripts/package-deployment.sh",
     "smoke:deployment": "tsx scripts/smoke-deployment.ts",
-    "db:test:rdl-016": "bash scripts/db-test-rdl-016.sh"
+    "db:test:rdl-016": "bash scripts/db-test-rdl-016.sh",
+    "db:test:rdl-017": "bash scripts/db-test-rdl-017.sh",
+    "test:rdl-017": "tsx scripts/test-rdl-017-extension-governance.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",

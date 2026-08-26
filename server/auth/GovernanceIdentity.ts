@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const GOVERNANCE_REVIEWER_ROLE = "rdl-mapping-reviewer";
+export const EXTENSION_REVIEWER_ROLE = "rdl-extension-reviewer";
 const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
 export type GovernanceIdentity = {
@@ -26,6 +27,7 @@ export function authenticateGovernanceIdentity(
   headers: HeaderBag | undefined,
   env: NodeJS.ProcessEnv = process.env,
   now = Date.now(),
+  requiredRole = GOVERNANCE_REVIEWER_ROLE,
 ): GovernanceIdentity {
   const secret = env.RDL_GOVERNANCE_AUTH_SECRET?.trim();
   if (!secret) throw new GovernanceAuthError(503, "Governance authentication is not configured.");
@@ -48,8 +50,8 @@ export function authenticateGovernanceIdentity(
   if (!safeEqualHex(suppliedSignature, expectedSignature)) {
     throw new GovernanceAuthError(401, "Governance identity signature is invalid.");
   }
-  if (!roles.includes(GOVERNANCE_REVIEWER_ROLE)) {
-    throw new GovernanceAuthError(403, "The authenticated user is not authorized to review RDL mappings.");
+  if (!roles.includes(requiredRole)) {
+    throw new GovernanceAuthError(403, `The authenticated user is not authorized for required governance role ${requiredRole}.`);
   }
 
   return { reviewer, roles, authenticatedAt: timestamp };

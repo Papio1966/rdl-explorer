@@ -1,0 +1,4 @@
+export const EXTENSION_DEMO_ITEMS=[
+  {extensionChangeId:1701,contextKey:"DEMO-COMPANY",contextType:"company" as const,contextName:"Demonstration Company RDL",changeKind:"add" as const,entityType:"equipment_class",nativeIdentifier:"DEMO-VACUUM-TOILET",proposedName:"Vacuum toilet",status:"in_review",rationale:"Dedicated maintenance strategy requires a distinct maintainable equipment class.",proposedBy:"demonstration.author",proposedAt:"2026-08-26T00:00:00Z",reviewVersion:1},
+  {extensionChangeId:1702,contextKey:"DEMO-ASSET",contextType:"asset" as const,contextName:"Demonstration Asset RDL",changeKind:"override" as const,entityType:"property",nativeIdentifier:"DEMO-INSPECTION-INTERVAL",proposedName:"Inspection interval",status:"draft",rationale:"Asset regulation requires a tighter inspection interval than the company baseline.",proposedBy:"demonstration.author",proposedAt:"2026-08-26T00:00:00Z",reviewVersion:0},
+];

@@ -280,3 +280,12 @@ RDL-001 is complete when:
 - **RDL-HIER-008 — Promotion without rewrite** — A Project extension may later be promoted to Asset, Company or upstream governance, but promotion shall create a new governed version and shall not rewrite the frozen project baseline.
 - **RDL-HIER-009 — Provenance in UX** — The hierarchy UX shall explain the origin and governance status of every layer and shall label demonstration enterprise layers honestly.
 - **RDL-HIER-010 — DataGate boundary** — Effective packages shall be suitable for later publication to DataGate without direct database coupling; RDL Explorer remains the standards publisher and DataGate remains the consumer.
+
+### RDL-017 Enterprise extension authoring and governance
+- **RDL-EXT-001** Company, Asset and Project/CIS extensions SHALL be authored as explicit records and SHALL NOT mutate upstream RDL packages.
+- **RDL-EXT-002** Extension lifecycle SHALL support draft/in-review/approved/rejected/retired states with append-only review events.
+- **RDL-EXT-003** Governance decisions SHALL capture trusted reviewer identity, rationale, timestamp and optimistic review version.
+- **RDL-EXT-004** Approval SHALL fail when unresolved same-identity extension conflicts exist in the applicable context lineage.
+- **RDL-EXT-005** Users SHALL be able to preview inherited and proposed effective state before publication.
+- **RDL-EXT-006** Live extension writes SHALL require the signed `rdl-extension-reviewer` role; unauthenticated browser use SHALL remain read-only.
+- **RDL-EXT-007** Promotion SHALL create a new governed extension at the target layer and SHALL NOT rewrite a frozen Project/CIS baseline.

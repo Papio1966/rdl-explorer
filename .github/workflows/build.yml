@@ -29,6 +29,9 @@ jobs:
       - name: Run RDL-015 deployment and observability contract
         run: npm run test:rdl-015
 
+      - name: Run RDL-017 extension governance contract
+        run: npm run test:rdl-017
+
       - name: Run regression suite
         run: npm run test:regression
 

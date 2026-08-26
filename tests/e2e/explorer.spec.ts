@@ -120,6 +120,19 @@ test("enterprise RDL hierarchy preserves immutable upstream and project pinning 
   await expect(page.locator('section[aria-labelledby="hierarchy-heading"]').getByText(/does not auto-migrate/i)).toBeVisible();
 });
 
+
+test("enterprise extension authoring remains governed and previewable", async ({ page }) => {
+  await page.goto("/extensions");
+  await expect(page.getByRole("heading", { name: "Extension authoring & governance" })).toBeVisible();
+  await expect(page.getByText("Governed authoring boundary")).toBeVisible();
+  await expect(page.getByText("Read-only demonstration mode")).toBeVisible();
+  await expect(page.getByRole("button", { name: "New extension" })).toBeDisabled();
+  await expect(page.getByText("Vacuum toilet")).toBeVisible();
+  await page.getByRole("button", { name: "Effective preview" }).first().click();
+  await expect(page.getByRole("heading", { name: "Effective preview" })).toBeVisible();
+  await expect(page.getByText(/inherited upstream package remains unchanged/i)).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 
