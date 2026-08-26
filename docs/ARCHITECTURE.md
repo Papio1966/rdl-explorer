@@ -594,3 +594,11 @@ RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state.
 RDL-026 introduces a separate trust-observability layer around the advisory AI boundary. `rdl.ai_feedback` stores append-only human classifications against immutable advisory runs. `rdl.ai_evaluation_case` is a versioned evaluation dataset, while `rdl.ai_evaluation_result` stores immutable prompt/model evaluation outcomes with groundedness, evidence coverage, unsupported-claim counts and a SHA-256 result fingerprint. `rdl.ai_trust_metrics` and `rdl.ai_advisory_trust_summary` are read projections only.
 
 The `/api/ai-trust/*` service boundary exposes trusted quality telemetry and feedback capture. `/ai-trust` is a read-oriented quality dashboard. RDL-026 also records `prompt_version` on new advisory runs so model/prompt comparisons are reproducible. No trust metric or evaluation verdict is allowed to auto-promote a model, mutate a mapping, approve an extension, publish a release, approve a migration, or activate a consumer.
+
+## RDL-027 — Enterprise identity and access boundary
+
+RDL Explorer does not become an identity provider. A production deployment uses an enterprise OIDC-capable gateway or platform identity service to perform the actual authorization-code/token exchange, validate issuer/audience/signature/expiry, and then forward a short-lived signed normalized assertion containing subject, email, display name and group claims. `EnterpriseIdentity.authenticateEnterpriseSsoIdentity` verifies that internal assertion using `RDL_SSO_GATEWAY_SECRET`; arbitrary browser headers are not a trust source.
+
+`rdl.enterprise_identity_user`, `rdl.enterprise_role_assignment` and `rdl.enterprise_group_role_mapping` provide the application identity/authorization model. `rdl.enterprise_identity_audit_event` is append-only. `EnterpriseIdentityRepository` and `EnterpriseIdentityService` sit behind `/api/identity/*`; `/identity-admin` is fail-closed and falls back to a clearly labelled demonstration when live identity administration is unavailable.
+
+RDL-027 intentionally preserves existing workflow-specific authorization while establishing centralized role resolution. Later hardening can migrate governance services from legacy signed governance assertions to the enterprise identity session without changing domain-service semantics.

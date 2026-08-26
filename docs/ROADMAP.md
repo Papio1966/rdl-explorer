@@ -122,3 +122,7 @@ RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state.
 ## RDL-026 — AI Evaluation, Feedback & Trust Controls
 
 RDL-026 makes AI quality measurable before broader expansion. It adds append-only answer feedback, versioned evaluation cases, immutable evaluation results, groundedness/evidence-coverage metrics, unsupported-claim counts, prompt/model version tracking and a dedicated `/ai-trust` experience. Trust metrics are advisory operational signals only: they do not auto-promote a model or prompt and cannot trigger a governed standards decision.
+
+## RDL-027 — Enterprise SSO, User Identity & Role Administration
+
+RDL-027 introduces the production identity boundary for RDL Explorer. Enterprise authentication is delegated to an OIDC-capable gateway or platform identity layer; RDL Explorer consumes only signed normalized claims, records enterprise user profiles, resolves direct and group-derived application roles, and exposes a dedicated `/identity-admin` administration experience. Identity administration is auditable and separation-of-duties rules prevent self-grant of identity-admin authority and self-disablement. Existing workflow authorization remains authoritative while services are progressively migrated to centralized role resolution.

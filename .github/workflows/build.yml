@@ -59,6 +59,9 @@ jobs:
       - name: Run RDL-026 AI trust controls contract
         run: npm run test:rdl-026
 
+      - name: Run RDL-027 enterprise identity contract
+        run: npm run test:rdl-027
+
       - name: Run regression suite
         run: npm run test:regression
 

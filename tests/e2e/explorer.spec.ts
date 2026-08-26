@@ -239,6 +239,16 @@ test("AI trust and evaluation is fail-closed and measurable", async ({ page }) =
   await expect(page.getByText(/No automatic promotion/i)).toBeVisible();
 });
 
+
+test("enterprise identity administration is fail-closed and separates authentication from privilege", async ({ page }) => {
+  await page.goto("/identity-admin");
+  await expect(page.getByRole("heading", { name: "Identity & access administration" })).toBeVisible();
+  await expect(page.getByText("Read-only identity demonstration", { exact: true })).toBeVisible();
+  await expect(page.getByText("No automatic privilege promotion.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Enterprise identity directory" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Enterprise group to role mappings" })).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 

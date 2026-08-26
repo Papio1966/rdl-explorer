@@ -1,0 +1,4 @@
+import { beginApiRequest,completeApiRequest } from "../_runtime.ts";
+import { handleIdentityError,identityAdminContext,parseBody,type ApiRequest,type ApiResponse } from "./_shared.ts";
+type Body={subject:string;status:"active"|"disabled";rationale:string};
+export default async function handler(request:ApiRequest,response:ApiResponse){const context=beginApiRequest(request,response,"identity.status");if(request.method!=="POST"){completeApiRequest(context,405);response.status(405).json({error:"Method not allowed."});return}try{const{identity,service,session}=await identityAdminContext(request);const body=parseBody<Body>(request.body);const result=await service.setUserStatus(identity,session.roles,body);completeApiRequest(context,200);response.status(200).json({contract:"rdl-enterprise-user-admin/v1",result})}catch(error){handleIdentityError(response,error)}}

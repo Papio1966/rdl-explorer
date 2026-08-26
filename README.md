@@ -122,3 +122,7 @@ RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state.
 ## RDL-026 — AI Evaluation, Feedback & Trust Controls
 
 RDL-026 adds `/ai-trust`, append-only answer feedback, versioned evaluation cases and immutable trust results for the RDL-025 advisory AI layer. The dashboard tracks groundedness, evidence coverage, unsupported claims, feedback sentiment, prompt version and model version. Trust signals are measurable and auditable but never automatically promote a model or make a governance decision.
+
+### Enterprise identity (RDL-027)
+
+Production identity is designed for an enterprise OIDC gateway or platform identity layer. The gateway validates the external identity token and forwards only short-lived signed normalized claims. RDL Explorer stores user/role/group administration state and exposes `/identity-admin`; it does not implement or expose an identity provider secret in the browser.

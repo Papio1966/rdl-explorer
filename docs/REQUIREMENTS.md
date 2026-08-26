@@ -389,3 +389,16 @@ RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state.
 - Prompt and model versions must be observable for every newly recorded advisory run.
 - Browser trust telemetry must fail closed on unavailable, unauthorized, malformed, non-JSON or SPA-fallback responses.
 - Trust metrics must never automatically promote a model/prompt or execute a standards-governance action.
+
+## RDL-027 — Enterprise SSO, identity and role administration requirements
+
+- **RDL-ID-001 — Enterprise SSO boundary** — Production user authentication shall be delegated to an enterprise OIDC-capable identity gateway; browser-provided identity claims shall never be trusted directly.
+- **RDL-ID-002 — Signed normalized claims** — The application shall accept only signed, time-bounded normalized identity claims from the trusted gateway.
+- **RDL-ID-003 — User directory** — Authenticated enterprise subjects shall have a normalized profile containing subject, email, display name, provider, status and last-authenticated timestamp.
+- **RDL-ID-004 — Role administration** — Direct role assignments and group-to-role mappings shall be explicit, auditable and independently revocable.
+- **RDL-ID-005 — Separation of duties** — Identity administrators shall not grant themselves identity-admin authority, revoke their own identity-admin role, or disable their own account.
+- **RDL-ID-006 — Deactivation** — Enterprise identities may be disabled without deleting historical governance records.
+- **RDL-ID-007 — Auditability** — Identity and role administration events shall be append-only.
+- **RDL-ID-008 — Fail closed** — Missing, stale, malformed or unsigned enterprise SSO assertions shall never result in authenticated application state.
+- **RDL-ID-009 — No implicit privilege** — Authentication shall prove identity only; governance authority shall require resolved application roles.
+- **RDL-ID-010 — Controlled bootstrap** — Initial identity administrators may be supplied through explicit deployment configuration until centrally managed assignments exist.
