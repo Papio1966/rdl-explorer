@@ -109,3 +109,7 @@ feature/fix branch
 ### Enterprise standards control tower
 
 RDL-023 adds `/control-tower`, a read-only management view over standards governance, published releases, consumer adoption and migration readiness. Live data remains behind the trusted governance boundary; without a valid session the page shows clearly labelled demonstration data.
+
+### Enterprise notifications & work queue
+
+RDL-024 adds `/work-queue`, a personal operational inbox for standards reviewers and approvers. Work items can be assigned, acknowledged, tracked against SLA/aging indicators, reminded and escalated, but every item drills through to the authoritative governed workflow for the actual decision. Live data remains behind the trusted signed identity boundary; otherwise the page is clearly labelled as demonstration data.

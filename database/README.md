@@ -191,3 +191,15 @@ Migration `014_create_enterprise_standards_control_tower.sql` adds read-only ope
 - `rdl.enterprise_standards_adoption_summary`
 
 The migration deliberately creates no new mutable dashboard tables. `npm run db:test:rdl-023` is data-independent and can run when the database contains zero business records.
+
+### RDL-024 enterprise notifications and work queue
+
+Migration `015_create_enterprise_notifications_work_queue.sql` adds durable operational work items, append-only work-item events, optimistic transition/assignment/reminder functions, and the `rdl.enterprise_work_queue_summary` SLA/aging view. It does not change the authoritative governance lifecycle tables.
+
+Run after migration:
+
+```bash
+npm run db:test:rdl-024
+```
+
+The acceptance test is self-contained: it creates its fixture inside a transaction and ends with `ROLLBACK`, so it does not require any pre-existing enterprise standards business data.

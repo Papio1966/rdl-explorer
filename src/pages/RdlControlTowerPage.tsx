@@ -99,7 +99,7 @@ export function RdlControlTowerPage() {
           </tr>) : <tr><td colSpan={6}>No open migration plans.</td></tr>}</tbody>
         </table>
       </div>
-      <div className="rdl-publication-actions"><Link to="/impact">Release impact</Link><Link to="/migration">Migration planning</Link></div>
+      <div className="rdl-publication-actions"><Link to="/impact">Release impact</Link><Link to="/migration">Migration planning</Link><Link to="/work-queue">My work queue</Link></div>
     </section>
 
     <section className="rdl-hierarchy-section" aria-labelledby="principles-heading">
