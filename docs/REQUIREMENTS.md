@@ -324,3 +324,16 @@ RDL-001 is complete when:
 - **RDL-INT-006 — No auto-activation** — A release shall be staged before activation; publication or notification shall never auto-activate a consumer.
 - **RDL-INT-007 — Lifecycle notifications** — Published, deprecated and superseded lifecycle events shall be represented explicitly and idempotently.
 - **RDL-INT-008 — DataGate boundary** — DataGate shall consume through the notification/distribution contracts with no direct SQL coupling.
+
+## RDL-021 — Release change intelligence and impact analysis requirements
+
+- **RDL-IMPACT-001 — Exact release comparison** — Impact analysis shall compare two explicit immutable published release identifiers and shall never substitute “latest”.
+- **RDL-IMPACT-002 — Semantic delta** — Analysis shall classify effective entities as added, removed, modified or unchanged.
+- **RDL-IMPACT-003 — Compatibility signal** — Removed or materially modified governed entities shall be identifiable as potentially breaking; classification is advisory rather than automatic migration authority.
+- **RDL-IMPACT-004 — Provenance** — Delta items shall retain entity identity, source layer and governed rationale where available.
+- **RDL-IMPACT-005 — Consumer impact** — Analysis shall report discovered, staged, activated and rejected consumers pinned to the source release.
+- **RDL-IMPACT-006 — Frozen consumers** — Analysis shall never auto-migrate or auto-activate a project or consumer.
+- **RDL-IMPACT-007 — Release notes** — The platform shall derive machine-readable release notes from the exact computed delta.
+- **RDL-IMPACT-008 — Immutable analysis** — Persisted release analyses shall be immutable and fingerprinted with SHA-256.
+- **RDL-IMPACT-009 — Fail-closed browser** — Live impact APIs shall require a trusted package-consumer identity; malformed or SPA fallback responses shall leave the browser in read-only demonstration mode.
+- **RDL-IMPACT-010 — Machine contract** — Release analysis shall expose the versioned `rdl-release-impact/v1` contract for downstream decision support.

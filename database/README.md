@@ -172,3 +172,7 @@ Migration `010_create_published_package_distribution.sql` adds consumer-facing l
 
 ### RDL-020 consumer integration
 Migration `011_create_consumer_integration_notification.sql` adds consumer subscriptions, release notification/outbox records, explicit consumer release state and idempotent pull receipts. Run `npm run db:test:rdl-020` after migration.
+
+### RDL-021 release impact
+
+Migration `012_create_release_change_intelligence.sql` adds immutable release-to-release impact analysis records. Run `npm run db:test:rdl-021` after migration.

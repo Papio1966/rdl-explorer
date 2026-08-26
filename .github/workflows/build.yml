@@ -41,6 +41,9 @@ jobs:
       - name: Run RDL-020 consumer integration contract
         run: npm run test:rdl-020
 
+      - name: Run RDL-021 release impact contract
+        run: npm run test:rdl-021
+
       - name: Run regression suite
         run: npm run test:regression
 

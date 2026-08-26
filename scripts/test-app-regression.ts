@@ -129,6 +129,11 @@ const integrationBrowserService = read("src/rdl/consumerIntegrationService.ts");
 const integrationRepository = read("server/rdl/ConsumerIntegrationRepository.ts");
 const integrationMigration = read("database/migrations/011_create_consumer_integration_notification.sql");
 const rdl020Test = read("scripts/test-rdl-020-consumer-integration.ts");
+const releaseImpactPage = read("src/pages/RdlReleaseImpactPage.tsx");
+const releaseImpactBrowserService = read("src/rdl/releaseImpactService.ts");
+const releaseImpactRepository = read("server/rdl/ReleaseChangeIntelligenceRepository.ts");
+const releaseImpactMigration = read("database/migrations/012_create_release_change_intelligence.sql");
+const rdl021Test = read("scripts/test-rdl-021-release-impact.ts");
 
 const routes = [
   "/classes/tag",
@@ -344,6 +349,11 @@ assert.ok(integrationPage.includes("Consumer integration & change notification")
 assert.ok(integrationBrowserService.includes("isSession") && integrationBrowserService.includes('contentType.includes("application/json")'), "RDL-020 consumer session must validate shape and reject SPA fallback responses");
 assert.ok(integrationRepository.includes("consumer_pull_receipt") && integrationMigration.includes("release must be staged before activation") && integrationMigration.includes("enqueue_release_notifications"), "RDL-020 must provide idempotent notification/pull and explicit activation state");
 assert.ok(rdl020Test.includes("consumer integration contract and change notification"), "RDL-020 must provide a deterministic contract test");
+assert.ok(app.includes('path="/impact"') && shell.includes("Release Impact"), "RDL-021 release impact route must be discoverable");
+assert.ok(releaseImpactPage.includes("Release change intelligence & impact analysis") && releaseImpactPage.includes("Read-only impact demonstration") && releaseImpactPage.includes("Migration decision support"), "RDL-021 UX must expose advisory release impact analysis and honest fallback");
+assert.ok(releaseImpactBrowserService.includes("validSession") && releaseImpactBrowserService.includes('content-type'), "RDL-021 browser client must validate trusted session shape and reject SPA fallback responses");
+assert.ok(releaseImpactRepository.includes("rdl-release-impact/v1") && releaseImpactRepository.includes("consumer_release_state") && releaseImpactMigration.includes("release_change_analysis"), "RDL-021 must compare immutable releases and assess downstream consumer impact");
+assert.ok(rdl021Test.includes("release change intelligence and impact analysis contract"), "RDL-021 must provide a deterministic contract test");
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");
 assert.ok(shell.includes("GlobalRdlSearch") && shell.includes("RdlScopeSelector"), "RDL-009 global search and scope selector must be present in the application shell");

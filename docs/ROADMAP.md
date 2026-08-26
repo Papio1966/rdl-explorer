@@ -92,3 +92,7 @@ Provides a stable, versioned consumption boundary for immutable effective-standa
 ## RDL-020 — Consumer Integration Contract & Change Notification ✅
 
 Defines the consumer subscription, transactional release-notification/outbox, acknowledgement, idempotent pull/staging and explicit activation lifecycle. The preferred integration pattern is push notification, pull immutable content. Adds a DataGate reference contract without direct SQL coupling or automatic downstream activation.
+
+## RDL-021 — Release Change Intelligence & Impact Analysis ✅
+
+Adds exact published-release comparison, semantic added/removed/modified/unchanged deltas, advisory breaking-change classification, downstream pinned-consumer impact, governed release notes, immutable SHA-256 analysis records and a fail-closed `/impact` experience. Analysis informs explicit migration decisions and never auto-migrates or auto-activates a project or consumer.

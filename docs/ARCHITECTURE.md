@@ -557,3 +557,7 @@ explicit consumer activation
 `rdl.consumer_subscription` scopes release discovery. `rdl.release_notification` is an idempotent transactional notification/outbox record. `rdl.consumer_pull_receipt` records retry-safe pull/staging identity, while `rdl.consumer_release_state` prevents activation from skipping staging. Notification and publication never modify the consumer's active standard.
 
 The same contract is the DataGate reference boundary: RDL Explorer announces; DataGate pulls, verifies, stages and activates under DataGate governance. There is no cross-product database access.
+
+## RDL-021 — Release change intelligence
+
+RDL-021 sits above immutable publication/distribution. It compares two exact `effective_standard_release` records, derives a deterministic semantic delta from their machine-consumable package payloads, assesses consumer states pinned to the source release, and emits `rdl-release-impact/v1`. Persisted analyses are immutable and SHA-256 fingerprinted. The impact engine is advisory: downstream staging, activation and project migration remain explicit consumer governance decisions.
