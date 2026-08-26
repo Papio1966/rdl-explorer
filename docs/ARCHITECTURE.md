@@ -588,3 +588,9 @@ The browser route `/work-queue` validates JSON content type, session shape and p
 ## RDL-025 — AI-assisted Standards Intelligence
 
 RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state. Live enterprise evidence requires a trusted `rdl-ai-standards-analyst` identity. AI outputs cite evidence identifiers and cannot approve extensions, publish releases, approve/stage/activate migrations, or migrate projects/consumers. Advisory runs may be immutably audited without becoming governance decisions.
+
+## RDL-026 — AI Evaluation, Feedback & Trust Controls
+
+RDL-026 introduces a separate trust-observability layer around the advisory AI boundary. `rdl.ai_feedback` stores append-only human classifications against immutable advisory runs. `rdl.ai_evaluation_case` is a versioned evaluation dataset, while `rdl.ai_evaluation_result` stores immutable prompt/model evaluation outcomes with groundedness, evidence coverage, unsupported-claim counts and a SHA-256 result fingerprint. `rdl.ai_trust_metrics` and `rdl.ai_advisory_trust_summary` are read projections only.
+
+The `/api/ai-trust/*` service boundary exposes trusted quality telemetry and feedback capture. `/ai-trust` is a read-oriented quality dashboard. RDL-026 also records `prompt_version` on new advisory runs so model/prompt comparisons are reproducible. No trust metric or evaluation verdict is allowed to auto-promote a model, mutate a mapping, approve an extension, publish a release, approve a migration, or activate a consumer.

@@ -60,7 +60,9 @@
     "db:test:rdl-024": "bash scripts/db-test-rdl-024.sh",
     "test:rdl-024": "tsx scripts/test-rdl-024-work-queue.ts",
     "db:test:rdl-025": "bash scripts/db-test-rdl-025.sh",
-    "test:rdl-025": "tsx scripts/test-rdl-025-ai-standards-intelligence.ts"
+    "test:rdl-025": "tsx scripts/test-rdl-025-ai-standards-intelligence.ts",
+    "db:test:rdl-026": "bash scripts/db-test-rdl-026.sh",
+    "test:rdl-026": "tsx scripts/test-rdl-026-ai-trust-controls.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",

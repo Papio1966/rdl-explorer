@@ -118,3 +118,7 @@ Adds a durable reviewer/approver work queue around the governed standards lifecy
 ## RDL-025 — AI-assisted Standards Intelligence
 
 RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state. Live enterprise evidence requires a trusted `rdl-ai-standards-analyst` identity. AI outputs cite evidence identifiers and cannot approve extensions, publish releases, approve/stage/activate migrations, or migrate projects/consumers. Advisory runs may be immutably audited without becoming governance decisions.
+
+## RDL-026 — AI Evaluation, Feedback & Trust Controls
+
+RDL-026 makes AI quality measurable before broader expansion. It adds append-only answer feedback, versioned evaluation cases, immutable evaluation results, groundedness/evidence-coverage metrics, unsupported-claim counts, prompt/model version tracking and a dedicated `/ai-trust` experience. Trust metrics are advisory operational signals only: they do not auto-promote a model or prompt and cannot trigger a governed standards decision.

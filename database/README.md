@@ -208,3 +208,7 @@ The acceptance test is self-contained: it creates its fixture inside a transacti
 ## RDL-025 — AI-assisted Standards Intelligence
 
 RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state. Live enterprise evidence requires a trusted `rdl-ai-standards-analyst` identity. AI outputs cite evidence identifiers and cannot approve extensions, publish releases, approve/stage/activate migrations, or migrate projects/consumers. Advisory runs may be immutably audited without becoming governance decisions.
+
+## RDL-026 — AI Evaluation, Feedback & Trust Controls
+
+Migration `017_create_ai_evaluation_feedback_trust_controls.sql` adds append-only `rdl.ai_feedback`, versioned `rdl.ai_evaluation_case`, immutable `rdl.ai_evaluation_result`, prompt-version tracking on `rdl.ai_advisory_run`, and read-only trust metric projections. Run `npm run db:test:rdl-026` after migration; the acceptance test is self-contained and rolls back its fixture transaction.

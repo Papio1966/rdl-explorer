@@ -11,7 +11,7 @@ export class AiStandardsIntelligenceService {
     return { intent: inferIntent(clean), items: await this.repository.collectEvidence(clean, required(actor,"actor")) };
   }
 
-  record(input: { actor: string; intent: AiIntent; question: string; evidence: AiEvidenceItem[]; answer: string; model: string }) {
+  record(input: { actor: string; intent: AiIntent; question: string; evidence: AiEvidenceItem[]; answer: string; model: string; promptVersion: string }) {
     if (!input.evidence.length) throw new Error("Evidence is required before recording an advisory answer.");
     return this.repository.recordAdvisory({ ...input, actor: required(input.actor,"actor"), question: required(input.question,"question"), answer: required(input.answer,"answer"), model: required(input.model,"model") });
   }

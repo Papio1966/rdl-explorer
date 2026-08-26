@@ -56,6 +56,9 @@ jobs:
       - name: Run RDL-025 AI standards intelligence contract
         run: npm run test:rdl-025
 
+      - name: Run RDL-026 AI trust controls contract
+        run: npm run test:rdl-026
+
       - name: Run regression suite
         run: npm run test:regression
 

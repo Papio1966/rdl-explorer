@@ -1,0 +1,3 @@
+import { beginApiRequest, completeApiRequest } from "../_runtime.ts";
+import { authenticatedTrustContext, handleApiError, type ApiRequest, type ApiResponse } from "./_shared.ts";
+export default async function handler(request:ApiRequest,response:ApiResponse){const context=beginApiRequest(request,response,"ai_trust.summary");if(request.method!=="GET"){completeApiRequest(context,405);response.status(405).json({error:"Method not allowed."});return;}try{const{service}=authenticatedTrustContext(request,context);const data=await service.summary();completeApiRequest(context,200);response.status(200).json({schemaVersion:"rdl-ai-trust/v1",generatedAt:new Date().toISOString(),...data});}catch(error){handleApiError(response,error,context);}}
