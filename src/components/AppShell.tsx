@@ -86,7 +86,7 @@ export function AppShell() {
           <RdlScopeSelector />
         </header>
 
-        <main className="main-content" style={{ height: "calc(100vh - var(--topbar-height))", minHeight: 0, overflowX: "hidden", overflowY: "auto", overscrollBehavior: "contain" }}><Outlet /></main>
+        <main className="main-content" tabIndex={0} style={{ height: "calc(100vh - var(--topbar-height))", minHeight: 0, overflowX: "hidden", overflowY: "auto", overscrollBehavior: "contain" }}><Outlet /></main>
       </div>
     </div>
   );

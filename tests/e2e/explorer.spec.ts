@@ -117,7 +117,7 @@ test("enterprise RDL hierarchy preserves immutable upstream and project pinning 
   await expect(page.getByRole("heading", { name: "Company RDL" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Asset RDL" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Project / CIS RDL" })).toBeVisible();
-  await expect(page.getByText(/does not auto-migrate/i)).toBeVisible();
+  await expect(page.locator('section[aria-labelledby="hierarchy-heading"]').getByText(/does not auto-migrate/i)).toBeVisible();
 });
 
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
