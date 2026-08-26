@@ -374,3 +374,8 @@ RDL Explorer shall provide a read-only enterprise control tower over the governe
 - **RDL-WQ-008 — Drill-through** — Every work item shall identify an application route for the authoritative governed workflow that owns the decision.
 - **RDL-WQ-009 — Fail closed** — Browser work-queue mode shall remain read-only demonstration when the API is unavailable, unauthorized, malformed or replaced by an SPA fallback response.
 - **RDL-WQ-010 — Self-contained acceptance** — Database acceptance tests shall create their own work-item fixture inside a transaction and shall not depend on pre-existing business data.
+
+
+## RDL-025 — AI-assisted Standards Intelligence
+
+RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state. Live enterprise evidence requires a trusted `rdl-ai-standards-analyst` identity. AI outputs cite evidence identifiers and cannot approve extensions, publish releases, approve/stage/activate migrations, or migrate projects/consumers. Advisory runs may be immutably audited without becoming governance decisions.

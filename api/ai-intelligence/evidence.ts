@@ -1,0 +1,4 @@
+import { beginApiRequest, completeApiRequest } from "../_runtime.ts";
+import { queryValue } from "../governance/_shared.ts";
+import { authenticatedAiContext, handleApiError, type ApiRequest, type ApiResponse } from "./_shared.ts";
+export default async function handler(request:ApiRequest,response:ApiResponse){const context=beginApiRequest(request,response,"ai_intelligence.evidence");if(request.method!=="GET"){completeApiRequest(context,405);response.status(405).json({error:"Method not allowed."});return;}try{const {identity,service}=authenticatedAiContext(request,context);const question=queryValue(request.query?.question);const result=await service.evidence(question,identity.reviewer);completeApiRequest(context,200,{evidenceCount:result.items.length,intent:result.intent});response.status(200).json({schemaVersion:"rdl-ai-evidence/v1",generatedAt:new Date().toISOString(),...result});}catch(error){handleApiError(response,error,context);}}

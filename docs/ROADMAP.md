@@ -113,3 +113,8 @@ Turn RDL-021 impact intelligence into governed adoption plans. Plans are tied to
 ## RDL-024 — Enterprise Notifications & Work Queue — Implementation sprint
 
 Adds a durable reviewer/approver work queue around the governed standards lifecycle. Work items support assignment, acknowledgement, start/completion, SLA/aging indicators, reminders, escalation and append-only operational history. Every item drills through to the workflow that owns the actual governance decision. The work queue never auto-approves, publishes, stages, activates or migrates governed state.
+
+
+## RDL-025 — AI-assisted Standards Intelligence
+
+RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state. Live enterprise evidence requires a trusted `rdl-ai-standards-analyst` identity. AI outputs cite evidence identifiers and cannot approve extensions, publish releases, approve/stage/activate migrations, or migrate projects/consumers. Advisory runs may be immutably audited without becoming governance decisions.

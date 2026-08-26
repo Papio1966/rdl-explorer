@@ -203,3 +203,8 @@ npm run db:test:rdl-024
 ```
 
 The acceptance test is self-contained: it creates its fixture inside a transaction and ends with `ROLLBACK`, so it does not require any pre-existing enterprise standards business data.
+
+
+## RDL-025 — AI-assisted Standards Intelligence
+
+RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state. Live enterprise evidence requires a trusted `rdl-ai-standards-analyst` identity. AI outputs cite evidence identifiers and cannot approve extensions, publish releases, approve/stage/activate migrations, or migrate projects/consumers. Advisory runs may be immutably audited without becoming governance decisions.

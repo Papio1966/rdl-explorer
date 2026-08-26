@@ -113,3 +113,8 @@ RDL-023 adds `/control-tower`, a read-only management view over standards govern
 ### Enterprise notifications & work queue
 
 RDL-024 adds `/work-queue`, a personal operational inbox for standards reviewers and approvers. Work items can be assigned, acknowledged, tracked against SLA/aging indicators, reminded and escalated, but every item drills through to the authoritative governed workflow for the actual decision. Live data remains behind the trusted signed identity boundary; otherwise the page is clearly labelled as demonstration data.
+
+
+## RDL-025 — AI-assisted Standards Intelligence
+
+RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state. Live enterprise evidence requires a trusted `rdl-ai-standards-analyst` identity. AI outputs cite evidence identifiers and cannot approve extensions, publish releases, approve/stage/activate migrations, or migrate projects/consumers. Advisory runs may be immutably audited without becoming governance decisions.

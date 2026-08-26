@@ -5,6 +5,7 @@ export const EXTENSION_REVIEWER_ROLE = "rdl-extension-reviewer";
 export const PACKAGE_CONSUMER_ROLE = "rdl-package-consumer";
 export const MIGRATION_APPROVER_ROLE = "rdl-migration-approver";
 export const WORK_QUEUE_COORDINATOR_ROLE = "rdl-work-queue-coordinator";
+export const AI_STANDARDS_ANALYST_ROLE = "rdl-ai-standards-analyst";
 const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
 export type GovernanceIdentity = {

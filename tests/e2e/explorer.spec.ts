@@ -220,6 +220,15 @@ test("enterprise work queue is fail-closed and preserves governed workflow owner
   await expect(page.getByText(/never auto-approve/i).first()).toBeVisible();
 });
 
+test("AI standards intelligence is fail-closed and evidence-backed", async ({ page }) => {
+  await page.goto("/ai-intelligence");
+  await expect(page.getByRole("heading", { name: "AI Standards Intelligence" })).toBeVisible();
+  await expect(page.getByText("Read-only demonstration mode", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Evidence" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Governance guardrails" })).toBeVisible();
+  await expect(page.getByText(/cannot approve extensions/i)).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 
