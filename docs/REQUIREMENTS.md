@@ -337,3 +337,14 @@ RDL-001 is complete when:
 - **RDL-IMPACT-008 — Immutable analysis** — Persisted release analyses shall be immutable and fingerprinted with SHA-256.
 - **RDL-IMPACT-009 — Fail-closed browser** — Live impact APIs shall require a trusted package-consumer identity; malformed or SPA fallback responses shall leave the browser in read-only demonstration mode.
 - **RDL-IMPACT-010 — Machine contract** — Release analysis shall expose the versioned `rdl-release-impact/v1` contract for downstream decision support.
+
+## RDL-022 — Migration planning and controlled adoption requirements
+
+- **RDL-MIG-001** — A migration plan shall identify an exact source release, target release, project/consumer subject, owner and rationale.
+- **RDL-MIG-002** — Impacted entities shall be translated into explicit remediation checklist actions with owner, due date, status and evidence.
+- **RDL-MIG-003** — Migration lifecycle shall be governed as draft → in review → approved → staged → activated, with rejected/cancelled terminal alternatives.
+- **RDL-MIG-004** — Staging shall be blocked until approval is recorded, readiness is `ready`, and all actions are completed or explicitly waived.
+- **RDL-MIG-005** — Activation shall be impossible before staging and shall require a trusted migration approver.
+- **RDL-MIG-006** — Migration transitions shall use optimistic version checks and append-only audit history.
+- **RDL-MIG-007** — Browser behavior shall fail closed on unavailable, unauthorized, malformed or non-JSON session responses.
+- **RDL-MIG-008** — Impact analysis remains advisory; RDL Explorer shall never auto-migrate a pinned project or auto-activate a downstream consumer.

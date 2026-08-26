@@ -3,7 +3,7 @@ import { ArrowRight, CheckCircle2, CircleHelp, FileJson, FileSpreadsheet, Mail, 
 import "./HelpPage.css";
 
 const PILOT_FEEDBACK_EMAIL = "alessandro@papioconsulting.eu";
-const sections = [["getting-started", "Getting started"], ["pilot", "Pilot status"], ["navigation", "Navigation & search"], ["classes", "Classes"], ["information", "Information"], ["reference", "Reference"], ["model", "Data Model"], ["validation", "Validation"], ["cis", "CIS Builder"], ["assistant", "AI Assistant"], ["cross-rdl", "Cross-RDL Intelligence"], ["workflows", "Common workflows"], ["feedback", "Feedback"]];
+const sections = [["getting-started", "Getting started"], ["pilot", "Pilot status"], ["navigation", "Navigation & search"], ["classes", "Classes"], ["information", "Information"], ["reference", "Reference"], ["model", "Data Model"], ["validation", "Validation"], ["cis", "CIS Builder"], ["assistant", "AI Assistant"], ["cross-rdl", "Cross-RDL Intelligence"], ["migration", "Migration Planning"], ["workflows", "Common workflows"], ["feedback", "Feedback"]];
 
 function GuideSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) { return <section className="guide-section" id={id}><h2>{title}</h2>{children}</section>; }
 
@@ -44,8 +44,10 @@ export function HelpPage() {
 
         <GuideSection id="cross-rdl" title="Cross-RDL Intelligence"><p>Use <Link to="/intelligence">Cross-RDL Intelligence</Link> to compare loaded RDLs, review deterministic candidate mappings and inspect structural overlap/gap indicators. Candidate mappings show provenance, confidence and status; they are not treated as authoritative equivalence.</p></GuideSection>
 
+        <GuideSection id="migration" title="Migration Planning"><p>Use <Link to="/impact">Release Impact</Link> to understand a source-to-target release delta, then <Link to="/migration">Migration Planning</Link> to turn that impact into an owned remediation checklist. A plan must prove readiness, pass an approval gate, stage the exact target release and then be explicitly activated. Publication and impact analysis never migrate a pinned project or consumer automatically.</p></GuideSection>
+
         <footer className="guide-footer"><span>Need context on the application itself?</span><Link to="/about">About RDL Explorer <ArrowRight size={15}/></Link></footer>
       </article>
-</div>
+    </div>
   );
 }

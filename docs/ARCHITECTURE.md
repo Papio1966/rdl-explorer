@@ -561,3 +561,7 @@ The same contract is the DataGate reference boundary: RDL Explorer announces; Da
 ## RDL-021 — Release change intelligence
 
 RDL-021 sits above immutable publication/distribution. It compares two exact `effective_standard_release` records, derives a deterministic semantic delta from their machine-consumable package payloads, assesses consumer states pinned to the source release, and emits `rdl-release-impact/v1`. Persisted analyses are immutable and SHA-256 fingerprinted. The impact engine is advisory: downstream staging, activation and project migration remain explicit consumer governance decisions.
+
+## RDL-022 — Migration planning and controlled adoption
+
+RDL-022 sits between release-impact intelligence and downstream activation. A `release_migration_plan` references two exact immutable releases and an adoption subject (`consumer` or `project`). `release_migration_action` records the remediation checklist, while `release_migration_history` is append-only audit evidence. PostgreSQL transition functions enforce optimistic concurrency, approval-before-staging, readiness and checklist completion before staging, and staged-before-activation. The browser is read-only without a valid `rdl-package-consumer` session; approval and activation require the trusted `rdl-migration-approver` role. No route can infer authentication from an SPA fallback because session clients require JSON content type and validate response shape.

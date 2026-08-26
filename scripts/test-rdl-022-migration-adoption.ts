@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";import fs from "node:fs";
+const read=(p:string)=>fs.readFileSync(new URL(`../${p}`,import.meta.url),"utf8");
+const migration=read("database/migrations/013_create_migration_planning_controlled_adoption.sql");const repo=read("server/rdl/MigrationPlanningRepository.ts");const service=read("server/rdl/MigrationPlanningService.ts");const browser=read("src/rdl/migrationPlanningService.ts");const page=read("src/pages/RdlMigrationPlanningPage.tsx");const app=read("src/App.tsx");const shell=read("src/components/AppShell.tsx");const e2e=read("tests/e2e/explorer.spec.ts");const a11y=read("tests/e2e/accessibility.spec.ts");
+assert.ok(migration.includes("release_migration_plan")&&migration.includes("release_migration_action")&&migration.includes("release_migration_history"));
+assert.ok(migration.includes("migration plan must be approved before staging")&&migration.includes("all migration actions must be completed or waived before staging")&&migration.includes("must be staged before activation"));
+assert.ok(migration.includes("append-only")&&migration.includes("expected_version"));
+assert.ok(repo.includes("transition_release_migration_plan")&&service.includes("expectedVersion"));
+assert.ok(browser.includes('content-type')&&browser.includes("validSession"),"Browser client must fail closed and validate session shape.");
+assert.ok(page.includes("Migration planning & controlled adoption")&&page.includes("Read-only migration demonstration")&&page.includes("Approval gate")&&page.includes("Explicit activation only"));
+assert.ok(app.includes('path="/migration"')&&shell.includes("Migration Planning"));
+assert.ok(e2e.includes("migration planning remains fail-closed and activation stays explicit"));
+assert.ok(a11y.includes('"/migration"'));
+console.log("PASS RDL-022 migration planning and controlled adoption contract");

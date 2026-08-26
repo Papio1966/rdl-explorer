@@ -1,0 +1,4 @@
+import { beginApiRequest, completeApiRequest } from "../_runtime.ts";
+import { queryValue } from "../governance/_shared.ts";
+import { authenticatedMigrationContext,handleApiError,type ApiRequest,type ApiResponse } from "./_shared.ts";
+export default async function handler(request:ApiRequest,response:ApiResponse){const context=beginApiRequest(request,response,"adoption.plans");if(request.method!=="GET"){completeApiRequest(context,405);response.status(405).json({error:"Method not allowed."});return;}try{const {identity,service}=authenticatedMigrationContext(request,context);const limit=Number(queryValue(request.query?.limit)||"100");const plans=await service.plans(identity.reviewer,limit);completeApiRequest(context,200,{consumer:identity.reviewer,planCount:plans.length});response.status(200).json({schemaVersion:"rdl-migration-plans/v1",plans});}catch(error){handleApiError(response,error,context);}}
