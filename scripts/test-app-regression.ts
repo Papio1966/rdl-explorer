@@ -119,6 +119,11 @@ const publicationBrowserService = read("src/rdl/effectivePublicationService.ts")
 const publicationRepository = read("server/rdl/EffectiveStandardPublicationRepository.ts");
 const publicationMigration = read("database/migrations/009_create_effective_standard_publication.sql");
 const rdl018Test = read("scripts/test-rdl-018-effective-publication.ts");
+const distributionPage = read("src/pages/RdlDistributionPage.tsx");
+const distributionBrowserService = read("src/rdl/packageDistributionService.ts");
+const distributionRepository = read("server/rdl/PublishedPackageDistributionRepository.ts");
+const distributionMigration = read("database/migrations/010_create_published_package_distribution.sql");
+const rdl019Test = read("scripts/test-rdl-019-package-distribution.ts");
 
 const routes = [
   "/classes/tag",
@@ -141,6 +146,7 @@ const routes = [
   "/governance",
   "/hierarchy",
   "/publication",
+  "/distribution",
 ];
 
 for (const route of routes) {
@@ -162,6 +168,7 @@ for (const label of [
   "Mapping Governance",
   "Enterprise RDL Hierarchy",
   "Effective Publication",
+  "Package Distribution",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
 }
@@ -320,6 +327,11 @@ assert.ok(publicationPage.includes("Effective standard comparison & publication"
 assert.ok(publicationBrowserService.includes("isPublicationSession") && publicationBrowserService.includes('contentType.includes("application/json")'), "RDL-018 browser session must validate shape and reject SPA fallback responses");
 assert.ok(publicationRepository.includes("rdl-effective-standard-package/v1") && publicationRepository.includes("sha256") && publicationMigration.includes("effective_standard_release"), "RDL-018 must build hashed machine-consumable immutable releases");
 assert.ok(rdl018Test.includes("effective standard comparison and publication contract"), "RDL-018 must provide a deterministic contract test");
+assert.ok(app.includes('path="/distribution"') && shell.includes("Package Distribution"), "RDL-019 distribution route must be discoverable");
+assert.ok(distributionPage.includes("Published package distribution & consumption") && distributionPage.includes("Read-only distribution demonstration") && distributionPage.includes("Consumers pin a release identifier"), "RDL-019 UX must expose fail-closed distribution and explicit release pinning");
+assert.ok(distributionBrowserService.includes("isSession") && distributionBrowserService.includes('contentType.includes("application/json")'), "RDL-019 consumer session must validate shape and reject SPA fallback responses");
+assert.ok(distributionRepository.includes("rdl-distribution-package/v1") && distributionRepository.includes("effectiveEntities") && distributionMigration.includes("superseded_by_release_id"), "RDL-019 must provide versioned consumer packages and lifecycle metadata");
+assert.ok(rdl019Test.includes("published package distribution and consumption contract"), "RDL-019 must provide a deterministic contract test");
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");
 assert.ok(shell.includes("GlobalRdlSearch") && shell.includes("RdlScopeSelector"), "RDL-009 global search and scope selector must be present in the application shell");

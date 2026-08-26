@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const GOVERNANCE_REVIEWER_ROLE = "rdl-mapping-reviewer";
 export const EXTENSION_REVIEWER_ROLE = "rdl-extension-reviewer";
+export const PACKAGE_CONSUMER_ROLE = "rdl-package-consumer";
 const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
 export type GovernanceIdentity = {

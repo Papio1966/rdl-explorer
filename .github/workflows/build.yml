@@ -35,6 +35,9 @@ jobs:
       - name: Run RDL-018 effective publication contract
         run: npm run test:rdl-018
 
+      - name: Run RDL-019 package distribution contract
+        run: npm run test:rdl-019
+
       - name: Run regression suite
         run: npm run test:regression
 

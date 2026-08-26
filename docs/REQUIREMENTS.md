@@ -302,3 +302,14 @@ RDL-001 is complete when:
 - **RDL-PUB-008** — Publication authority shall be derived only from the trusted signed governance identity boundary.
 - **RDL-PUB-009** — Browser publication UX shall remain read-only when the publication API is unavailable, unauthorized, malformed or replaced by an SPA fallback response.
 - **RDL-PUB-010** — Publication provenance shall be sufficient to reproduce and verify the effective standard without modifying upstream RDL packages or frozen project baselines.
+
+## RDL-019 — Published package distribution requirements
+
+- **RDL-DIST-001 — Stable consumer contract** — Published effective standards shall be exposed through a versioned distribution contract independent from internal database tables.
+- **RDL-DIST-002 — Release catalogue** — Consumers shall be able to discover exact immutable release identifiers, versions, lifecycle status and compatibility metadata.
+- **RDL-DIST-003 — Release pinning** — Consumers shall pin an explicit release; the platform shall not silently redirect a pinned consumer to “latest”.
+- **RDL-DIST-004 — Manifest and entities** — A consumer shall be able to retrieve the package manifest and effective entities for an exact release.
+- **RDL-DIST-005 — Integrity** — Distributed packages shall expose SHA-256-based integrity metadata and cache-safe ETag values.
+- **RDL-DIST-006 — Lifecycle metadata** — Deprecation and supersession shall be represented separately from immutable release content; supersession shall identify an explicit replacement release.
+- **RDL-DIST-007 — Consumer authorization** — Live distribution APIs shall fail closed without a trusted `rdl-package-consumer` identity.
+- **RDL-DIST-008 — No direct SQL coupling** — DataGate and other consumers shall use the distribution contract rather than RDL Explorer database tables.

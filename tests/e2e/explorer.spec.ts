@@ -145,6 +145,18 @@ test("effective standard publication remains fail-closed and comparison is inspe
   await expect(page.getByRole("button", { name: "Publish immutable package" })).toBeDisabled();
 });
 
+
+test("published package distribution remains fail-closed and release pinning is explicit", async ({ page }) => {
+  await page.goto("/distribution");
+  await expect(page.getByRole("heading", { name: "Published package distribution & consumption" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Consumption boundary" })).toBeVisible();
+  await expect(page.getByText("Read-only distribution demonstration", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Published release catalogue" })).toBeVisible();
+  await expect(page.getByText("project-alpha-effective · 1.0.0", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Deprecation and supersession" })).toBeVisible();
+  await expect(page.getByText(/Consumers pin a release identifier/i)).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 

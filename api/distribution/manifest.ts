@@ -1,0 +1,4 @@
+import { beginApiRequest, completeApiRequest } from "../_runtime.ts";
+import { queryValue } from "../governance/_shared.ts";
+import { authenticatedDistributionContext,handleApiError,type ApiRequest,type ApiResponse } from "./_shared.ts";
+export default async function handler(request:ApiRequest,response:ApiResponse){const context=beginApiRequest(request,response,"distribution.manifest");if(request.method!=="GET"){completeApiRequest(context,405);response.status(405).json({error:"Method not allowed."});return;}try{const {service}=authenticatedDistributionContext(request,context);const releaseId=Number(queryValue(request.query?.id));const manifest=await service.manifest(releaseId);if(!manifest)throw new Error("A valid releaseId is required.");response.setHeader?.("ETag",`\"sha256-${manifest.integrity.compositionSha256}\"`);completeApiRequest(context,200,{releaseId});response.status(200).json(manifest);}catch(error){handleApiError(response,error,context);}}

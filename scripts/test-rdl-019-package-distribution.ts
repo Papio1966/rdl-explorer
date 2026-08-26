@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";import {readFileSync} from "node:fs";const read=(p:string)=>readFileSync(p,"utf8");
+const migration=read("database/migrations/010_create_published_package_distribution.sql");const repo=read("server/rdl/PublishedPackageDistributionRepository.ts");const browser=read("src/rdl/packageDistributionService.ts");const page=read("src/pages/RdlDistributionPage.tsx");const api=read("api/distribution/package.ts");const auth=read("server/auth/GovernanceIdentity.ts");const e2e=read("tests/e2e/explorer.spec.ts");const a11y=read("tests/e2e/accessibility.spec.ts");const workflow=read(".github/workflows/build.yml");
+assert.ok(migration.includes("effective_standard_distribution")&&migration.includes("superseded_by_release_id")&&migration.includes("compatibility"),"RDL-019 must model consumer lifecycle separately from immutable release bytes");
+assert.ok(repo.includes("rdl-distribution-package/v1")&&repo.includes("effectiveEntities")&&repo.includes("sha256"),"RDL-019 must expose a verifiable effective-entity consumer package");
+assert.ok(browser.includes('contentType.includes("application/json")')&&browser.includes("isSession"),"RDL-019 browser must reject SPA/non-JSON fallback and validate consumer session shape");
+assert.ok(page.includes("Read-only distribution demonstration")&&page.includes("Consumers pin a release identifier")&&page.includes("rdl-package-consumer"),"RDL-019 UX must explain fail-closed consumption and release pinning");
+assert.ok(api.includes("Content-Disposition")&&api.includes("ETag"),"RDL-019 package download must expose immutable download and integrity headers");
+assert.ok(auth.includes('PACKAGE_CONSUMER_ROLE = "rdl-package-consumer"'),"RDL-019 must use a dedicated package consumer role");
+assert.ok(e2e.includes("published package distribution remains fail-closed")&&a11y.includes('"/distribution"'),"RDL-019 must have browser E2E and accessibility coverage");
+assert.ok(workflow.includes("test:rdl-019"),"RDL-019 contract must run in CI");
+console.log("PASS RDL-019 published package distribution and consumption contract");

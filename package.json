@@ -46,7 +46,9 @@
     "db:test:rdl-017": "bash scripts/db-test-rdl-017.sh",
     "test:rdl-017": "tsx scripts/test-rdl-017-extension-governance.ts",
     "db:test:rdl-018": "bash scripts/db-test-rdl-018.sh",
-    "test:rdl-018": "tsx scripts/test-rdl-018-effective-publication.ts"
+    "test:rdl-018": "tsx scripts/test-rdl-018-effective-publication.ts",
+    "db:test:rdl-019": "bash scripts/db-test-rdl-019.sh",
+    "test:rdl-019": "tsx scripts/test-rdl-019-package-distribution.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",
