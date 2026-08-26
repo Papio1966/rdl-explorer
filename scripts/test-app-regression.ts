@@ -177,6 +177,7 @@ const routes = [
   "/control-tower",
   "/work-queue",
   "/ai-intelligence",
+  "/ai-trust",
 ];
 
 for (const route of routes) {
@@ -386,6 +387,8 @@ assert.ok(controlTowerBrowserService.includes("validDashboard") && controlTowerB
 assert.ok(controlTowerRepository.includes("enterprise_standards_control_tower_kpi") && controlTowerMigration.includes("read-only") && controlTowerMigration.includes("enterprise_standards_governance_queue"), "RDL-023 must aggregate existing governed lifecycle state without creating a second system of record");
 assert.ok(rdl023Test.includes("enterprise standards dashboard and control tower contract"), "RDL-023 must provide a deterministic contract test");
 assert.ok(app.includes('path="/work-queue"') && shell.includes("My Work Queue"), "RDL-024 work queue route must be discoverable");
+assert.ok(app.includes('path="/ai-trust"') && shell.includes("AI Trust & Evaluation"), "RDL-026 AI trust route must be discoverable");
+
 assert.ok(workQueuePage.includes("Enterprise notifications & work queue") && workQueuePage.includes("Read-only work queue demonstration") && workQueuePage.includes("Personal inbox, not an approval engine"), "RDL-024 UX must expose fail-closed operational orchestration semantics");
 assert.ok(workQueueBrowserService.includes("validSession") && workQueueBrowserService.includes("validPayload") && workQueueBrowserService.includes("content-type"), "RDL-024 browser client must validate response/session shape and reject SPA fallback responses");
 assert.ok(workQueueRepository.includes("enterprise_work_queue_summary") && workQueueMigration.includes("enterprise_work_item_event") && workQueueMigration.includes("sla_state"), "RDL-024 must provide durable assignment history plus derived SLA/aging signals");

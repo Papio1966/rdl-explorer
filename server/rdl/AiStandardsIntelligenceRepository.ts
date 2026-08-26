@@ -85,12 +85,12 @@ export class AiStandardsIntelligenceRepository {
     return dedupe(evidence).slice(0, safeLimit);
   }
 
-  async recordAdvisory(input: { actor: string; intent: string; question: string; evidence: AiEvidenceItem[]; answer: string; model: string }) {
+  async recordAdvisory(input: { actor: string; intent: string; question: string; evidence: AiEvidenceItem[]; answer: string; model: string; promptVersion: string }) {
     const answerSha256 = createHash("sha256").update(input.answer, "utf8").digest("hex");
     const advisoryKey = `ai-${randomUUID()}`;
     const manifest = JSON.stringify({ schemaVersion: "rdl-ai-evidence/v1", items: input.evidence });
-    const rows = await this.client.query<any>(`INSERT INTO rdl.ai_advisory_run(advisory_key,actor_key,intent,question,evidence_manifest,answer_text,answer_sha256,model_key)
-      VALUES(${sqlLiteral(advisoryKey)},${sqlLiteral(input.actor)},${sqlLiteral(input.intent)},${sqlLiteral(input.question)},${sqlLiteral(manifest)}::jsonb,${sqlLiteral(input.answer)},${sqlLiteral(answerSha256)},${sqlLiteral(input.model)}) RETURNING ai_advisory_run_id,advisory_key,answer_sha256,created_at`);
+    const rows = await this.client.query<any>(`INSERT INTO rdl.ai_advisory_run(advisory_key,actor_key,intent,question,evidence_manifest,answer_text,answer_sha256,model_key,prompt_version)
+      VALUES(${sqlLiteral(advisoryKey)},${sqlLiteral(input.actor)},${sqlLiteral(input.intent)},${sqlLiteral(input.question)},${sqlLiteral(manifest)}::jsonb,${sqlLiteral(input.answer)},${sqlLiteral(answerSha256)},${sqlLiteral(input.model)},${sqlLiteral(input.promptVersion)}) RETURNING ai_advisory_run_id,advisory_key,answer_sha256,prompt_version,created_at`);
     return rows[0] ?? null;
   }
 }

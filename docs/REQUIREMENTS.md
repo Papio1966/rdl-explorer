@@ -379,3 +379,13 @@ RDL Explorer shall provide a read-only enterprise control tower over the governe
 ## RDL-025 — AI-assisted Standards Intelligence
 
 RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state. Live enterprise evidence requires a trusted `rdl-ai-standards-analyst` identity. AI outputs cite evidence identifiers and cannot approve extensions, publish releases, approve/stage/activate migrations, or migrate projects/consumers. Advisory runs may be immutably audited without becoming governance decisions.
+
+## RDL-026 — AI Evaluation, Feedback & Trust Controls
+
+- Users must be able to classify an advisory AI answer as helpful, incorrect or incomplete.
+- Feedback must be append-only and tied to an immutable advisory run.
+- Evaluation datasets must be versioned so the same quality cases can be rerun across prompt/model versions.
+- Evaluation results must record groundedness, evidence coverage, unsupported claims and an explicit pass/review/fail verdict.
+- Prompt and model versions must be observable for every newly recorded advisory run.
+- Browser trust telemetry must fail closed on unavailable, unauthorized, malformed, non-JSON or SPA-fallback responses.
+- Trust metrics must never automatically promote a model/prompt or execute a standards-governance action.

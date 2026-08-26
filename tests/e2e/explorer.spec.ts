@@ -229,6 +229,16 @@ test("AI standards intelligence is fail-closed and evidence-backed", async ({ pa
   await expect(page.getByText(/cannot approve extensions/i)).toBeVisible();
 });
 
+test("AI trust and evaluation is fail-closed and measurable", async ({ page }) => {
+  await page.goto("/ai-trust");
+  await expect(page.getByRole("heading", { name: "AI trust & evaluation" })).toBeVisible();
+  await expect(page.getByText("Read-only trust demonstration", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Trust metrics" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Evaluation regression" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Trust-control principles" })).toBeVisible();
+  await expect(page.getByText(/No automatic promotion/i)).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 
