@@ -169,6 +169,17 @@ test("consumer integration remains fail-closed and activation is explicit", asyn
   await expect(page.getByRole("heading", { name: "Idempotent pull contract" })).toBeVisible();
 });
 
+test("release impact analysis remains advisory and explains breaking changes", async ({ page }) => {
+  await page.goto("/impact");
+  await expect(page.getByRole("heading", { name: "Release change intelligence & impact analysis" })).toBeVisible();
+  await expect(page.getByText("Read-only impact demonstration", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Semantic release delta" })).toBeVisible();
+  await expect(page.getByText("Potentially breaking", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Breaking", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Breaking", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("heading", { name: "Migration decision support" })).toBeVisible();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 
