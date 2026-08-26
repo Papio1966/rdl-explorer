@@ -114,6 +114,11 @@ const enterpriseHierarchyMigration = read("database/migrations/007_create_enterp
 const enterpriseHierarchyRepository = read("server/rdl/EnterpriseRdlHierarchyRepository.ts");
 const enterpriseHierarchyPage = read("src/pages/RdlHierarchyPage.tsx");
 const rdl016Test = read("database/sql/test_rdl_016_enterprise_hierarchy.sql");
+const publicationPage = read("src/pages/RdlPublicationPage.tsx");
+const publicationBrowserService = read("src/rdl/effectivePublicationService.ts");
+const publicationRepository = read("server/rdl/EffectiveStandardPublicationRepository.ts");
+const publicationMigration = read("database/migrations/009_create_effective_standard_publication.sql");
+const rdl018Test = read("scripts/test-rdl-018-effective-publication.ts");
 
 const routes = [
   "/classes/tag",
@@ -135,6 +140,7 @@ const routes = [
   "/intelligence",
   "/governance",
   "/hierarchy",
+  "/publication",
 ];
 
 for (const route of routes) {
@@ -155,6 +161,7 @@ for (const label of [
   "Cross-RDL Intelligence",
   "Mapping Governance",
   "Enterprise RDL Hierarchy",
+  "Effective Publication",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
 }
@@ -308,6 +315,11 @@ assert.ok(requirements.includes("RDL-OPS-001") && requirements.includes("RDL-OPS
 assert.ok(app.includes('path="/extensions"') && shell.includes("Extension Governance"), "RDL-017 extension governance route must be discoverable");
 assert.ok(extensionsPage.includes("Extension authoring & governance") && extensionsPage.includes("Effective preview") && extensionsPage.includes("Read-only demonstration mode"), "RDL-017 UX must expose governed extension authoring and honest read-only fallback");
 assert.ok(extensionService.includes("Extension conflict must be resolved before approval") && extensionMigration.includes("context_extension_review_event") && extensionMigration.includes("review_version"), "RDL-017 must enforce conflicts, audit history and optimistic versioning");
+assert.ok(app.includes('path="/publication"') && shell.includes("Effective Publication"), "RDL-018 publication route must be discoverable");
+assert.ok(publicationPage.includes("Effective standard comparison & publication") && publicationPage.includes("Read-only demonstration mode") && publicationPage.includes("Publish immutable package"), "RDL-018 UX must expose comparison, fail-closed mode and immutable publication");
+assert.ok(publicationBrowserService.includes("isPublicationSession") && publicationBrowserService.includes('contentType.includes("application/json")'), "RDL-018 browser session must validate shape and reject SPA fallback responses");
+assert.ok(publicationRepository.includes("rdl-effective-standard-package/v1") && publicationRepository.includes("sha256") && publicationMigration.includes("effective_standard_release"), "RDL-018 must build hashed machine-consumable immutable releases");
+assert.ok(rdl018Test.includes("effective standard comparison and publication contract"), "RDL-018 must provide a deterministic contract test");
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");
 assert.ok(shell.includes("GlobalRdlSearch") && shell.includes("RdlScopeSelector"), "RDL-009 global search and scope selector must be present in the application shell");

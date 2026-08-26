@@ -80,3 +80,7 @@ After the core multi-RDL platform is proven:
 
 ### RDL-017 — Enterprise Extension Authoring & Governance — Complete
 Adds enterprise extension drafting, authenticated submit/review decisions, conflict detection, effective preview, append-only audit history, optimistic concurrency and read-only demonstration UX.
+
+## RDL-018 — Effective Standard Comparison & Publication ✅
+
+Delivered parent-versus-effective comparison, change-impact filtering, immutable versioned effective-standard releases, SHA-256 package verification, machine-consumable JSON package download, release provenance, fail-closed publication authorization and browser/accessibility regression coverage. This establishes the publishable standards contract that can later be consumed by DataGate without direct database coupling.

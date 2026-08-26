@@ -133,6 +133,18 @@ test("enterprise extension authoring remains governed and previewable", async ({
   await expect(page.getByText(/inherited upstream package remains unchanged/i)).toBeVisible();
 });
 
+
+test("effective standard publication remains fail-closed and comparison is inspectable", async ({ page }) => {
+  await page.goto("/publication");
+  await expect(page.getByRole("heading", { name: "Effective standard comparison & publication" })).toBeVisible();
+  await expect(page.getByText("Publication boundary")).toBeVisible();
+  await expect(page.getByText("Read-only demonstration mode")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Change impact" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Parent vs proposed effective standard" })).toBeVisible();
+  await expect(page.getByText("Vacuum toilet")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Publish immutable package" })).toBeDisabled();
+});
+
 test("class detail pages provide contents navigation and progressive disclosure", async ({ page }) => {
   await page.goto("/classes/tag/CFIHOS-30000521");
 

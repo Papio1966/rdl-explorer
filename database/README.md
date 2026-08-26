@@ -161,3 +161,7 @@ Migration `007_create_enterprise_rdl_hierarchy.sql` adds Company, Asset and Proj
 
 ### Migration 008 — RDL-017 enterprise extension authoring
 Adds extension draft/review lifecycle fields, append-only review events, optimistic governance transitions, conflict detection and extension governance queue view. Run `npm run db:migrate` then `npm run db:test:rdl-017`.
+
+### RDL-018 effective publication
+
+Migration `009_create_effective_standard_publication.sql` adds immutable `rdl.effective_standard_release` records. Each release stores its comparison summary, exact package manifest, machine-consumable payload, publisher identity and SHA-256 composition fingerprint. Run `npm run db:test:rdl-018` after migration to validate immutability and release-summary behavior.
