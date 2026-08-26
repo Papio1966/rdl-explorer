@@ -178,6 +178,7 @@ const routes = [
   "/work-queue",
   "/ai-intelligence",
   "/ai-trust",
+  "/identity-admin",
 ];
 
 for (const route of routes) {
@@ -203,6 +204,7 @@ for (const label of [
   "Consumer Integration",
   "Migration Planning",
   "My Work Queue",
+  "Identity & Access",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
 }

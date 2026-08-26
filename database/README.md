@@ -212,3 +212,7 @@ RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state.
 ## RDL-026 — AI Evaluation, Feedback & Trust Controls
 
 Migration `017_create_ai_evaluation_feedback_trust_controls.sql` adds append-only `rdl.ai_feedback`, versioned `rdl.ai_evaluation_case`, immutable `rdl.ai_evaluation_result`, prompt-version tracking on `rdl.ai_advisory_run`, and read-only trust metric projections. Run `npm run db:test:rdl-026` after migration; the acceptance test is self-contained and rolls back its fixture transaction.
+
+## RDL-027 enterprise identity and role administration
+
+Migration `018_create_enterprise_identity_role_administration.sql` adds normalized enterprise users, direct role assignments, group-to-role mappings, an append-only identity audit trail, and the `rdl.enterprise_identity_directory` read projection. Run `npm run db:test:rdl-027` after migration. The acceptance test creates all required business fixtures inside its own transaction and ends with `ROLLBACK`.

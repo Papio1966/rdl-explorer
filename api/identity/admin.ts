@@ -1,0 +1,3 @@
+import { beginApiRequest,completeApiRequest } from "../_runtime.ts";
+import { handleIdentityError,identityAdminContext,type ApiRequest,type ApiResponse } from "./_shared.ts";
+export default async function handler(request:ApiRequest,response:ApiResponse){const context=beginApiRequest(request,response,"identity.admin");if(request.method!=="GET"){completeApiRequest(context,405);response.status(405).json({error:"Method not allowed."});return}try{const{identity,service,session}=await identityAdminContext(request);const data=await service.adminSummary(identity,session.roles);completeApiRequest(context,200,{subject:session.subject});response.status(200).json(data)}catch(error){handleIdentityError(response,error)}}
