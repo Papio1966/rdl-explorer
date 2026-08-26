@@ -165,3 +165,7 @@ Adds extension draft/review lifecycle fields, append-only review events, optimis
 ### RDL-018 effective publication
 
 Migration `009_create_effective_standard_publication.sql` adds immutable `rdl.effective_standard_release` records. Each release stores its comparison summary, exact package manifest, machine-consumable payload, publisher identity and SHA-256 composition fingerprint. Run `npm run db:test:rdl-018` after migration to validate immutability and release-summary behavior.
+
+### RDL-019 distribution model
+
+Migration `010_create_published_package_distribution.sql` adds consumer-facing lifecycle and compatibility metadata for immutable effective-standard releases. Run `npm run db:test:rdl-019` after migration. The distribution API must be used by downstream systems; internal RDL tables are not a supported integration contract.

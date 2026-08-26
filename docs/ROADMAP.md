@@ -84,3 +84,7 @@ Adds enterprise extension drafting, authenticated submit/review decisions, confl
 ## RDL-018 — Effective Standard Comparison & Publication ✅
 
 Delivered parent-versus-effective comparison, change-impact filtering, immutable versioned effective-standard releases, SHA-256 package verification, machine-consumable JSON package download, release provenance, fail-closed publication authorization and browser/accessibility regression coverage. This establishes the publishable standards contract that can later be consumed by DataGate without direct database coupling.
+
+## RDL-019 — Published Package Distribution & Consumption API ✅
+
+Provides a stable, versioned consumption boundary for immutable effective-standard releases. Adds a release catalogue, manifest, effective-entity retrieval, downloadable `rdl-distribution-package/v1` package, SHA-256/ETag integrity metadata, explicit consumer compatibility, release pinning, and separate deprecation/supersession metadata. Consumer access uses a dedicated trusted `rdl-package-consumer` role and never requires direct SQL access.

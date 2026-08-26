@@ -522,3 +522,11 @@ RDL-017 also exposes governed upward promotion (`Project → Asset`, `Asset → 
 RDL-018 completes the governed path from enterprise extension authoring to immutable effective-standard publication. The publication service composes the selected enterprise context lineage, exact package pins and approved/retired extension records into a versioned `rdl-effective-standard-package/v1` artifact. Publication is fail-closed when unresolved draft/candidate/in-review extensions remain. The canonical manifest and payload are hashed with SHA-256 and persisted in `rdl.effective_standard_release`; published rows are immutable. The browser never treats an HTML SPA fallback or malformed session payload as authenticated publication authority.
 
 The publication API is deliberately server-side and uses the same signed `rdl-extension-reviewer` trust boundary as extension governance. `/api/publications/compare` provides parent-versus-effective impact, `/api/publications/publish` creates an immutable release, and `/api/publications/package` returns the machine-consumable JSON package with its composition hash. DataGate integration remains outside this sprint; the package contract is the future integration boundary.
+
+## RDL-019 — Published package distribution boundary
+
+RDL-019 separates immutable publication from downstream distribution. `rdl.effective_standard_release` remains immutable. Consumer lifecycle metadata is stored separately in `rdl.effective_standard_distribution`, allowing a release to be marked active, deprecated or superseded without rewriting its package bytes or composition fingerprint.
+
+The read-only distribution API is authenticated through the trusted gateway/BFF using the dedicated `rdl-package-consumer` role. It exposes a catalogue, manifest, filtered effective entities and an immutable `rdl-distribution-package/v1` JSON package. Browser clients reject non-JSON/SPA fallback responses and remain in an explicitly labelled demonstration mode when no valid consumer session exists.
+
+Consumers must pin an exact release ID/version. “Latest” is discovery metadata only and must never silently migrate a consumer. A superseding release is an explicit new immutable release. This is the intended future DataGate integration boundary: discover → review → pin → retrieve → verify → activate, with no direct SQL coupling.
