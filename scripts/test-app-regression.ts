@@ -124,6 +124,11 @@ const distributionBrowserService = read("src/rdl/packageDistributionService.ts")
 const distributionRepository = read("server/rdl/PublishedPackageDistributionRepository.ts");
 const distributionMigration = read("database/migrations/010_create_published_package_distribution.sql");
 const rdl019Test = read("scripts/test-rdl-019-package-distribution.ts");
+const integrationPage = read("src/pages/RdlConsumerIntegrationPage.tsx");
+const integrationBrowserService = read("src/rdl/consumerIntegrationService.ts");
+const integrationRepository = read("server/rdl/ConsumerIntegrationRepository.ts");
+const integrationMigration = read("database/migrations/011_create_consumer_integration_notification.sql");
+const rdl020Test = read("scripts/test-rdl-020-consumer-integration.ts");
 
 const routes = [
   "/classes/tag",
@@ -147,6 +152,7 @@ const routes = [
   "/hierarchy",
   "/publication",
   "/distribution",
+  "/integration",
 ];
 
 for (const route of routes) {
@@ -169,6 +175,7 @@ for (const label of [
   "Enterprise RDL Hierarchy",
   "Effective Publication",
   "Package Distribution",
+  "Consumer Integration",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
 }
@@ -332,6 +339,11 @@ assert.ok(distributionPage.includes("Published package distribution & consumptio
 assert.ok(distributionBrowserService.includes("isSession") && distributionBrowserService.includes('contentType.includes("application/json")'), "RDL-019 consumer session must validate shape and reject SPA fallback responses");
 assert.ok(distributionRepository.includes("rdl-distribution-package/v1") && distributionRepository.includes("effectiveEntities") && distributionMigration.includes("superseded_by_release_id"), "RDL-019 must provide versioned consumer packages and lifecycle metadata");
 assert.ok(rdl019Test.includes("published package distribution and consumption contract"), "RDL-019 must provide a deterministic contract test");
+assert.ok(app.includes('path="/integration"') && shell.includes("Consumer Integration"), "RDL-020 consumer integration route must be discoverable");
+assert.ok(integrationPage.includes("Consumer integration & change notification") && integrationPage.includes("Read-only integration demonstration") && integrationPage.includes("Notify, pull, stage, activate"), "RDL-020 UX must expose fail-closed notify/pull/stage/activate semantics");
+assert.ok(integrationBrowserService.includes("isSession") && integrationBrowserService.includes('contentType.includes("application/json")'), "RDL-020 consumer session must validate shape and reject SPA fallback responses");
+assert.ok(integrationRepository.includes("consumer_pull_receipt") && integrationMigration.includes("release must be staged before activation") && integrationMigration.includes("enqueue_release_notifications"), "RDL-020 must provide idempotent notification/pull and explicit activation state");
+assert.ok(rdl020Test.includes("consumer integration contract and change notification"), "RDL-020 must provide a deterministic contract test");
 assert.ok(shell.includes("pilot-badge"), "Pilot status badge is missing from the application shell");
 assert.ok(shell.includes("CFIHOS 2.0 + 2 candidate extensions"), "Loaded multi-RDL provenance summary is missing from the shell");
 assert.ok(shell.includes("GlobalRdlSearch") && shell.includes("RdlScopeSelector"), "RDL-009 global search and scope selector must be present in the application shell");

@@ -38,6 +38,9 @@ jobs:
       - name: Run RDL-019 package distribution contract
         run: npm run test:rdl-019
 
+      - name: Run RDL-020 consumer integration contract
+        run: npm run test:rdl-020
+
       - name: Run regression suite
         run: npm run test:regression
 
