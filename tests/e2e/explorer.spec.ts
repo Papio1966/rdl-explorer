@@ -479,5 +479,7 @@ test("RDL releases remain isolated and version selectable", async ({ page }) => 
 
   await page.getByRole("heading", { name: "reverse-osmosis system tag", exact: true }).click();
   await expect(page).toHaveURL(/\/rdl\/water-desalination\/water-desalination-2\.0-candidate\/tag_class\/WATERRDL-31000012/);
-  await expect(page.getByText("2.0 candidate · candidate", { exact: true })).toBeVisible();
+  await expect(
+    page.getByLabel("Release", { exact: true }).locator("option:checked"),
+  ).toHaveText("2.0 candidate · candidate");
 });
