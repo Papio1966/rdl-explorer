@@ -6,6 +6,7 @@ import {
   Routes,
 } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
+import { RdlLegacyEntityRedirect } from "./components/RdlLegacyEntityRedirect";
 import { RdlScopedLegacyGuard } from "./components/RdlScopedLegacyGuard";
 import { RdlScopeProvider } from "./rdl/RdlScopeContext";
 
@@ -111,21 +112,21 @@ export default function App() {
             <Route path="/inspect/documents" element={<DocumentSchemaInspectionPage />} />
             <Route path="/inspect/standards" element={<SourceStandardsInspectionPage />} />
             <Route path="/classes/tag" element={<RdlScopedLegacyGuard entityType="tag_class" title="Tag Classes"><TagClassesPage /></RdlScopedLegacyGuard>} />
-            <Route path="/classes/tag/:tagClassId" element={<RdlScopedLegacyGuard entityType="tag_class" title="Tag Classes" detailParam="tagClassId"><TagClassesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/classes/tag/:tagClassId" element={<RdlLegacyEntityRedirect entityType="tag_class" paramName="tagClassId" />} />
             <Route path="/classes/equipment" element={<RdlScopedLegacyGuard entityType="equipment_class" title="Equipment Classes"><EquipmentClassesPage /></RdlScopedLegacyGuard>} />
-            <Route path="/classes/equipment/:equipmentClassId" element={<RdlScopedLegacyGuard entityType="equipment_class" title="Equipment Classes" detailParam="equipmentClassId"><EquipmentClassesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/classes/equipment/:equipmentClassId" element={<RdlLegacyEntityRedirect entityType="equipment_class" paramName="equipmentClassId" />} />
             <Route path="/documents" element={<RdlScopedLegacyGuard entityType="document_type" title="Document Types"><DocumentTypesPage /></RdlScopedLegacyGuard>} />
-            <Route path="/documents/:documentTypeId" element={<RdlScopedLegacyGuard entityType="document_type" title="Document Types" detailParam="documentTypeId"><DocumentTypesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/documents/:documentTypeId" element={<RdlLegacyEntityRedirect entityType="document_type" paramName="documentTypeId" />} />
             <Route path="/disciplines" element={<RdlScopedLegacyGuard entityType="discipline" title="Disciplines"><DisciplinesPage /></RdlScopedLegacyGuard>} />
-            <Route path="/disciplines/:disciplineId" element={<RdlScopedLegacyGuard entityType="discipline" title="Disciplines" detailParam="disciplineId"><DisciplinesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/disciplines/:disciplineId" element={<RdlLegacyEntityRedirect entityType="discipline" paramName="disciplineId" />} />
             <Route path="/lifecycle" element={<Navigate to="/lifecycle/detailed-engineering" replace />} />
             <Route path="/lifecycle/:lifecyclePhase" element={<RdlScopedLegacyGuard title="Lifecycle Requirements" specialized><LifecycleRequirementsPage /></RdlScopedLegacyGuard>} />
             <Route path="/dictionary" element={<RdlScopedLegacyGuard entityType="property" title="Data Dictionary"><DataDictionaryPage /></RdlScopedLegacyGuard>} />
-            <Route path="/dictionary/:propertyId" element={<RdlScopedLegacyGuard entityType="property" title="Data Dictionary" detailParam="propertyId"><DataDictionaryPage /></RdlScopedLegacyGuard>} />
+            <Route path="/dictionary/:propertyId" element={<RdlLegacyEntityRedirect entityType="property" paramName="propertyId" />} />
             <Route path="/standards" element={<RdlScopedLegacyGuard entityType="source_standard" title="Source Standards"><SourceStandardsPage /></RdlScopedLegacyGuard>} />
-            <Route path="/standards/:sourceStandardId" element={<RdlScopedLegacyGuard entityType="source_standard" title="Source Standards" detailParam="sourceStandardId"><SourceStandardsPage /></RdlScopedLegacyGuard>} />
+            <Route path="/standards/:sourceStandardId" element={<RdlLegacyEntityRedirect entityType="source_standard" paramName="sourceStandardId" />} />
             <Route path="/units" element={<RdlScopedLegacyGuard entityType="unit_of_measure" title="Units of Measure"><UnitsOfMeasurePage /></RdlScopedLegacyGuard>} />
-            <Route path="/units/:unitId" element={<RdlScopedLegacyGuard entityType="unit_of_measure" title="Units of Measure" detailParam="unitId"><UnitsOfMeasurePage /></RdlScopedLegacyGuard>} />
+            <Route path="/units/:unitId" element={<RdlLegacyEntityRedirect entityType="unit_of_measure" paramName="unitId" />} />
             <Route path="/model" element={<RdlScopedLegacyGuard title="Data Model" specialized><DataModelPage /></RdlScopedLegacyGuard>} />
             <Route path="/validation" element={<ValidationPage />} />
             <Route path="/assistant" element={<AssistantPage />} />
