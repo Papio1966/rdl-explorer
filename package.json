@@ -66,7 +66,14 @@
     "db:test:rdl-027": "bash scripts/db-test-rdl-027.sh",
     "test:rdl-027": "tsx scripts/test-rdl-027-enterprise-identity.ts",
     "db:test:rdl-028": "bash scripts/db-test-rdl-028.sh",
-    "test:rdl-028": "tsx scripts/test-rdl-028-tenant-isolation.ts"
+    "test:rdl-028": "tsx scripts/test-rdl-028-tenant-isolation.ts",
+    "test:rdl-029": "tsx scripts/test-rdl-029-ui-scope-integrity.ts",
+    "test:rdl-030": "tsx scripts/test-rdl-030-source-upgrade-versioning.ts",
+    "db:ingest:rdl-030": "bash scripts/db-ingest-rdl-030.sh",
+    "db:finalize:rdl-030": "bash scripts/db-finalize-rdl-030.sh",
+    "db:test:rdl-030": "bash scripts/db-test-rdl-030.sh",
+    "db:ingest:ccus:v2": "bash scripts/db-ingest-ccus-v2.sh",
+    "db:ingest:water-desalination:v2": "bash scripts/db-ingest-water-desalination-v2.sh"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",

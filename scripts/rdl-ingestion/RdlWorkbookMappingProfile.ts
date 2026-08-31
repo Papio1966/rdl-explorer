@@ -12,6 +12,10 @@ export type RdlWorkbookMappingProfile = {
   releaseStatus: "candidate" | "published";
   workbookPath: string;
   sourceUri: string;
+  identityAudit?: {
+    fromReleaseKey: string;
+    auditPath: string;
+  };
   sheetNames: Record<string, string>;
   fields: FieldAliases;
 };

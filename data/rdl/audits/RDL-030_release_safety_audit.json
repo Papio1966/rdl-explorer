@@ -1,0 +1,340 @@
+{
+  "build": {
+    "CCUS": {
+      "changed_cells": 2095,
+      "changed_by_sheet": {
+        "Guidance": 12,
+        "RDL master object": 481,
+        "property": 3,
+        "property picklist values": 214,
+        "property groupings": 36,
+        "source standard": 12,
+        "Jip33 info required spec": 34,
+        "document required per class": 75,
+        "tag or equip class src standard": 288,
+        "tag equip class prop src std": 938,
+        "unit of measure": 2
+      },
+      "master_rows_added": 2
+    },
+    "Water": {
+      "changed_cells": 721,
+      "changed_by_sheet": {
+        "Guidance": 16,
+        "RDL master object": 16,
+        "property picklist values": 123,
+        "property groupings": 63,
+        "source standard": 16,
+        "Jip33 info required spec": 43,
+        "document required per class": 37,
+        "tag or equip class src standard": 81,
+        "tag equip class prop src std": 326
+      },
+      "master_rows_added": 2
+    }
+  },
+  "continuity": {
+    "CCUS": {
+      "entities": {
+        "equipment class": {
+          "old": 45,
+          "new": 61,
+          "retained": 45,
+          "added": 16,
+          "removed": 0
+        },
+        "tag class": {
+          "old": 11,
+          "new": 18,
+          "retained": 11,
+          "added": 7,
+          "removed": 0
+        },
+        "property": {
+          "old": 55,
+          "new": 96,
+          "retained": 55,
+          "added": 41,
+          "removed": 0
+        },
+        "document type": {
+          "old": 30,
+          "new": 42,
+          "retained": 30,
+          "added": 12,
+          "removed": 0
+        }
+      },
+      "relationships": {
+        "equipment -> property": {
+          "old": 148,
+          "new": 330,
+          "retained": 148,
+          "added": 182,
+          "removed": 0
+        },
+        "tag -> property": {
+          "old": 18,
+          "new": 139,
+          "retained": 18,
+          "added": 121,
+          "removed": 0
+        },
+        "tag -> equipment": {
+          "old": 27,
+          "new": 69,
+          "retained": 27,
+          "added": 42,
+          "removed": 0
+        },
+        "class -> required document": {
+          "old": 30,
+          "new": 95,
+          "retained": 30,
+          "added": 65,
+          "removed": 0
+        }
+      }
+    },
+    "Water": {
+      "entities": {
+        "equipment class": {
+          "old": 50,
+          "new": 50,
+          "retained": 50,
+          "added": 0,
+          "removed": 0
+        },
+        "tag class": {
+          "old": 30,
+          "new": 31,
+          "retained": 30,
+          "added": 1,
+          "removed": 0
+        },
+        "property": {
+          "old": 49,
+          "new": 63,
+          "retained": 49,
+          "added": 14,
+          "removed": 0
+        },
+        "document type": {
+          "old": 28,
+          "new": 28,
+          "retained": 28,
+          "added": 0,
+          "removed": 0
+        }
+      },
+      "relationships": {
+        "equipment -> property": {
+          "old": 144,
+          "new": 193,
+          "retained": 144,
+          "added": 49,
+          "removed": 0
+        },
+        "tag -> property": {
+          "old": 99,
+          "new": 133,
+          "retained": 99,
+          "added": 34,
+          "removed": 0
+        },
+        "tag -> equipment": {
+          "old": 47,
+          "new": 51,
+          "retained": 47,
+          "added": 4,
+          "removed": 0
+        },
+        "class -> required document": {
+          "old": 37,
+          "new": 37,
+          "retained": 37,
+          "added": 0,
+          "removed": 0
+        }
+      }
+    }
+  },
+  "verification": {
+    "CCUS": {
+      "sheet_count": 23,
+      "sheet_names": [
+        "Cover and Index",
+        "Guidance",
+        "RDL master object",
+        "data dictionary",
+        "CFIHOS object equivalent mappin",
+        "discipline",
+        "document type",
+        "discipline document type",
+        "equipment class",
+        "equipment class property",
+        "handover event",
+        "property",
+        "property picklist values",
+        "property groupings",
+        "source standard",
+        "Jip33 info required spec",
+        "document required per class",
+        "tag class",
+        "tag class property",
+        "tag equipment class relationshi",
+        "tag or equip class src standard",
+        "tag equip class prop src std",
+        "unit of measure"
+      ],
+      "source_standard_count": 18,
+      "shared_source_ids": [
+        "CCUSRDL-90000001",
+        "CCUSRDL-90000002",
+        "CCUSRDL-90000003",
+        "CCUSRDL-90000004",
+        "CCUSRDL-90000005",
+        "CCUSRDL-90000006",
+        "CCUSRDL-90000007",
+        "CCUSRDL-90000008",
+        "CCUSRDL-90000009",
+        "CCUSRDL-90000010",
+        "CCUSRDL-90000011"
+      ],
+      "expected_shared_source_ids": [
+        "CCUSRDL-90000001",
+        "CCUSRDL-90000002",
+        "CCUSRDL-90000003",
+        "CCUSRDL-90000004",
+        "CCUSRDL-90000005",
+        "CCUSRDL-90000006",
+        "CCUSRDL-90000007",
+        "CCUSRDL-90000008",
+        "CCUSRDL-90000009",
+        "CCUSRDL-90000010",
+        "CCUSRDL-90000011"
+      ],
+      "shared_id_set_matches_expectation": true,
+      "missing_source_references": [],
+      "required_dimensions_registered": [
+        "CCUSRDL-45000021",
+        "CCUSRDL-45000022"
+      ],
+      "all_required_dimensions_registered": true,
+      "duplicate_ids": {},
+      "source_identity_checks": {
+        "CCUSRDL-90000008": "API RP 1176",
+        "CCUSRDL-90000009": "API RP 1175",
+        "CCUSRDL-90000010": "ASME B31.4 / ASME B31.8",
+        "CCUSRDL-90000011": "CCUS RDL Extension v2.0 Candidate"
+      }
+    },
+    "Water": {
+      "sheet_count": 23,
+      "sheet_names": [
+        "Cover and Index",
+        "Guidance",
+        "RDL master object",
+        "data dictionary",
+        "CFIHOS object equivalent mappin",
+        "discipline",
+        "document type",
+        "discipline document type",
+        "equipment class",
+        "equipment class property",
+        "handover event",
+        "property",
+        "property picklist values",
+        "property groupings",
+        "source standard",
+        "Jip33 info required spec",
+        "document required per class",
+        "tag class",
+        "tag class property",
+        "tag equipment class relationshi",
+        "tag or equip class src standard",
+        "tag equip class prop src std",
+        "unit of measure"
+      ],
+      "source_standard_count": 18,
+      "shared_source_ids": [
+        "WATERRDL-90000001",
+        "WATERRDL-90000002",
+        "WATERRDL-90000004",
+        "WATERRDL-90000008",
+        "WATERRDL-90000010"
+      ],
+      "expected_shared_source_ids": [
+        "WATERRDL-90000001",
+        "WATERRDL-90000002",
+        "WATERRDL-90000004",
+        "WATERRDL-90000008",
+        "WATERRDL-90000010"
+      ],
+      "shared_id_set_matches_expectation": true,
+      "missing_source_references": [],
+      "required_dimensions_registered": [
+        "WATERRDL-45000001",
+        "WATERRDL-45000002"
+      ],
+      "all_required_dimensions_registered": true,
+      "duplicate_ids": {},
+      "source_identity_checks": {
+        "WATERRDL-90000001": "ISO 24516-2:2019",
+        "WATERRDL-90000002": "ISO 24516-4:2019",
+        "WATERRDL-90000004": "WHO Guidelines for Drinking-water Quality",
+        "WATERRDL-90000008": "NSF/ANSI/CAN 61-2023",
+        "WATERRDL-90000010": "Water & Desalination RDL Extension v2.0 Candidate"
+      }
+    }
+  },
+  "source_remaps": {
+    "CCUS": {
+      "CCUSRDL-90000001": "CCUSRDL-90000001",
+      "CCUSRDL-90000002": "CCUSRDL-90000002",
+      "CCUSRDL-90000003": "CCUSRDL-90000003",
+      "CCUSRDL-90000004": "CCUSRDL-90000004",
+      "CCUSRDL-90000005": "CCUSRDL-90000005",
+      "CCUSRDL-90000006": "CCUSRDL-90000006",
+      "CCUSRDL-90000007": "CCUSRDL-90000007",
+      "CCUSRDL-90000008": "CCUSRDL-90000012",
+      "CCUSRDL-90000009": "CCUSRDL-90000013",
+      "CCUSRDL-90000010": "CCUSRDL-90000014",
+      "CCUSRDL-90000011": "CCUSRDL-90000009",
+      "CCUSRDL-90000012": "CCUSRDL-90000008",
+      "CCUSRDL-90000013": "CCUSRDL-90000010",
+      "CCUSRDL-90000014": "CCUSRDL-90000015",
+      "CCUSRDL-90000015": "CCUSRDL-90000016",
+      "CCUSRDL-90000016": "CCUSRDL-90000017",
+      "CCUSRDL-90000017": "CCUSRDL-90000018",
+      "CCUSRDL-90000018": "CCUSRDL-90000011"
+    },
+    "Water": {
+      "WATERRDL-90000001": "WATERRDL-90000001",
+      "WATERRDL-90000002": "WATERRDL-90000002",
+      "WATERRDL-90000003": "WATERRDL-90000011",
+      "WATERRDL-90000004": "WATERRDL-90000012",
+      "WATERRDL-90000005": "WATERRDL-90000013",
+      "WATERRDL-90000006": "WATERRDL-90000004",
+      "WATERRDL-90000007": "WATERRDL-90000014",
+      "WATERRDL-90000008": "WATERRDL-90000015",
+      "WATERRDL-90000009": "WATERRDL-90000016",
+      "WATERRDL-90000010": "WATERRDL-90000017",
+      "WATERRDL-90000011": "WATERRDL-90000018",
+      "WATERRDL-90000012": "WATERRDL-90000008",
+      "WATERRDL-90000013": "WATERRDL-90000019",
+      "WATERRDL-90000014": "WATERRDL-90000020",
+      "WATERRDL-90000015": "WATERRDL-90000021",
+      "WATERRDL-90000016": "WATERRDL-90000022",
+      "WATERRDL-90000017": "WATERRDL-90000023",
+      "WATERRDL-90000018": "WATERRDL-90000010"
+    }
+  },
+  "dimension_remaps": {
+    "CCUS": {
+      "CCUSRDL-45000001": "CCUSRDL-45000021",
+      "CCUSRDL-45000002": "CCUSRDL-45000022"
+    },
+    "Water": {}
+  }
+}

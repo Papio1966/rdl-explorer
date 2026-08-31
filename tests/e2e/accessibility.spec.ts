@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const routes = ["/", "/rdls", "/search?q=pump&source=all",
+const routes = ["/", "/rdls", "/search?q=pump&source=all", "/classes/tag",
   "/intelligence", "/governance", "/hierarchy", "/extensions", "/publication", "/distribution", "/integration", "/impact", "/migration", "/control-tower", "/work-queue", "/ai-intelligence", "/ai-trust", "/identity-admin", "/tenant-admin", "/documents", "/cis", "/assistant", "/about", "/help"];
 
 for (const route of routes) {

@@ -130,3 +130,21 @@ RDL-027 introduces the production identity boundary for RDL Explorer. Enterprise
 ## RDL-028 — Tenant / Organization Isolation & Enterprise Configuration
 
 RDL-028 establishes the reusable organization isolation boundary needed for enterprise and SaaS deployment. It introduces organizations, active membership, tenant-scoped roles, enterprise configuration, one-owner private resource bindings, append-only tenant administration history and explicit database-level cross-tenant denial. Public/industry RDL remains intentionally global. Enterprise-private contexts, extensions, releases, consumers, migration/work items and AI records can be bound to one organization and consumed through tenant-aware services. The `/tenant-admin` experience fails closed to demonstration mode without trusted SSO and active tenant authorization.
+
+### RDL-029 — UI/UX Stabilization & RDL Scope Integrity
+
+Status: implementation candidate / visual acceptance required before merge.
+
+- Make sidebar navigation collapsible by product capability group.
+- Separate RDL-scoped, enterprise multi-RDL, and administration page context behavior.
+- Eliminate silent CFIHOS fallback when CCUS or Water / Desalination is selected.
+- Add fail-closed package-native list/detail rendering for scope-sensitive legacy routes.
+- Introduce a shared enterprise visual treatment for dashboard, work queue, distribution, integration, impact and migration pages.
+- Add browser regression coverage for Water / Desalination → CCUS switching and no CFIHOS leakage.
+- Require a human visual acceptance pass before merge.
+
+## RDL-030 — RDL Source Upgrade & Versioning Validation — Implementation package
+
+Uses the release-safe Water / Desalination 2.0 Candidate and CCUS 2.0 Candidate workbooks as the first production-like proof of the source-release architecture. Historical 0.1 drafts remain addressable, v2 packages are loaded as new candidate releases, old fingerprints are preserved, identifier reuse is guarded by database validation, and browser routes/search are release-explicit. A source-level comparison view exposes the audited entity and relationship enrichment. This sprint deliberately does **not** auto-migrate pinned consumers; RDL-021/RDL-022 remain the impact and controlled-adoption path.
+
+Next after RDL-030 acceptance: **RDL-031 — Consistent Rich Navigation Across RDLs**, using the richer v2 content for generic Definition → Classification → Hierarchy → Properties → Related Classes → Required Documents → Information Requirements → Source Standards → Provenance pages.

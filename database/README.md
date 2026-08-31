@@ -220,3 +220,7 @@ Migration `018_create_enterprise_identity_role_administration.sql` adds normaliz
 ### RDL-028 organization isolation
 
 Migration `019_create_tenant_organization_isolation.sql` adds enterprise organizations, memberships, tenant roles, organization configuration, one-owner private-resource bindings and append-only tenant audit history. `rdl.assert_tenant_resource_access()` is the fail-closed ownership assertion used by tenant-aware services. Run `npm run db:test:rdl-028` to verify same-tenant access, cross-tenant denial and duplicate-owner prevention using transaction-local fixtures.
+
+## RDL-030 source release upgrade and versioning
+
+Migration `020_create_source_release_versioning_guard.sql` adds release fingerprint and identifier-continuity gates plus source-release comparison functions. Load the release-safe domain upgrades with `npm run db:ingest:rdl-030`; the wrapper preserves existing historical packages, ingests Water / Desalination and CCUS v2 as new candidate releases, then marks the 0.1 drafts superseded without deleting them. Run `npm run db:test:rdl-030` for real-source and negative-fixture acceptance.

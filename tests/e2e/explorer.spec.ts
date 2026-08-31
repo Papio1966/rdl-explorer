@@ -426,3 +426,50 @@ test("Discipline detail pages progressively disclose long Document Type relation
   await page.getByRole("button", { name: "Show less", exact: true }).click();
   await expect(rows).toHaveCount(5);
 });
+
+test("RDL scope switch never falls back to CFIHOS content", async ({ page }) => {
+  await page.goto("/classes/tag");
+  const selector = page.getByRole("combobox", { name: "Active RDL search scope" });
+  await selector.selectOption("water-desalination");
+  await expect(page.getByText("Water / Desalination RDL Extension", { exact: true })).toBeVisible();
+  await expect(page.getByText("WATERRDL-31000001", { exact: true })).toBeVisible();
+  await expect(page.getByText(/CFIHOS-30000001/)).toHaveCount(0);
+
+  await selector.selectOption("ccus");
+  await expect(page.getByText("CCUSRDL-31000001", { exact: true })).toBeVisible();
+  await expect(page.getByText(/WATERRDL-31000001/)).toHaveCount(0);
+});
+
+test("enterprise workflow pages are truthful all-RDL views", async ({ page }) => {
+  await page.goto("/migration");
+  const enterpriseView = page.getByRole("combobox", { name: "Enterprise workflow RDL view" });
+  await expect(enterpriseView).toHaveValue("all");
+  await expect(enterpriseView).toBeDisabled();
+  await expect(page.getByText("RDL VIEW", { exact: true })).toBeVisible();
+});
+
+test("sidebar sections collapse and active section reopens", async ({ page }) => {
+  await page.goto("/control-tower");
+  const operate = page.getByRole("button", { name: /Operate/i });
+  await expect(operate).toHaveAttribute("aria-expanded", "true");
+  await operate.click();
+  await expect(operate).toHaveAttribute("aria-expanded", "false");
+  await page.goto("/work-queue");
+  await expect(page.getByRole("button", { name: /Operate/i })).toHaveAttribute("aria-expanded", "true");
+});
+
+
+test("RDL releases remain isolated and version selectable", async ({ page }) => {
+  await page.goto("/search?source=water-desalination&release=water-desalination-0.1-draft&q=WATERRDL-31000012");
+  await expect(page.getByRole("heading", { name: "RO", exact: true })).toBeVisible();
+  const release = page.getByLabel("Release", { exact: true });
+  await expect(release).toHaveValue("water-desalination-0.1-draft");
+
+  await release.selectOption("water-desalination-2.0-candidate");
+  await expect(page.getByRole("heading", { name: "reverse-osmosis system tag", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "RO", exact: true })).toHaveCount(0);
+
+  await page.getByRole("heading", { name: "reverse-osmosis system tag", exact: true }).click();
+  await expect(page).toHaveURL(/\/rdl\/water-desalination\/water-desalination-2\.0-candidate\/tag_class\/WATERRDL-31000012/);
+  await expect(page.getByText("2.0 candidate · candidate", { exact: true })).toBeVisible();
+});

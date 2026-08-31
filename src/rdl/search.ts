@@ -1,8 +1,10 @@
-import type { RdlSourceKey } from "./catalog";
+import { getDefaultReleaseKey, type RdlSourceKey } from "./catalog";
 
 export type RdlSearchRecord = {
   sourceKey: RdlSourceKey;
   sourceName: string;
+  releaseKey: string;
+  releaseStatus: string;
   versionLabel: string;
   packageKey: string;
   entityType: string;
@@ -23,12 +25,15 @@ export function loadRdlSearchIndex(): Promise<RdlSearchRecord[]> {
   return indexPromise;
 }
 
-export function searchRdlRecords(records: RdlSearchRecord[], query: string, source: string, limit = 80): RdlSearchRecord[] {
+export function searchRdlRecords(records: RdlSearchRecord[], query: string, source: string, releaseKey: string | null = null, limit = 80): RdlSearchRecord[] {
   const terms = query.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
   if (!terms.length) return [];
 
   return records
-    .filter((record) => source === "all" || record.sourceKey === source)
+    .filter((record) => {
+      if (source === "all") return record.releaseKey === getDefaultReleaseKey(record.sourceKey);
+      return record.sourceKey === source && (!releaseKey || record.releaseKey === releaseKey);
+    })
     .map((record) => {
       const id = record.nativeIdentifier.toLocaleLowerCase();
       const name = record.name.toLocaleLowerCase();

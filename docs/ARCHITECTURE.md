@@ -617,3 +617,17 @@ A tenant-aware request follows this sequence:
 6. deny a different organization before returning the private record.
 
 The tenant selector is therefore never trusted as authorization. Resource bindings are unique by `(resource_type, resource_key)`, preventing ambiguous dual ownership. Tenant administration events are append-only. RDL-028 is the foundation for progressively moving existing enterprise-private APIs behind the same scope boundary; globally readable industry/reference browsing is intentionally unchanged.
+
+## RDL-029 UI/UX stabilization and scope-integrity boundary
+
+The application distinguishes three navigation contexts: RDL-scoped exploration, multi-RDL enterprise operations, and administration. The top-bar selector is an authoritative content scope only for RDL-scoped pages; it is presented as an RDL filter on enterprise portfolio pages and omitted on administration pages.
+
+Legacy CFIHOS-rich detail pages are guarded by `RdlScopedLegacyGuard`. When CCUS or Water / Desalination is selected, the guard reads the generic package index and renders only records with matching package provenance. It never invokes CFIHOS repositories as a fallback. Specialized CFIHOS-only relationship views fail closed with an explicit unsupported state until an equivalent generic contract exists.
+
+The enterprise UI uses a shared visual system in `src/index.css` for page headers, boundary callouts, KPI cards, section cards, tables, action rows, status surfaces and scope-integrity states. This reduces one-off page styling and keeps future enterprise workflows visually coherent.
+
+## RDL-030 source-release identity boundary
+
+A source release is identified by `(source_key, release_key)` and materialized by a normalized package with a SHA-256 workbook fingerprint. RDL-030 treats that fingerprint as immutable: a different source file cannot be loaded under an existing release key. Successor content receives a new release and package, so historical package identity remains available to pinned consumers.
+
+Cross-release native identity is fail-closed. Entity-type reuse always fails. Canonical-name changes are not resolved by fuzzy matching; when a successor declares a predecessor, the package must carry a fingerprinted release-safety audit. The database records that validation separately from the source content. Release-aware UI routes include `sourceKey + releaseKey + entityType + nativeIdentifier`, preventing ambiguous first-match resolution when the same identifier exists in multiple releases.

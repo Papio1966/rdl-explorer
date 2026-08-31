@@ -24,7 +24,7 @@ export function RdlWorkQueuePage() {
 
   return <div className="page rdl-hierarchy-page">
     <header className="page-header"><div>
-      <span className="eyebrow">RDL-024 · Operational governance</span>
+      <span className="eyebrow">Operational governance</span>
       <h1>Enterprise notifications & work queue</h1>
       <p>Turn governance signals into assigned, acknowledged and time-bound work without moving the authoritative standards lifecycle automatically.</p>
     </div></header>

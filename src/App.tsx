@@ -6,6 +6,7 @@ import {
   Routes,
 } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
+import { RdlScopedLegacyGuard } from "./components/RdlScopedLegacyGuard";
 import { RdlScopeProvider } from "./rdl/RdlScopeContext";
 
 function lazyNamed<T extends Record<string, unknown>, K extends keyof T>(
@@ -49,6 +50,7 @@ const HelpPage = lazyNamed(() => import("./pages/HelpPage"), "HelpPage");
 const RdlCataloguePage = lazyNamed(() => import("./pages/RdlCataloguePage"), "RdlCataloguePage");
 const RdlSearchPage = lazyNamed(() => import("./pages/RdlSearchPage"), "RdlSearchPage");
 const RdlEntityPage = lazyNamed(() => import("./pages/RdlEntityPage"), "RdlEntityPage");
+const RdlSourceReleaseComparePage = lazyNamed(() => import("./pages/RdlSourceReleaseComparePage"), "RdlSourceReleaseComparePage");
 const RdlIntelligencePage = lazyNamed(() => import("./pages/RdlIntelligencePage"), "RdlIntelligencePage");
 const RdlGovernancePage = lazyNamed(() => import("./pages/RdlGovernancePage"), "RdlGovernancePage");
 const RdlHierarchyPage = lazyNamed(() => import("./pages/RdlHierarchyPage"), "RdlHierarchyPage");
@@ -88,6 +90,8 @@ export default function App() {
             <Route path="/source" element={<DataSourcePage />} />
             <Route path="/rdls" element={<RdlCataloguePage />} />
             <Route path="/search" element={<RdlSearchPage />} />
+            <Route path="/rdls/:sourceKey/compare" element={<RdlSourceReleaseComparePage />} />
+            <Route path="/rdl/:sourceKey/:releaseKey/:entityType/:nativeIdentifier" element={<RdlEntityPage />} />
             <Route path="/rdl/:sourceKey/:entityType/:nativeIdentifier" element={<RdlEntityPage />} />
             <Route path="/intelligence" element={<RdlIntelligencePage />} />
             <Route path="/governance" element={<RdlGovernancePage />} />
@@ -106,23 +110,23 @@ export default function App() {
             <Route path="/tenant-admin" element={<RdlTenantAdministrationPage />} />
             <Route path="/inspect/documents" element={<DocumentSchemaInspectionPage />} />
             <Route path="/inspect/standards" element={<SourceStandardsInspectionPage />} />
-            <Route path="/classes/tag" element={<TagClassesPage />} />
-            <Route path="/classes/tag/:tagClassId" element={<TagClassesPage />} />
-            <Route path="/classes/equipment" element={<EquipmentClassesPage />} />
-            <Route path="/classes/equipment/:equipmentClassId" element={<EquipmentClassesPage />} />
-            <Route path="/documents" element={<DocumentTypesPage />} />
-            <Route path="/documents/:documentTypeId" element={<DocumentTypesPage />} />
-            <Route path="/disciplines" element={<DisciplinesPage />} />
-            <Route path="/disciplines/:disciplineId" element={<DisciplinesPage />} />
+            <Route path="/classes/tag" element={<RdlScopedLegacyGuard entityType="tag_class" title="Tag Classes"><TagClassesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/classes/tag/:tagClassId" element={<RdlScopedLegacyGuard entityType="tag_class" title="Tag Classes" detailParam="tagClassId"><TagClassesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/classes/equipment" element={<RdlScopedLegacyGuard entityType="equipment_class" title="Equipment Classes"><EquipmentClassesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/classes/equipment/:equipmentClassId" element={<RdlScopedLegacyGuard entityType="equipment_class" title="Equipment Classes" detailParam="equipmentClassId"><EquipmentClassesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/documents" element={<RdlScopedLegacyGuard entityType="document_type" title="Document Types"><DocumentTypesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/documents/:documentTypeId" element={<RdlScopedLegacyGuard entityType="document_type" title="Document Types" detailParam="documentTypeId"><DocumentTypesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/disciplines" element={<RdlScopedLegacyGuard entityType="discipline" title="Disciplines"><DisciplinesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/disciplines/:disciplineId" element={<RdlScopedLegacyGuard entityType="discipline" title="Disciplines" detailParam="disciplineId"><DisciplinesPage /></RdlScopedLegacyGuard>} />
             <Route path="/lifecycle" element={<Navigate to="/lifecycle/detailed-engineering" replace />} />
-            <Route path="/lifecycle/:lifecyclePhase" element={<LifecycleRequirementsPage />} />
-            <Route path="/dictionary" element={<DataDictionaryPage />} />
-            <Route path="/dictionary/:propertyId" element={<DataDictionaryPage />} />
-            <Route path="/standards" element={<SourceStandardsPage />} />
-            <Route path="/standards/:sourceStandardId" element={<SourceStandardsPage />} />
-            <Route path="/units" element={<UnitsOfMeasurePage />} />
-            <Route path="/units/:unitId" element={<UnitsOfMeasurePage />} />
-            <Route path="/model" element={<DataModelPage />} />
+            <Route path="/lifecycle/:lifecyclePhase" element={<RdlScopedLegacyGuard title="Lifecycle Requirements" specialized><LifecycleRequirementsPage /></RdlScopedLegacyGuard>} />
+            <Route path="/dictionary" element={<RdlScopedLegacyGuard entityType="property" title="Data Dictionary"><DataDictionaryPage /></RdlScopedLegacyGuard>} />
+            <Route path="/dictionary/:propertyId" element={<RdlScopedLegacyGuard entityType="property" title="Data Dictionary" detailParam="propertyId"><DataDictionaryPage /></RdlScopedLegacyGuard>} />
+            <Route path="/standards" element={<RdlScopedLegacyGuard entityType="source_standard" title="Source Standards"><SourceStandardsPage /></RdlScopedLegacyGuard>} />
+            <Route path="/standards/:sourceStandardId" element={<RdlScopedLegacyGuard entityType="source_standard" title="Source Standards" detailParam="sourceStandardId"><SourceStandardsPage /></RdlScopedLegacyGuard>} />
+            <Route path="/units" element={<RdlScopedLegacyGuard entityType="unit_of_measure" title="Units of Measure"><UnitsOfMeasurePage /></RdlScopedLegacyGuard>} />
+            <Route path="/units/:unitId" element={<RdlScopedLegacyGuard entityType="unit_of_measure" title="Units of Measure" detailParam="unitId"><UnitsOfMeasurePage /></RdlScopedLegacyGuard>} />
+            <Route path="/model" element={<RdlScopedLegacyGuard title="Data Model" specialized><DataModelPage /></RdlScopedLegacyGuard>} />
             <Route path="/validation" element={<ValidationPage />} />
             <Route path="/assistant" element={<AssistantPage />} />
             <Route path="/cis" element={<CisBuilderPage />} />

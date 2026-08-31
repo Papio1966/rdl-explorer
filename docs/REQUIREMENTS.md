@@ -417,3 +417,27 @@ RDL-025 adds evidence-backed, advisory AI over governed RDL and lifecycle state.
 - **RDL-TEN-010 — AI evidence boundary** — Private AI advisory/evaluation records may be tenant-bound and must pass the same ownership assertion before tenant-aware consumption.
 - **RDL-TEN-011 — Workflow migration contract** — Existing globally readable industry RDL remains global; enterprise-private workflows migrate onto the tenant binding contract without changing native RDL identity.
 - **RDL-TEN-012 — Explicit denial tests** — Database acceptance tests shall prove successful same-tenant access, cross-tenant denial and prevention of duplicate private ownership in a self-contained transaction.
+
+## RDL-029 UI/UX and scope integrity
+
+- The active RDL selector MUST be authoritative for scope-sensitive Explorer content.
+- Scope-sensitive pages MUST NOT silently render CFIHOS records when another RDL is selected.
+- Unsupported package-specific views MUST fail closed with an explicit empty/unsupported state.
+- Enterprise portfolio pages MUST present RDL selection as a filter rather than implying single-package authority.
+- Administration pages MUST not show an irrelevant RDL selector.
+- Primary navigation MUST support collapsible capability groups and automatically expose the active route.
+- Enterprise workflow pages MUST use a coherent card/table/status visual language and remain keyboard accessible.
+- RDL-029 requires manual visual acceptance in addition to automated build, regression, E2E and accessibility gates.
+
+## RDL-030 — RDL Source Upgrade & Versioning Validation requirements
+
+- **RDL-VER-001 — Historical release preservation** — A successor source release shall be ingested as a new `rdl_release`/`rdl_package`; it shall never overwrite or delete a historical release.
+- **RDL-VER-002 — Release-key immutability** — Once a normalized package fingerprint exists for a source/release key, a different workbook fingerprint shall be rejected. A changed source requires a new release key.
+- **RDL-VER-003 — Identifier type continuity** — Reuse of a native identifier for a different entity type in another release of the same RDL shall fail ingestion.
+- **RDL-VER-004 — Governed semantic continuity** — Same-type canonical identity changes across an explicitly declared predecessor release shall require a SHA-256 fingerprinted release identity audit; fuzzy name similarity shall not authorize continuity.
+- **RDL-VER-005 — Candidate truthfulness** — Water / Desalination 2.0 and CCUS 2.0 shall remain visibly `candidate`; historical 0.1 drafts may be marked `superseded` without deletion.
+- **RDL-VER-006 — Explicit release selection** — Search, generic entity detail and scope-sensitive fallback views shall resolve against an explicit release key. No other release or CFIHOS package may be used as a silent fallback.
+- **RDL-VER-007 — Current-release defaults** — All-RDL search and cross-RDL intelligence shall use the configured default/current release for each source, while historical releases remain explicitly browsable.
+- **RDL-VER-008 — Real release comparison** — The product shall expose the audited old→v2 entity and relationship delta for Water / Desalination and CCUS and shall preserve native identifier continuity in detailed change views.
+- **RDL-VER-009 — Pinned-consumer safety** — Publishing or ingesting a successor source release shall not change an existing consumer/project pin; migration remains an explicit RDL-022 adoption decision.
+- **RDL-VER-010 — Self-contained acceptance** — Automated acceptance shall prove the real Water/CCUS deltas plus a corrupt identifier-reuse fixture that is rejected fail-closed.

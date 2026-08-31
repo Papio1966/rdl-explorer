@@ -9,7 +9,7 @@ export function RdlHierarchyPage() {
     </div>
 
     <div className="rdl-intelligence-warning">
-      <ShieldCheck size={20}/><div><strong>Governance boundary</strong><p>This page demonstrates the RDL-016 composition model. The Company, Asset and Project labels below are illustrative and are not presented as authoritative customer standards.</p></div>
+      <ShieldCheck size={20}/><div><strong>Governance boundary</strong><p>This page demonstrates the governed enterprise composition model. The Company, Asset and Project labels below are illustrative and are not presented as authoritative customer standards.</p></div>
     </div>
 
     <section className="rdl-hierarchy-section" aria-labelledby="hierarchy-heading">

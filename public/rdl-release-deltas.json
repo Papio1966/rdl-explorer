@@ -1,0 +1,129 @@
+{
+  "auditSha256": "35c1cb97008075f8075f27ab3cc46bc438f5d35aa19775538ae0d08a29419bd1",
+  "continuity": {
+    "CCUS": {
+      "entities": {
+        "equipment class": {
+          "old": 45,
+          "new": 61,
+          "retained": 45,
+          "added": 16,
+          "removed": 0
+        },
+        "tag class": {
+          "old": 11,
+          "new": 18,
+          "retained": 11,
+          "added": 7,
+          "removed": 0
+        },
+        "property": {
+          "old": 55,
+          "new": 96,
+          "retained": 55,
+          "added": 41,
+          "removed": 0
+        },
+        "document type": {
+          "old": 30,
+          "new": 42,
+          "retained": 30,
+          "added": 12,
+          "removed": 0
+        }
+      },
+      "relationships": {
+        "equipment -> property": {
+          "old": 148,
+          "new": 330,
+          "retained": 148,
+          "added": 182,
+          "removed": 0
+        },
+        "tag -> property": {
+          "old": 18,
+          "new": 139,
+          "retained": 18,
+          "added": 121,
+          "removed": 0
+        },
+        "tag -> equipment": {
+          "old": 27,
+          "new": 69,
+          "retained": 27,
+          "added": 42,
+          "removed": 0
+        },
+        "class -> required document": {
+          "old": 30,
+          "new": 95,
+          "retained": 30,
+          "added": 65,
+          "removed": 0
+        }
+      }
+    },
+    "Water": {
+      "entities": {
+        "equipment class": {
+          "old": 50,
+          "new": 50,
+          "retained": 50,
+          "added": 0,
+          "removed": 0
+        },
+        "tag class": {
+          "old": 30,
+          "new": 31,
+          "retained": 30,
+          "added": 1,
+          "removed": 0
+        },
+        "property": {
+          "old": 49,
+          "new": 63,
+          "retained": 49,
+          "added": 14,
+          "removed": 0
+        },
+        "document type": {
+          "old": 28,
+          "new": 28,
+          "retained": 28,
+          "added": 0,
+          "removed": 0
+        }
+      },
+      "relationships": {
+        "equipment -> property": {
+          "old": 144,
+          "new": 193,
+          "retained": 144,
+          "added": 49,
+          "removed": 0
+        },
+        "tag -> property": {
+          "old": 99,
+          "new": 133,
+          "retained": 99,
+          "added": 34,
+          "removed": 0
+        },
+        "tag -> equipment": {
+          "old": 47,
+          "new": 51,
+          "retained": 47,
+          "added": 4,
+          "removed": 0
+        },
+        "class -> required document": {
+          "old": 37,
+          "new": 37,
+          "retained": 37,
+          "added": 0,
+          "removed": 0
+        }
+      }
+    }
+  }
+}

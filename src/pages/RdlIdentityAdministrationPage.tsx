@@ -53,7 +53,7 @@ export function RdlIdentityAdministrationPage() {
   return (
     <div className="identity-admin-page">
       <header>
-        <div className="identity-eyebrow"><KeyRound size={16} /> RDL-027 · Enterprise SSO, User Identity & Role Administration</div>
+        <div className="identity-eyebrow"><KeyRound size={16} /> Enterprise SSO, User Identity & Role Administration</div>
         <h1>Identity & access administration</h1>
         <p>Normalize trusted enterprise OIDC identity, map groups and roles, enforce separation-of-duties controls, and retain an append-only administration trail.</p>
       </header>
