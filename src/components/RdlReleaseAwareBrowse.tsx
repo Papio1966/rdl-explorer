@@ -1,8 +1,10 @@
 import {
+  BookOpen,
   Boxes,
   ChevronDown,
   ChevronRight,
   CircleAlert,
+  FileText,
   LoaderCircle,
   Search,
   Tags,
@@ -38,6 +40,33 @@ type LoadState =
       relationships: RdlRelationshipIndexRecord[];
     }
   | { status: "error"; message: string };
+
+type BrowsePresentation = {
+  eyebrow: string;
+  singularTitle: string;
+  searchLabel: string;
+  icon: ReactNode;
+};
+
+function presentationFor(entityType: string, title: string): BrowsePresentation {
+  switch (entityType) {
+    case "tag_class":
+      return { eyebrow: "Classes", singularTitle: "Tag Class", searchLabel: "tag classes", icon: <Tags size={28} /> };
+    case "equipment_class":
+      return { eyebrow: "Classes", singularTitle: "Equipment Class", searchLabel: "equipment classes", icon: <Boxes size={28} /> };
+    case "document_type":
+      return { eyebrow: "Information", singularTitle: "Document Type", searchLabel: "document types", icon: <FileText size={28} /> };
+    case "property":
+      return { eyebrow: "Reference", singularTitle: "Property", searchLabel: "properties", icon: <BookOpen size={28} /> };
+    default:
+      return {
+        eyebrow: "Reference",
+        singularTitle: title.endsWith("s") ? title.slice(0, -1) : title,
+        searchLabel: title.toLocaleLowerCase(),
+        icon: <BookOpen size={28} />,
+      };
+  }
+}
 
 function compareRecords(a: RdlSearchRecord, b: RdlSearchRecord) {
   return (
@@ -164,14 +193,7 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
 
   const source = getRdlSource(sourceKey);
   const release = getRdlRelease(sourceKey, releaseKey);
-  const singularTitle = entityType === "tag_class"
-    ? "Tag Class"
-    : entityType === "equipment_class"
-      ? "Equipment Class"
-      : title.endsWith("s")
-        ? title.slice(0, -1)
-        : title;
-  const EmptyIcon = entityType === "equipment_class" ? Boxes : Tags;
+  const presentation = presentationFor(entityType, title);
 
   function openRecord(record: RdlSearchRecord) {
     navigate(
@@ -204,12 +226,27 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
     );
   }
 
+  const hasHierarchy = hierarchy.hierarchyRelationshipCount > 0;
+  const searching = Boolean(searchQuery.trim());
+  const navigationRole = searching || !hasHierarchy ? "list" : "tree";
+  const navigationLabel = searching
+    ? `${title} search results`
+    : hasHierarchy
+      ? `${title} hierarchy`
+      : `${title} vocabulary`;
+  const flatRecords = [...state.records].sort(compareRecords);
+
   return (
-    <div className="rdl-release-browse" data-source-key={sourceKey} data-release-key={releaseKey}>
+    <div
+      className="rdl-release-browse"
+      data-source-key={sourceKey}
+      data-release-key={releaseKey}
+      data-browse-mode={hasHierarchy ? "hierarchy" : "flat"}
+    >
       <aside className="rdl-release-browse-panel">
         <div className="rdl-release-browse-heading">
           <div>
-            <div className="rdl-release-browse-eyebrow">Classes</div>
+            <div className="rdl-release-browse-eyebrow">{presentation.eyebrow}</div>
             <h1>{title}</h1>
           </div>
           <div className="rdl-release-browse-count">{state.records.length}</div>
@@ -221,8 +258,8 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
             type="search"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder={`Search ${title.toLocaleLowerCase()}...`}
-            aria-label={`Search ${title.toLocaleLowerCase()}`}
+            placeholder={`Search ${presentation.searchLabel}...`}
+            aria-label={`Search ${presentation.searchLabel}`}
           />
           {searchQuery && (
             <button type="button" aria-label="Clear search" onClick={() => setSearchQuery("")}>
@@ -231,17 +268,25 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
           )}
         </div>
 
-        <div className="rdl-release-browse-tree" role="tree" aria-label={`${title} hierarchy`}>
-          {searchQuery.trim() ? (
-            <SearchResults results={searchResults} onSelect={openRecord} />
+        <div
+          className="rdl-release-browse-navigation"
+          role={navigationRole}
+          aria-label={navigationLabel}
+        >
+          {searching ? (
+            <RecordList records={searchResults} onSelect={openRecord} />
           ) : state.records.length ? (
-            hierarchy.roots.map((node) => (
-              <BrowseTreeNode
-                key={node.record.nativeIdentifier}
-                node={node}
-                onSelect={openRecord}
-              />
-            ))
+            hasHierarchy ? (
+              hierarchy.roots.map((node) => (
+                <BrowseTreeNode
+                  key={node.record.nativeIdentifier}
+                  node={node}
+                  onSelect={openRecord}
+                />
+              ))
+            ) : (
+              <RecordList records={flatRecords} onSelect={openRecord} />
+            )
           ) : (
             <div className="rdl-release-browse-search-empty">No {title.toLocaleLowerCase()} in this release.</div>
           )}
@@ -250,15 +295,15 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
 
       <section className="rdl-release-browse-detail-panel">
         <div className="rdl-release-browse-empty-selection">
-          <div className="rdl-release-browse-empty-icon"><EmptyIcon size={28} /></div>
-          <h2>Select a {singularTitle}</h2>
+          <div className="rdl-release-browse-empty-icon">{presentation.icon}</div>
+          <h2>Select a {presentation.singularTitle}</h2>
           <p>
-            Browse the release hierarchy or search by engineering name or native identifier.
+            {hasHierarchy ? "Browse the release hierarchy" : "Browse the release vocabulary"} or search by engineering name or native identifier.
             Selecting an entity opens its canonical release-aware detail.
           </p>
           <small>
             {source?.shortName ?? sourceKey} · {release?.versionLabel ?? releaseKey} · {release?.status ?? "selected release"}
-            {hierarchy.hierarchyRelationshipCount > 0
+            {hasHierarchy
               ? ` · ${hierarchy.hierarchyRelationshipCount} authoritative parent relationship${hierarchy.hierarchyRelationshipCount === 1 ? "" : "s"}`
               : " · flat release vocabulary"}
           </small>
@@ -322,15 +367,18 @@ function BrowseTreeNode({ node, onSelect, depth = 0 }: BrowseTreeNodeProps) {
   );
 }
 
-function SearchResults({ results, onSelect }: { results: RdlSearchRecord[]; onSelect: (record: RdlSearchRecord) => void }) {
-  if (!results.length) {
+function RecordList({ records, onSelect }: { records: RdlSearchRecord[]; onSelect: (record: RdlSearchRecord) => void }) {
+  if (!records.length) {
     return <div className="rdl-release-browse-search-empty">No matching entities found.</div>;
   }
-  return (
-    <div className="rdl-release-browse-search-results">
-      {results.map((record) => (
+  return <>
+    {records.map((record) => (
+      <div
+        key={`${record.packageKey}:${record.entityType}:${record.nativeIdentifier}`}
+        className="rdl-release-browse-list-item"
+        role="listitem"
+      >
         <button
-          key={`${record.packageKey}:${record.entityType}:${record.nativeIdentifier}`}
           type="button"
           className="rdl-release-browse-search-result"
           onClick={() => onSelect(record)}
@@ -338,9 +386,9 @@ function SearchResults({ results, onSelect }: { results: RdlSearchRecord[]; onSe
           <span className="rdl-release-browse-search-result-name">{record.name}</span>
           <span className="rdl-release-browse-search-result-code">{record.nativeIdentifier}</span>
         </button>
-      ))}
-    </div>
-  );
+      </div>
+    ))}
+  </>;
 }
 
 function StatusScreen({ icon, title, message }: { icon: ReactNode; title: string; message: string }) {
