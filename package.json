@@ -76,7 +76,8 @@
     "db:ingest:ccus:v2": "bash scripts/db-ingest-ccus-v2.sh",
     "db:ingest:water-desalination:v2": "bash scripts/db-ingest-water-desalination-v2.sh",
     "test:rdl-031": "tsx scripts/test-rdl-031-rich-navigation.ts",
-    "test:rdl-032": "tsx scripts/test-rdl-032-unified-detail-parity.ts && tsx scripts/test-rdl-032-legacy-route-convergence.ts"
+    "test:rdl-032": "tsx scripts/test-rdl-032-unified-detail-parity.ts && tsx scripts/test-rdl-032-legacy-route-convergence.ts",
+    "test:rdl-033": "tsx scripts/test-rdl-033-specialist-detail-retirement.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",

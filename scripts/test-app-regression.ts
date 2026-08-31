@@ -22,6 +22,8 @@ const documentTypes = read("src/pages/DocumentTypesPage.tsx");
 const dataDictionary = read("src/pages/DataDictionaryPage.tsx");
 const sourceStandards = read("src/pages/SourceStandardsPage.tsx");
 const disciplines = read("src/pages/DisciplinesPage.tsx");
+const unitsOfMeasure = read("src/pages/UnitsOfMeasurePage.tsx");
+const rdlRelationshipSection = read("src/components/RdlRelationshipSection.tsx");
 
 const productBoundary = read("docs/PRODUCT_BOUNDARY.md");
 const architecture = read("docs/ARCHITECTURE.md");
@@ -404,41 +406,43 @@ assert.ok(about.includes("controlled evaluation") && about.includes("pilot"), "A
 assert.ok(help.includes("Global RDL search is enabled") && help.includes("RDL scope") && help.includes("source and release provenance"), "User Guide must explain the enabled multi-RDL global-search pilot behavior");
 assert.ok(help.includes("Do not include confidential project information"), "Pilot feedback guidance must warn against confidential information");
 
-for (const [name, source] of [["Tag Classes", tagClasses], ["Equipment Classes", equipmentClasses]] as const) {
-  assert.ok(source.includes('aria-label="On this page"'), `${name} detail page must expose an On this page navigator`);
-  assert.ok(source.includes("COLLAPSE_THRESHOLD = 10"), `${name} must retain the long-list collapse threshold`);
-  assert.ok(source.includes("COLLAPSED_ITEM_COUNT = 5"), `${name} must retain the five-item collapsed preview`);
-  assert.ok(source.includes("aria-expanded={expanded}"), `${name} expansion controls must expose their state accessibly`);
+for (const [name, source, route] of [
+  ["Tag Classes", tagClasses, "/classes/tag/"],
+  ["Equipment Classes", equipmentClasses, "/classes/equipment/"],
+  ["Document Types", documentTypes, "/documents/"],
+  ["Data Dictionary", dataDictionary, "/dictionary/"],
+  ["Source Standards", sourceStandards, "/standards/"],
+  ["Disciplines", disciplines, "/disciplines/"],
+  ["Units of Measure", unitsOfMeasure, "/units/"],
+] as const) {
+  assert.ok(source.includes("useNavigate"), `${name} browse page must retain detail navigation`);
+  assert.ok(source.includes(route), `${name} browse page must retain its compatibility detail route`);
+  assert.ok(!source.includes("useParams"), `${name} browse page must not own route-param-driven specialist detail state`);
 }
 
-assert.ok(documentTypes.includes('aria-label="On this page"'), "Document Types detail page must expose an On this page navigator");
-assert.ok(documentTypes.includes("COLLAPSE_THRESHOLD = 10"), "Document Types must retain the long-list collapse threshold");
-assert.ok(documentTypes.includes("COLLAPSED_ITEM_COUNT = 5"), "Document Types must retain the five-item collapsed preview");
-assert.ok(documentTypes.includes("aria-expanded={expanded}"), "Document Types expansion controls must expose their state accessibly");
-assert.ok(documentTypes.includes('id="document-required-by-classes"'), "Document Types must expose a stable Required by Classes anchor");
-
-assert.ok(dataDictionary.includes('aria-label="On this page"'), "Data Dictionary property detail must expose an On this page navigator");
-assert.ok(dataDictionary.includes("COLLAPSE_THRESHOLD = 10"), "Data Dictionary must retain the long-list collapse threshold");
-assert.ok(dataDictionary.includes("COLLAPSED_ITEM_COUNT = 5"), "Data Dictionary must retain the five-item collapsed preview");
-assert.ok(dataDictionary.includes("aria-expanded={expanded}"), "Data Dictionary expansion controls must expose their state accessibly");
-assert.ok(dataDictionary.includes('id="dictionary-units"'), "Data Dictionary must expose a stable Units of Measure anchor");
-assert.ok(dataDictionary.includes('id="dictionary-tag-classes"'), "Data Dictionary must expose a stable Used by Tag Classes anchor");
-assert.ok(dataDictionary.includes('id="dictionary-picklist-values"'), "Data Dictionary must expose a stable Allowed Values anchor");
-
-
-assert.ok(sourceStandards.includes('aria-label="On this page"'), "Source Standards detail page must expose an On this page navigator");
-assert.ok(sourceStandards.includes("COLLAPSE_THRESHOLD = 10"), "Source Standards must retain the long-list collapse threshold");
-assert.ok(sourceStandards.includes("COLLAPSED_ITEM_COUNT = 5"), "Source Standards must retain the five-item collapsed preview");
-assert.ok(sourceStandards.includes("aria-expanded={expanded}"), "Source Standards expansion controls must expose their state accessibly");
-assert.ok(sourceStandards.includes('id="source-standard-classes"'), "Source Standards must expose a stable Classes anchor");
-assert.ok(sourceStandards.includes('id="source-standard-jip33"'), "Source Standards must expose a stable JIP33 anchor");
-assert.ok(sourceStandards.includes('id="source-standard-properties"'), "Source Standards must expose a stable Property mappings anchor");
-assert.ok(sourceStandards.includes('id="source-standard-picklist-values"'), "Source Standards must expose a stable Picklist values anchor");
-
-assert.ok(disciplines.includes("COLLAPSE_THRESHOLD = 10"), "Disciplines must retain the long-list collapse threshold");
-assert.ok(disciplines.includes("COLLAPSED_ITEM_COUNT = 5"), "Disciplines must retain the five-item collapsed preview");
-assert.ok(disciplines.includes("aria-expanded={documentTypesExpanded}"), "Discipline expansion control must expose its state accessibly");
-assert.ok(disciplines.includes('id="discipline-document-types-list"'), "Disciplines must expose a stable Document Types list target");
+assert.ok(rdlEntityPage.includes('aria-label="On this page"'), "Canonical RDL entity detail must expose an On this page navigator");
+for (const anchor of [
+  "rdl-properties",
+  "rdl-units-of-measure",
+  "rdl-allowed-values",
+  "rdl-related-classes",
+  "rdl-used-by-classes",
+  "rdl-required-documents",
+  "rdl-required-by-classes",
+  "rdl-disciplines",
+  "rdl-document-types",
+  "rdl-information-requirements",
+  "rdl-source-standards",
+  "rdl-property-mappings",
+  "rdl-picklist-values",
+  "rdl-provenance",
+]) {
+  assert.ok(rdlEntityPage.includes(anchor), `Canonical RDL entity detail must retain ${anchor}`);
+}
+assert.ok(rdlRelationshipSection.includes("DISCLOSURE_THRESHOLD = 10"), "Canonical relationship detail must retain the long-list collapse threshold");
+assert.ok(rdlRelationshipSection.includes("COLLAPSED_COUNT = 5"), "Canonical relationship detail must retain the five-item collapsed preview");
+assert.ok(rdlRelationshipSection.includes('aria-expanded={expanded}'), "Canonical relationship expansion controls must expose their state accessibly");
+assert.ok(rdlRelationshipSection.includes('aria-controls={listId}'), "Canonical relationship expansion controls must identify their controlled list");
 
 console.log(`PASS routes: ${routes.length} critical application routes registered.`);
 console.log("PASS navigation: critical Explorer capabilities remain discoverable.");
@@ -452,9 +456,6 @@ console.log("PASS RDL-007 multi-RDL foundation: CCUS mapping profile, provenance
 console.log("PASS RDL-008 genericity proof: Water / Desalination mapping, deterministic identifier derivation and three-RDL coexistence gates are present.");
 console.log("PASS RDL-009 multi-RDL UX: scope selection, package-aware global search, provenance routes and search repository gates are present.");
 console.log("PASS pilot readiness: status, provenance, honest search state and feedback route are present.");
-console.log("PASS class detail UX: anchored contents navigation and accessible progressive disclosure are present.");
-console.log("PASS document detail UX: anchored contents navigation and accessible progressive disclosure are present.");
-console.log("PASS property detail UX: anchored contents navigation and accessible progressive disclosure are present.");
-console.log("PASS Source Standard detail UX: anchored contents navigation and accessible progressive disclosure are present.");
-console.log("PASS Discipline detail UX: long Document Type relationships use accessible progressive disclosure.");
+console.log("PASS canonical entity detail UX: specialist browse pages delegate detail rendering to the generic release-aware renderer.");
+console.log("PASS canonical detail accessibility: progressive disclosure remains anchored and accessible.");
 console.log("\nApplication regression checks passed.");
