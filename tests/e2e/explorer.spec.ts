@@ -412,6 +412,13 @@ test("sidebar keeps the active section open and permits inactive sections to col
   await operate.click();
   await expect(operate).toHaveAttribute("aria-expanded", "true");
 
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: /Operate/i })).toHaveAttribute("aria-expanded", "false");
+
+  await page.goto("/work-queue");
+  await expect(page.getByRole("button", { name: /Operate/i })).toHaveAttribute("aria-expanded", "true");
+});
+
 test("RDL releases remain isolated and version selectable", async ({ page }) => {
   await page.goto("/search?source=water-desalination&release=water-desalination-0.1-draft&q=WATERRDL-31000012");
   await expect(page.getByRole("heading", { name: "RO", exact: true })).toBeVisible();
