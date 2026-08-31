@@ -130,3 +130,7 @@ Production identity is designed for an enterprise OIDC gateway or platform ident
 ### Enterprise organization isolation (RDL-028)
 
 `/tenant-admin` introduces the organization/tenant boundary for enterprise-private standards state. A selected organization is never trusted by itself: live APIs require trusted enterprise SSO, active organization membership and tenant authorization, and private resource ownership is asserted server-side. Public/industry RDL remains globally readable by design.
+
+### RDL-029 UI/UX stabilization
+
+RDL Explorer now treats active RDL scope as an integrity boundary for scope-sensitive pages: selecting CCUS or Water / Desalination cannot silently fall back to CFIHOS content. Enterprise workflows use a compact collapsible navigation model and a shared dashboard/workflow visual language. RDL-029 requires a manual visual acceptance pass before merge.

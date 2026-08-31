@@ -26,7 +26,7 @@ export function RdlControlTowerPage() {
   return <div className="page rdl-hierarchy-page">
     <header className="page-header">
       <div>
-        <span className="eyebrow">RDL-023 · Enterprise operations</span>
+        <span className="eyebrow">Enterprise operations</span>
         <h1>Enterprise standards dashboard & control tower</h1>
         <p>See standards health, governance workload, release adoption and migration readiness across the governed RDL lifecycle, then drill through to the authoritative workflow that owns each decision.</p>
       </div>

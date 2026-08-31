@@ -65,6 +65,12 @@ jobs:
       - name: Run RDL-028 tenant isolation contract
         run: npm run test:rdl-028
 
+      - name: Run RDL-029 UI/UX and RDL scope integrity contract
+        run: npm run test:rdl-029
+
+      - name: Run RDL-030 source release versioning contract
+        run: npm run test:rdl-030
+
       - name: Run regression suite
         run: npm run test:regression
 
