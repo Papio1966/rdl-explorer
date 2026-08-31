@@ -43,10 +43,25 @@ must(catalogue.includes('status: "superseded"'),"historical release status missi
 const search=read("src/rdl/search.ts");
 const searchPage=read("src/pages/RdlSearchPage.tsx");
 const entityPage=read("src/pages/RdlEntityPage.tsx");
+const entityDetail=read("src/rdl/entityDetail.ts");
 const guard=read("src/components/RdlScopedLegacyGuard.tsx");
 must(search.includes("record.releaseKey === getDefaultReleaseKey") && search.includes("record.releaseKey === releaseKey"),"search release isolation missing");
 must(searchPage.includes('params.get("release")') && searchPage.includes("rdlEntityRoute(result.sourceKey, result.releaseKey"),"search does not preserve explicit release context");
-must(entityPage.includes("item.releaseKey === releaseKey"),"generic entity route can leak across releases");
+must(entityPage.includes("loadRdlEntityDetail(sourceKey, releaseKey, entityType, nativeIdentifier)"),"generic entity page does not pass explicit release identity to the detail projection");
+must(
+  entityDetail.includes("item.sourceKey === sourceKey")
+    && entityDetail.includes("item.releaseKey === releaseKey")
+    && entityDetail.includes("item.entityType === entityType")
+    && entityDetail.includes("item.nativeIdentifier === nativeIdentifier"),
+  "generic entity detail lookup can leak across releases or typed identities",
+);
+must(
+  entityDetail.includes("item.sourceKey === record.sourceKey")
+    && entityDetail.includes("item.releaseKey === record.releaseKey")
+    && entityDetail.includes("item.packageKey === record.packageKey"),
+  "generic entity detail relationships can leak across release packages",
+);
+must(entityDetail.includes("rdlEntityRoute(record.sourceKey, record.releaseKey"),"generic related-entity links do not preserve explicit release identity");
 must(guard.includes("item.releaseKey === releaseKey"),"legacy scope guard can leak across releases");
 
 const app=read("src/App.tsx");
