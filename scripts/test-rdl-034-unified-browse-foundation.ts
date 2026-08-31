@@ -9,6 +9,7 @@ const browse = read("src/components/RdlReleaseAwareBrowse.tsx");
 const css = read("src/components/RdlReleaseAwareBrowse.css");
 const pkg = read("package.json");
 const app = read("src/App.tsx");
+const explorerE2e = read("tests/e2e/explorer.spec.ts");
 const search = JSON.parse(read("public/rdl-search-index.json")) as Array<{
   sourceKey: string;
   releaseKey: string;
@@ -58,6 +59,13 @@ must(!browse.includes("CfihosTagClass"), "generic browse shell depends on CFIHOS
 must(css.includes(".rdl-release-browse") && css.includes("grid-template-columns:340px"), "generic browse shell lost the established two-panel navigation pattern");
 must(pkg.includes('"test:rdl-034"'), "RDL-034 package contract missing");
 must(app.includes('path="/classes/tag"'), "Tag Classes browse route missing");
+
+must(browse.includes('className="rdl-release-browse-tree-toggle rdl-release-browse-tree-toggle-static"'), "leaf hierarchy affordance is not rendered as inert content");
+must(browse.includes('aria-hidden="true"'), "leaf hierarchy affordance is not hidden from assistive technology");
+must(!browse.includes('aria-label={hasChildren ?'), "leaf hierarchy still creates an unnamed button branch");
+must(css.includes(".rdl-release-browse-tree-toggle-static{cursor:default}"), "leaf hierarchy affordance styling is missing");
+must(explorerE2e.includes('toHaveAttribute("data-source-key", "water-desalination")'), "scope-isolation E2E still depends on the retired generic-card banner");
+must(explorerE2e.includes('toHaveAttribute("data-source-key", "ccus")'), "scope-isolation E2E does not verify CCUS shared-browse identity");
 
 const releases = [
   ["water-desalination", "water-desalination-2.0-candidate"],

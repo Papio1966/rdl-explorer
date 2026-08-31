@@ -272,19 +272,23 @@ function BrowseTreeNode({ node, onSelect, depth = 0 }: BrowseTreeNodeProps) {
   return (
     <div className="rdl-release-browse-tree-node" role="treeitem" aria-expanded={hasChildren ? expanded : undefined}>
       <div className="rdl-release-browse-tree-row" style={{ paddingLeft: 8 + depth * 17 }}>
-        <button
-          type="button"
-          className="rdl-release-browse-tree-toggle"
-          onClick={() => hasChildren && setExpanded((current) => !current)}
-          aria-label={hasChildren ? `${expanded ? "Collapse" : "Expand"} ${node.record.name}` : undefined}
-          tabIndex={hasChildren ? 0 : -1}
-        >
-          {hasChildren ? (
-            expanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />
-          ) : (
+        {hasChildren ? (
+          <button
+            type="button"
+            className="rdl-release-browse-tree-toggle"
+            onClick={() => setExpanded((current) => !current)}
+            aria-label={`${expanded ? "Collapse" : "Expand"} ${node.record.name}`}
+          >
+            {expanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+          </button>
+        ) : (
+          <span
+            className="rdl-release-browse-tree-toggle rdl-release-browse-tree-toggle-static"
+            aria-hidden="true"
+          >
             <span className="rdl-release-browse-tree-dot" />
-          )}
-        </button>
+          </span>
+        )}
         <button
           type="button"
           className="rdl-release-browse-tree-label"
