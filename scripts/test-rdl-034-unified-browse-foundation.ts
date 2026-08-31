@@ -30,10 +30,13 @@ const relationships = JSON.parse(read("public/rdl-relationship-index.json")) as 
 }>;
 
 must(guard.includes('import { RdlReleaseAwareBrowse }'), "scope guard does not delegate to the release-aware browse shell");
-must(guard.includes('entityType === "tag_class" || entityType === "equipment_class"'), "shared class browse is not enabled for both Tag and Equipment Classes");
-must(guard.includes('if (usesSharedClassBrowse && entityType)'), "shared class browse branch is not reusable across class entity types");
+for (const entityType of ["tag_class", "equipment_class", "document_type", "property"]) {
+  must(guard.includes(`"${entityType}"`), `shared browse scope does not include ${entityType}`);
+}
+must(guard.includes("SHARED_BROWSE_ENTITY_TYPES") && guard.includes("usesSharedBrowse"), "shared browse boundary is not expressed as a reusable entity-type capability");
+must(guard.includes('if (usesSharedBrowse && entityType)'), "shared browse branch is not reusable across hierarchical and flat entity types");
 must(guard.includes('sourceKey={scope}') && guard.includes('releaseKey={releaseKey}') && guard.includes('entityType={entityType}'), "browse shell is not explicitly source/release/type scoped");
-must(guard.includes('item.releaseKey === releaseKey'), "existing non-class generic fallback lost release isolation");
+must(guard.includes('item.releaseKey === releaseKey'), "remaining generic fallback lost release isolation");
 must(guard.includes("CFIHOS data is never used as a silent fallback"), "existing fail-closed scope messaging was lost");
 
 for (const token of [
@@ -46,8 +49,11 @@ for (const token of [
   "rdlEntityRoute(",
   "record.releaseKey",
   "record.nativeIdentifier",
-  'role="tree"',
   'role="treeitem"',
+  'data-browse-mode={hasHierarchy ? "hierarchy" : "flat"}',
+  'navigationRole = searching || !hasHierarchy ? "list" : "tree"',
+  '`${title} vocabulary`',
+  "RecordList",
 ]) {
   must(browse.includes(token), `release-aware browse foundation missing contract token: ${token}`);
 }
@@ -59,12 +65,22 @@ for (const forbiddenStatusBranch of ['=== "candidate"', '=== "reviewed"', '=== "
 must(!browse.includes("cfihosRepository"), "generic browse shell depends on the CFIHOS repository");
 must(!browse.includes("CfihosTagClass"), "generic browse shell depends on CFIHOS Tag Class types");
 must(!browse.includes("CfihosEquipmentClass"), "generic browse shell depends on CFIHOS Equipment Class types");
-must(browse.includes('entityType === "equipment_class" ? Boxes : Tags'), "shared browse shell does not expose an Equipment Class-specific icon without changing navigation behavior");
-must(browse.includes('? "Tag Class"') && browse.includes('? "Equipment Class"'), "shared browse shell lost correct class singular labels");
+for (const presentation of [
+  'eyebrow: "Classes", singularTitle: "Tag Class", searchLabel: "tag classes"',
+  'eyebrow: "Classes", singularTitle: "Equipment Class", searchLabel: "equipment classes"',
+  'eyebrow: "Information", singularTitle: "Document Type", searchLabel: "document types"',
+  'eyebrow: "Reference", singularTitle: "Property", searchLabel: "properties"',
+]) {
+  must(browse.includes(presentation), `entity-neutral browse presentation missing: ${presentation}`);
+}
+must(browse.includes("<FileText size={28} />") && browse.includes("<BookOpen size={28} />"), "flat browse entity types do not expose truthful neutral iconography");
+must(!browse.includes('<div className="rdl-release-browse-eyebrow">Classes</div>'), "generic browse shell still hard-codes the Classes eyebrow");
 must(css.includes(".rdl-release-browse") && css.includes("grid-template-columns:340px"), "generic browse shell lost the established two-panel navigation pattern");
+must(css.includes(".rdl-release-browse-navigation"), "generic navigation container still assumes hierarchy-only naming");
 must(pkg.includes('"test:rdl-034"'), "RDL-034 package contract missing");
-must(app.includes('path="/classes/tag"'), "Tag Classes browse route missing");
-must(app.includes('path="/classes/equipment"'), "Equipment Classes browse route missing");
+for (const route of ['path="/classes/tag"', 'path="/classes/equipment"', 'path="/documents"', 'path="/dictionary"']) {
+  must(app.includes(route), `shared browse route missing: ${route}`);
+}
 
 must(browse.includes('className="rdl-release-browse-tree-toggle rdl-release-browse-tree-toggle-static"'), "leaf hierarchy affordance is not rendered as inert content");
 must(browse.includes('aria-hidden="true"'), "leaf hierarchy affordance is not hidden from assistive technology");
@@ -72,7 +88,10 @@ must(!browse.includes('aria-label={hasChildren ?'), "leaf hierarchy still create
 must(css.includes(".rdl-release-browse-tree-toggle-static{cursor:default}"), "leaf hierarchy affordance styling is missing");
 must(explorerE2e.includes('toHaveAttribute("data-source-key", "water-desalination")'), "scope-isolation E2E still depends on the retired generic-card banner");
 must(explorerE2e.includes('toHaveAttribute("data-source-key", "ccus")'), "scope-isolation E2E does not verify CCUS shared-browse identity");
-must(unifiedBrowseE2e.includes('entityType: "tag_class"') && unifiedBrowseE2e.includes('entityType: "equipment_class"'), "GitHub browser coverage does not exercise both shared class browse types");
+for (const entityType of ["tag_class", "equipment_class", "document_type", "property"]) {
+  must(unifiedBrowseE2e.includes(`entityType: "${entityType}"`), `GitHub browser coverage does not exercise ${entityType}`);
+}
+must(unifiedBrowseE2e.includes('mode: "hierarchy"') && unifiedBrowseE2e.includes('mode: "flat"'), "GitHub browser coverage does not prove both hierarchy and flat shared-browse modes");
 
 const releases = [
   ["water-desalination", "water-desalination-2.0-candidate"],
@@ -81,18 +100,22 @@ const releases = [
 
 const expectations = {
   "water-desalination": {
-    tag_class: { records: 31, parents: 30 },
-    equipment_class: { records: 50, parents: 49 },
+    tag_class: { records: 31, parents: 30, label: "Tag Classes" },
+    equipment_class: { records: 50, parents: 49, label: "Equipment Classes" },
+    document_type: { records: 28, parents: 0, label: "Document Types" },
+    property: { records: 63, parents: 0, label: "Properties" },
   },
   ccus: {
-    tag_class: { records: 18, parents: 17 },
-    equipment_class: { records: 61, parents: 60 },
+    tag_class: { records: 18, parents: 17, label: "Tag Classes" },
+    equipment_class: { records: 61, parents: 60, label: "Equipment Classes" },
+    document_type: { records: 42, parents: 0, label: "Document Types" },
+    property: { records: 96, parents: 0, label: "Properties" },
   },
 } as const;
 
 const entityKeys = new Set(search.map((item) => `${item.packageKey}|${item.entityType}|${item.nativeIdentifier}`));
 for (const [sourceKey, releaseKey] of releases) {
-  for (const entityType of ["tag_class", "equipment_class"] as const) {
+  for (const entityType of ["tag_class", "equipment_class", "document_type", "property"] as const) {
     const records = search.filter((item) => item.sourceKey === sourceKey && item.releaseKey === releaseKey && item.entityType === entityType);
     const expected = expectations[sourceKey][entityType];
     assert.equal(records.length, expected.records, `${releaseKey} ${entityType} record count changed unexpectedly`);
@@ -110,9 +133,9 @@ for (const [sourceKey, releaseKey] of releases) {
       must(entityKeys.has(`${row.packageKey}|${entityType}|${row.sourceNativeIdentifier}`), `${releaseKey} hierarchy child is outside the release package: ${row.sourceNativeIdentifier}`);
       must(entityKeys.has(`${row.packageKey}|${entityType}|${row.targetNativeIdentifier}`), `${releaseKey} hierarchy parent is outside the release package: ${row.targetNativeIdentifier}`);
     }
-    const label = entityType === "tag_class" ? "Tag Classes" : "Equipment Classes";
-    console.log(`RDL-034 ${sourceKey}: ${records.length} ${label}; ${parentRows.length} authoritative parent relationships`);
+    const mode = expected.parents > 0 ? "hierarchy" : "flat";
+    console.log(`RDL-034 ${sourceKey}: ${records.length} ${expected.label}; ${parentRows.length} authoritative parent relationships; ${mode} browse`);
   }
 }
 
-console.log("PASS RDL-034.2 unified release-aware Tag and Equipment Class browse convergence");
+console.log("PASS RDL-034.3 unified release-aware hierarchical and flat browse convergence");

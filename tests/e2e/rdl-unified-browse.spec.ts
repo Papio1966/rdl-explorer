@@ -2,13 +2,29 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 const sources = [
-  { source: "water-desalination", routeSource: "water-desalination", tagId: "WATERRDL-31000001", equipmentId: "WATERRDL-30000001" },
-  { source: "ccus", routeSource: "ccus", tagId: "CCUSRDL-31000001", equipmentId: "CCUSRDL-30000001" },
+  {
+    source: "water-desalination",
+    routeSource: "water-desalination",
+    tagId: "WATERRDL-31000001",
+    equipmentId: "WATERRDL-30000001",
+    documentId: "WATERRDL-70000001",
+    propertyId: "WATERRDL-40000001",
+  },
+  {
+    source: "ccus",
+    routeSource: "ccus",
+    tagId: "CCUSRDL-31000001",
+    equipmentId: "CCUSRDL-30000001",
+    documentId: "CCUSRDL-70000001",
+    propertyId: "CCUSRDL-40000001",
+  },
 ] as const;
 
 const browseTypes = [
-  { path: "/classes/tag", title: "Tag Classes", searchName: "Search tag classes", entityType: "tag_class", idField: "tagId" },
-  { path: "/classes/equipment", title: "Equipment Classes", searchName: "Search equipment classes", entityType: "equipment_class", idField: "equipmentId" },
+  { path: "/classes/tag", title: "Tag Classes", searchName: "Search tag classes", entityType: "tag_class", idField: "tagId", mode: "hierarchy" },
+  { path: "/classes/equipment", title: "Equipment Classes", searchName: "Search equipment classes", entityType: "equipment_class", idField: "equipmentId", mode: "hierarchy" },
+  { path: "/documents", title: "Document Types", searchName: "Search document types", entityType: "document_type", idField: "documentId", mode: "flat" },
+  { path: "/dictionary", title: "Data Dictionary", searchName: "Search properties", entityType: "property", idField: "propertyId", mode: "flat" },
 ] as const;
 
 for (const browseType of browseTypes) {
@@ -21,6 +37,7 @@ for (const browseType of browseTypes) {
       const browse = page.locator(".rdl-release-browse");
       await expect(browse).toBeVisible();
       await expect(browse).toHaveAttribute("data-source-key", scope.source);
+      await expect(browse).toHaveAttribute("data-browse-mode", browseType.mode);
       await expect(browse.getByRole("heading", { name: browseType.title, level: 1 })).toBeVisible();
       const search = browse.getByRole("searchbox", { name: browseType.searchName });
       await expect(search).toBeVisible();
@@ -33,11 +50,13 @@ for (const browseType of browseTypes) {
   }
 }
 
-test("Water shared class browse shells have no serious or critical accessibility violations", async ({ page }) => {
+test("Water shared browse shells have no serious or critical accessibility violations", async ({ page }) => {
   for (const browseType of browseTypes) {
     await page.goto(browseType.path);
     await page.getByRole("combobox", { name: "Active RDL search scope" }).selectOption("water-desalination");
-    await expect(page.locator(".rdl-release-browse")).toBeVisible();
+    const browse = page.locator(".rdl-release-browse");
+    await expect(browse).toBeVisible();
+    await expect(browse).toHaveAttribute("data-browse-mode", browseType.mode);
     const results = await new AxeBuilder({ page }).analyze();
     const blocking = results.violations.filter((violation) => violation.impact === "serious" || violation.impact === "critical");
     expect(blocking, `${browseType.title}: ${blocking.map((violation) => `${violation.id}: ${violation.help}`).join("\n")}`).toEqual([]);
