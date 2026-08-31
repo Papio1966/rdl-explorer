@@ -49,3 +49,9 @@
 .rdl-rich-entity-page .rdl-entity-source span {
   color: #52615c;
 }
+
+
+/* RDL-032.2: richer parity metadata stays readable without widening the page. */
+.rdl-detail-relationship-meta small { max-width:100%; overflow-wrap:anywhere; }
+.rdl-detail-relationship-meta small b { color:#40584f; }
+.rdl-detail-relationship-card:target { outline:2px solid #8eb9ad; outline-offset:2px; }

@@ -17,6 +17,17 @@ function HierarchyLinks({ title, items }: { title: string; items: RdlDetailLinke
   return <div className="rdl-detail-hierarchy-group"><h3>{title}</h3><div>{items.map((item) => <Link key={item.key} to={item.href}><strong>{item.name}</strong><code>{item.nativeIdentifier}</code></Link>)}</div></div>;
 }
 
+function detailLabels(entityType: string) {
+  return {
+    relatedClasses: entityType === "tag_class"
+      ? "Related Equipment Classes"
+      : entityType === "equipment_class"
+        ? "Related Tag Classes"
+        : "Related Classes",
+    usedByClasses: entityType === "source_standard" ? "Classes" : "Used by Classes",
+  };
+}
+
 export function RdlEntityPage() {
   const { sourceKey = "", releaseKey: routeReleaseKey, entityType = "", nativeIdentifier = "" } = useParams();
   const releaseKey = routeReleaseKey ?? getDefaultReleaseKey(sourceKey) ?? "";
@@ -40,6 +51,7 @@ export function RdlEntityPage() {
   const source = getRdlSource(sourceKey);
   const release = getRdlRelease(sourceKey, releaseKey);
   const detail = state.status === "ready" ? state.detail : null;
+  const labels = detailLabels(detail?.record.entityType ?? entityType);
 
   const sections = useMemo(() => {
     if (!detail) return [];
@@ -48,20 +60,29 @@ export function RdlEntityPage() {
       { id: "rdl-classification", label: "Classification", show: detail.classification.length > 0 },
       { id: "rdl-hierarchy", label: "Hierarchy", show: detail.hierarchy.parents.length + detail.hierarchy.children.length > 0 },
       { id: "rdl-properties", label: "Properties", show: detail.properties.length > 0 },
-      { id: "rdl-related-classes", label: "Related Classes", show: detail.relatedClasses.length > 0 },
+      { id: "rdl-units-of-measure", label: "Units of Measure", show: detail.unitsOfMeasure.length > 0 },
+      { id: "rdl-allowed-values", label: "Allowed Values", show: detail.allowedValues.length > 0 },
+      { id: "rdl-related-classes", label: labels.relatedClasses, show: detail.relatedClasses.length > 0 },
+      { id: "rdl-used-by-classes", label: labels.usedByClasses, show: detail.usedByClasses.length > 0 },
       { id: "rdl-required-documents", label: "Required Documents", show: detail.requiredDocuments.length > 0 },
+      { id: "rdl-required-by-classes", label: "Required by Classes", show: detail.requiredByClasses.length > 0 },
+      { id: "rdl-disciplines", label: "Discipline Requirements", show: detail.disciplines.length > 0 },
+      { id: "rdl-document-types", label: "Document Types", show: detail.documentTypes.length > 0 },
       { id: "rdl-information-requirements", label: "Information Requirements", show: detail.informationRequirements.length > 0 },
       { id: "rdl-source-standards", label: "Source Standards", show: detail.sourceStandards.length > 0 },
+      { id: "rdl-property-mappings", label: "Property Mappings", show: detail.propertyMappings.length > 0 },
+      { id: "rdl-picklist-values", label: "Picklist Values", show: detail.controlledValues.length > 0 },
       { id: "rdl-provenance", label: "Provenance", show: true },
     ];
     return items.filter((item) => item.show);
-  }, [detail]);
+  }, [detail, labels.relatedClasses, labels.usedByClasses]);
 
   if (state.status === "loading") return <div className="content-page"><div role="status" className="rdl-search-state">Loading release-aware RDL entity detail…</div></div>;
   if (state.status === "error") return <div className="content-page"><div role="alert" className="rdl-search-state"><strong>RDL entity detail could not be loaded</strong><span>{state.message}</span><Link to="/search">Return to global search</Link></div></div>;
   if (state.status === "missing" || !detail || !source || !release) return <div className="content-page"><div className="rdl-search-state"><strong>RDL entity not found in this release</strong><Link to="/search">Return to global search</Link></div></div>;
 
   const record = detail.record;
+  const sectionKey = `${record.sourceKey}:${record.releaseKey}:${record.entityType}:${record.nativeIdentifier}`;
   return <div className="content-page rdl-entity-page rdl-rich-entity-page">
     <Link className="rdl-back-link" to={`/search?source=${encodeURIComponent(record.sourceKey)}&release=${encodeURIComponent(record.releaseKey)}&q=${encodeURIComponent(record.nativeIdentifier)}`}><ArrowLeft size={16} />Back to search</Link>
 
@@ -90,11 +111,19 @@ export function RdlEntityPage() {
       <div className="rdl-detail-hierarchy"><HierarchyLinks title="Parent" items={detail.hierarchy.parents} /><HierarchyLinks title="Children" items={detail.hierarchy.children} /></div>
     </section>}
 
-    <RdlRelationshipSection id="rdl-properties" title="Properties" items={detail.properties} />
-    <RdlRelationshipSection id="rdl-related-classes" title="Related Classes" items={detail.relatedClasses} />
-    <RdlRelationshipSection id="rdl-required-documents" title="Required Documents" items={detail.requiredDocuments} />
-    <RdlRelationshipSection id="rdl-information-requirements" title="Information Requirements" items={detail.informationRequirements} />
-    <RdlRelationshipSection id="rdl-source-standards" title="Source Standards" items={detail.sourceStandards} />
+    <RdlRelationshipSection key={`${sectionKey}:properties`} id="rdl-properties" title="Properties" items={detail.properties} />
+    <RdlRelationshipSection key={`${sectionKey}:units`} id="rdl-units-of-measure" title="Units of Measure" items={detail.unitsOfMeasure} />
+    <RdlRelationshipSection key={`${sectionKey}:values`} id="rdl-allowed-values" title="Allowed Values" items={detail.allowedValues} />
+    <RdlRelationshipSection key={`${sectionKey}:related`} id="rdl-related-classes" title={labels.relatedClasses} items={detail.relatedClasses} />
+    <RdlRelationshipSection key={`${sectionKey}:used-by`} id="rdl-used-by-classes" title={labels.usedByClasses} items={detail.usedByClasses} />
+    <RdlRelationshipSection key={`${sectionKey}:required-docs`} id="rdl-required-documents" title="Required Documents" items={detail.requiredDocuments} />
+    <RdlRelationshipSection key={`${sectionKey}:required-by`} id="rdl-required-by-classes" title="Required by Classes" items={detail.requiredByClasses} />
+    <RdlRelationshipSection key={`${sectionKey}:disciplines`} id="rdl-disciplines" title="Discipline Requirements" items={detail.disciplines} />
+    <RdlRelationshipSection key={`${sectionKey}:documents`} id="rdl-document-types" title="Document Types" items={detail.documentTypes} />
+    <RdlRelationshipSection key={`${sectionKey}:information`} id="rdl-information-requirements" title="Information Requirements" items={detail.informationRequirements} />
+    <RdlRelationshipSection key={`${sectionKey}:standards`} id="rdl-source-standards" title="Source Standards" items={detail.sourceStandards} />
+    <RdlRelationshipSection key={`${sectionKey}:property-mappings`} id="rdl-property-mappings" title="Property Mappings" items={detail.propertyMappings} />
+    <RdlRelationshipSection key={`${sectionKey}:picklist-values`} id="rdl-picklist-values" title="Picklist Values" items={detail.controlledValues} />
 
     <section className="rdl-detail-section" id="rdl-provenance" aria-labelledby="rdl-provenance-heading">
       <h2 id="rdl-provenance-heading">Provenance</h2>
