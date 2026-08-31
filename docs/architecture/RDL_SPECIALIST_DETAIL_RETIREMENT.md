@@ -4,7 +4,7 @@
 
 RDL-031 introduced a release-aware generic rich entity-detail architecture. RDL-032 extended that projection to specialist CFIHOS parity and converged the historic CFIHOS detail URL families through a compatibility redirect.
 
-After convergence, the historic specialist detail implementations inside the browse-page modules became unreachable through application routing. Keeping them would preserve two implementations of the same semantics and create unnecessary drift risk.
+After convergence, the historic specialist detail implementations inside the browse-page modules became unreachable through application routing. RDL-033 removes those duplicate implementations and the residual page-local CSS that supported them.
 
 ## Target architecture
 
@@ -43,9 +43,10 @@ A specialist-named CFIHOS browse page may still provide:
 - source-native hierarchy browsing;
 - source-native list/search presentation;
 - browse filters such as Unit dimension;
-- navigation to an entity identifier.
+- navigation to an entity identifier;
+- page-local styling required by those browse/list surfaces.
 
-It must not own a second entity-detail projection or load detail-only relationships based on a URL parameter.
+It must not own a second entity-detail projection, load detail-only relationships from a route parameter, or retain unreachable CSS for a retired detail implementation.
 
 ## Scope guard responsibilities
 
@@ -64,15 +65,30 @@ Detail routing is not a responsibility of this guard after RDL-032.
 
 The adapter must not use a mutable default-release lookup.
 
+## CSS ownership after RDL-033.2
+
+The seven historic page stylesheets remain because the browse/list pages are still source-native CFIHOS surfaces. Their ownership is now limited to classes referenced by active TSX.
+
+The deterministic contract scans the active TSX source and rejects orphan classes in these stylesheets. It also checks representative retired-detail selectors are absent and browse-critical selectors remain.
+
+This provides a simple architectural invariant:
+
+> A specialist browse stylesheet may style an active browse surface, but it may not preserve a hidden second detail UI.
+
+The cleanup retains `uom-detail` because that class is still the active right-hand browse-layout container. Retired nested Unit detail classes such as `uom-detail-inner`, `uom-detail-header` and `uom-detail-row` are removed.
+
 ## Retirement safety rules
 
-1. Do not remove a browse route while retiring detail code.
+1. Do not remove a browse route while retiring detail code or styles.
 2. Do not remove a repository solely because one retired page stopped importing it.
-3. Do not change search or relationship index generation as part of code retirement.
+3. Do not change search or relationship index generation as part of code/style retirement.
 4. Do not change canonical entity-detail semantics.
 5. Preserve RDL-030 release isolation, RDL-031 navigation and RDL-032 parity/convergence contracts.
-6. Treat GitHub Chromium as the authoritative proof that browser behavior remains unchanged.
+6. Retain only page-local CSS classes that are referenced by active TSX.
+7. Treat GitHub Chromium as the authoritative proof that browser behavior and accessibility remain unchanged.
 
-## RDL-033.1 result
+## RDL-033 result
 
-The seven browse modules retain browse/search responsibilities but no longer contain route-param-driven specialist detail implementations. The combined retained TypeScript browse-page surface is constrained by the deterministic RDL-033 contract so future work cannot silently reintroduce large parallel detail implementations.
+RDL-033.1 reduced the seven specialist page modules to browse/search responsibilities only. RDL-033.2 then removes their unreachable specialist-detail styling and strengthens the deterministic contract so residual CSS cannot silently accumulate again.
+
+The resulting architecture has one detail renderer and seven lightweight CFIHOS browse/list entry points, with legacy URL compatibility preserved through an explicit release-pinned adapter.

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 
 const read = (path: string) => readFileSync(path, "utf8");
 const must = (condition: boolean, message: string) => assert.ok(condition, message);
@@ -165,7 +166,81 @@ must(regression.includes("canonical entity detail UX"), "application regression 
 must(regression.includes("RdlRelationshipSection.tsx"), "application regression contract does not verify canonical progressive disclosure");
 must(!regression.includes('id="dictionary-units"'), "application regression contract still requires retired specialist property anchors");
 must(!regression.includes('id="source-standard-properties"'), "application regression contract still requires retired specialist Source Standard anchors");
-
 must(packageJson.includes('"test:rdl-033"'), "RDL-033 package test script missing");
 
-console.log(`PASS RDL-033 specialist detail code retirement foundation (${retiredPageLines} retained browse-page lines)`);
+function collectTsx(dir: string): string[] {
+  const values: string[] = [];
+  for (const name of readdirSync(dir)) {
+    const path = join(dir, name);
+    const stat = statSync(path);
+    if (stat.isDirectory()) values.push(...collectTsx(path));
+    else if (name.endsWith(".tsx")) values.push(read(path));
+  }
+  return values;
+}
+
+const allTsx = collectTsx("src").join("\n");
+const cssClassPattern = /\.([A-Za-z][A-Za-z0-9_-]*)/g;
+const cssTargets = [
+  {
+    path: "src/pages/TagClassesPage.css",
+    required: ["tag-explorer", "tag-browser-panel", "tag-tree-row", "tag-detail-panel", "tag-empty-selection"],
+    forbidden: ["tag-property-drawer", "tag-required-documents-section", "tag-jip33-section", "tag-standards-section", "tag-properties-section"],
+  },
+  {
+    path: "src/pages/EquipmentClassesPage.css",
+    required: ["equipment-explorer", "equipment-browser-panel", "equipment-tree-row", "equipment-detail-panel", "equipment-empty-selection"],
+    forbidden: ["equipment-property-drawer", "equipment-required-documents-section", "equipment-standards-section", "equipment-properties-section", "equipment-related-classes-section"],
+  },
+  {
+    path: "src/pages/DocumentTypesPage.css",
+    required: ["document-explorer", "document-browser", "document-list-item", "document-detail", "document-empty"],
+    forbidden: ["document-details-content", "document-class-requirement-table", "document-jip33-list", "document-on-this-page", "document-usage-section"],
+  },
+  {
+    path: "src/pages/DataDictionaryPage.css",
+    required: ["dictionary-explorer", "dictionary-browser", "dictionary-property-item", "dictionary-detail", "dictionary-empty"],
+    forbidden: ["dictionary-details-content", "dictionary-picklist-table", "dictionary-unit-grid", "dictionary-page-contents", "dictionary-section-anchor"],
+  },
+  {
+    path: "src/pages/SourceStandardsPage.css",
+    required: ["source-standard-explorer", "source-standard-browser", "source-standard-list-item", "source-standard-detail", "source-standard-empty"],
+    forbidden: ["source-standard-details-content", "source-standard-picklist-table", "source-standard-property-table", "source-standard-page-contents", "source-standard-class-table"],
+  },
+  {
+    path: "src/pages/DisciplinesPage.css",
+    required: ["discipline-explorer", "discipline-browser", "discipline-list-item", "discipline-detail", "discipline-empty"],
+    forbidden: ["discipline-details-content", "discipline-table", "discipline-documents-section", "discipline-lifecycle-summary", "discipline-details-button"],
+  },
+  {
+    path: "src/pages/UnitsOfMeasurePage.css",
+    required: ["uom-explorer", "uom-browser", "uom-list-item", "uom-detail", "uom-empty-selection"],
+    forbidden: ["uom-detail-inner", "uom-detail-header", "uom-detail-row", "uom-family-grid", "uom-card-grid"],
+  },
+] as const;
+
+let retainedCssLines = 0;
+let retainedCssClasses = 0;
+for (const target of cssTargets) {
+  const css = read(target.path);
+  retainedCssLines += lineCount(css);
+  const classes = new Set(Array.from(css.matchAll(cssClassPattern), (match) => match[1]));
+  retainedCssClasses += classes.size;
+
+  for (const required of target.required) {
+    must(classes.has(required), `${target.path} lost browse selector: ${required}`);
+  }
+  for (const forbidden of target.forbidden) {
+    must(!classes.has(forbidden), `${target.path} still contains retired detail selector: ${forbidden}`);
+  }
+  for (const cssClass of classes) {
+    must(allTsx.includes(cssClass), `${target.path} contains orphan CSS class with no TSX reference: ${cssClass}`);
+  }
+}
+
+must(retainedCssLines < 2200, `specialist CSS retirement did not materially reduce the stylesheet surface (${retainedCssLines} lines)`);
+must(retainedCssClasses < 150, `specialist CSS retirement left too many page-local classes (${retainedCssClasses})`);
+
+console.log(
+  `PASS RDL-033 specialist detail retirement and CSS simplification (${retiredPageLines} browse TSX lines; ${retainedCssLines} browse CSS lines; ${retainedCssClasses} referenced CSS classes)`,
+);
