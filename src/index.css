@@ -974,7 +974,7 @@ a {
 .rdl-scope-selector-group { display:flex; align-items:center; gap:8px; min-width:0; }
 .rdl-scope-selector-group .rdl-scope-selector + .rdl-scope-selector { border-left:0; padding-left:0; min-width:180px; }
 .rdl-release-selector select { max-width:185px; }
-.rdl-status-superseded { background:#eef0ef; color:#65736e; }
+.rdl-status-superseded { background:#eef0ef; color:#596763; }
 .rdl-source-card > p { min-height:0; }
 .rdl-release-list { display:grid; gap:8px; margin:14px 0; }
 .rdl-release-list-row { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:10px; border:1px solid #e2e9e6; border-radius:10px; background:#fafcfb; }

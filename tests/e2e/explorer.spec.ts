@@ -6,10 +6,12 @@ test("core Explorer navigation is available", async ({ page }) => {
     page.getByRole("heading", { name: "Explore reference data. Understand the source.", level: 1 }),
   ).toBeVisible();
 
+  await page.getByRole("button", { name: /Information/i }).click();
   await page.getByRole("link", { name: "Document Types", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Document Types", level: 1 })).toBeVisible();
 
-  await page.getByRole("link", { name: "About RDL Explorer" }).click();
+  await page.getByRole("button", { name: /Help/i }).click();
+  await page.getByRole("link", { name: "About RDL Explorer", exact: true }).click();
   await expect(page).toHaveURL(/\/about$/);
 
   await page.getByRole("link", { name: "User Guide", exact: true }).click();
@@ -54,12 +56,12 @@ test("global RDL search preserves source and typed identity", async ({ page }) =
   await expect(page).toHaveURL(/\/search\?/);
   await expect(page.getByText("Tag Class", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Equipment Class", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("CFIHOS · 2.0", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("CFIHOS · 2.0 · reviewed", { exact: true }).first()).toBeVisible();
 
   await page.getByLabel("Source").selectOption("water-desalination");
   await page.getByLabel("Global RDL search query").fill("water");
   await page.getByRole("button", { name: "Search", exact: true }).last().click();
-  await expect(page.getByText(/Water \/ Desalination · 0.1 draft/).first()).toBeVisible();
+  await expect(page.getByText("Water / Desalination · 2.0 candidate · candidate", { exact: true }).first()).toBeVisible();
 });
 
 test("cross-RDL intelligence keeps derived matches governed", async ({ page }) => {
@@ -224,7 +226,7 @@ test("AI standards intelligence is fail-closed and evidence-backed", async ({ pa
   await page.goto("/ai-intelligence");
   await expect(page.getByRole("heading", { name: "AI Standards Intelligence" })).toBeVisible();
   await expect(page.getByText("Read-only demonstration mode", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Evidence" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Evidence", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Governance guardrails" })).toBeVisible();
   await expect(page.getByText(/cannot approve extensions/i)).toBeVisible();
 });
@@ -448,12 +450,18 @@ test("enterprise workflow pages are truthful all-RDL views", async ({ page }) =>
   await expect(page.getByText("RDL VIEW", { exact: true })).toBeVisible();
 });
 
-test("sidebar sections collapse and active section reopens", async ({ page }) => {
+test("sidebar keeps the active section open and permits inactive sections to collapse", async ({ page }) => {
   await page.goto("/control-tower");
   const operate = page.getByRole("button", { name: /Operate/i });
   await expect(operate).toHaveAttribute("aria-expanded", "true");
+
+  // The active route keeps its section visible even when the persisted expansion is toggled off.
   await operate.click();
-  await expect(operate).toHaveAttribute("aria-expanded", "false");
+  await expect(operate).toHaveAttribute("aria-expanded", "true");
+
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: /Operate/i })).toHaveAttribute("aria-expanded", "false");
+
   await page.goto("/work-queue");
   await expect(page.getByRole("button", { name: /Operate/i })).toHaveAttribute("aria-expanded", "true");
 });

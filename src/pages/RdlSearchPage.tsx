@@ -55,8 +55,8 @@ export function RdlSearchPage() {
         <Search size={19} /><input name="q" type="search" defaultValue={query} placeholder="Class, property, document, identifier…" aria-label="Global RDL search query" /><button type="submit">Search</button>
       </form>
       <div className="rdl-search-toolbar">
-        <label>Source <select value={source} onChange={(event) => changeSource(event.target.value)}><option value="all">All current RDLs</option>{RDL_SOURCES.map((item) => <option value={item.key} key={item.key}>{item.shortName}</option>)}</select></label>
-        {sourceDefinition && releaseKey && <label>Release <select value={releaseKey} onChange={(event) => { const next = new URLSearchParams(params); next.set("release", event.target.value); setParams(next); }}>{sourceDefinition.releases.map((release) => <option key={release.key} value={release.key}>{release.versionLabel} · {release.status}</option>)}</select></label>}
+        <label>Source <select aria-label="Source" value={source} onChange={(event) => changeSource(event.target.value)}><option value="all">All current RDLs</option>{RDL_SOURCES.map((item) => <option value={item.key} key={item.key}>{item.shortName}</option>)}</select></label>
+        {sourceDefinition && releaseKey && <label>Release <select aria-label="Release" value={releaseKey} onChange={(event) => { const next = new URLSearchParams(params); next.set("release", event.target.value); setParams(next); }}>{sourceDefinition.releases.map((release) => <option key={release.key} value={release.key}>{release.versionLabel} · {release.status}</option>)}</select></label>}
         {state === "ready" && query && <span>{results.length} result{results.length === 1 ? "" : "s"}{results.length === 80 ? " (first 80)" : ""}</span>}
       </div>
       {state === "loading" && <div className="rdl-search-state" role="status">Loading RDL search index…</div>}

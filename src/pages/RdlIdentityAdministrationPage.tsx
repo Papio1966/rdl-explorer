@@ -100,15 +100,15 @@ export function RdlIdentityAdministrationPage() {
 
       <section aria-labelledby="directory-heading">
         <h2 id="directory-heading">Enterprise identity directory</h2>
-        <div className="identity-table" tabIndex={0} aria-label="Enterprise identity directory">
-          <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Direct roles</th></tr></thead><tbody>{data.users.length ? data.users.map((user) => <tr key={user.subject_key}><th scope="row">{user.display_name}<br /><small>{user.email}</small></th><td><code>{user.subject_key}</code></td><td>{user.status}</td><td>{user.direct_roles.length ? user.direct_roles.join(", ") : "None"}</td></tr>) : <tr><td colSpan={4}>No enterprise identities recorded.</td></tr>}</tbody></table>
+        <div className="identity-table" tabIndex={0}>
+          <table aria-label="Enterprise identity directory"><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Direct roles</th></tr></thead><tbody>{data.users.length ? data.users.map((user) => <tr key={user.subject_key}><th scope="row">{user.display_name}<br /><small>{user.email}</small></th><td><code>{user.subject_key}</code></td><td>{user.status}</td><td>{user.direct_roles.length ? user.direct_roles.join(", ") : "None"}</td></tr>) : <tr><td colSpan={4}>No enterprise identities recorded.</td></tr>}</tbody></table>
         </div>
       </section>
 
       <section aria-labelledby="group-heading">
         <h2 id="group-heading">Group-to-role mappings</h2>
-        <div className="identity-table" tabIndex={0} aria-label="Enterprise group to role mappings">
-          <table><thead><tr><th>Enterprise group</th><th>RDL role</th><th>Status</th></tr></thead><tbody>{data.groupMappings.length ? data.groupMappings.map((mapping, index) => <tr key={`${mapping.group_key}:${mapping.role_key}:${index}`}><th scope="row">{mapping.group_key}</th><td>{mapping.role_key}</td><td>{mapping.status}</td></tr>) : <tr><td colSpan={3}>No group mappings configured.</td></tr>}</tbody></table>
+        <div className="identity-table" tabIndex={0}>
+          <table aria-label="Enterprise group to role mappings"><thead><tr><th>Enterprise group</th><th>RDL role</th><th>Status</th></tr></thead><tbody>{data.groupMappings.length ? data.groupMappings.map((mapping, index) => <tr key={`${mapping.group_key}:${mapping.role_key}:${index}`}><th scope="row">{mapping.group_key}</th><td>{mapping.role_key}</td><td>{mapping.status}</td></tr>) : <tr><td colSpan={3}>No group mappings configured.</td></tr>}</tbody></table>
         </div>
       </section>
 
