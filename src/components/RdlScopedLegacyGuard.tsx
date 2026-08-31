@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getRdlRelease, getRdlSource, rdlEntityRoute } from "../rdl/catalog";
 import { useRdlScope } from "../rdl/RdlScopeContext";
 import { loadRdlSearchIndex, type RdlSearchRecord } from "../rdl/search";
+import { RdlReleaseAwareBrowse } from "./RdlReleaseAwareBrowse";
 
 type Props = { children: ReactNode; entityType?: string; title: string; specialized?: boolean };
 
@@ -12,7 +13,7 @@ export function RdlScopedLegacyGuard({ children, entityType, title, specialized 
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    if (scope === "cfihos" || scope === "all") return;
+    if (scope === "cfihos" || scope === "all" || (entityType === "tag_class" && !specialized)) return;
     let active = true;
     setRecords(null);
     setFailed(false);
@@ -20,11 +21,33 @@ export function RdlScopedLegacyGuard({ children, entityType, title, specialized 
       .then((items) => active && setRecords(items.filter((item) => item.sourceKey === scope && item.releaseKey === releaseKey && (!entityType || item.entityType === entityType))))
       .catch(() => active && setFailed(true));
     return () => { active = false; };
-  }, [scope, releaseKey, entityType]);
+  }, [scope, releaseKey, entityType, specialized]);
 
   const source = getRdlSource(scope);
   const release = getRdlRelease(scope, releaseKey ?? undefined);
   if (scope === "cfihos" || scope === "all") return <>{children}</>;
+
+  if (entityType === "tag_class" && !specialized) {
+    if (!releaseKey) {
+      return (
+        <div className="content-page rdl-scope-guard-page">
+          <section className="enterprise-section-card rdl-scope-empty">
+            <h2>No release selected</h2>
+            <p>Select an explicit RDL release before browsing {title.toLocaleLowerCase()}.</p>
+          </section>
+        </div>
+      );
+    }
+    return (
+      <RdlReleaseAwareBrowse
+        key={`${scope}:${releaseKey}:${entityType}`}
+        sourceKey={scope}
+        releaseKey={releaseKey}
+        entityType={entityType}
+        title={title}
+      />
+    );
+  }
 
   return (
     <div className="content-page rdl-scope-guard-page">

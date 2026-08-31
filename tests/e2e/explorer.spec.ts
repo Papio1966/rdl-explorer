@@ -395,13 +395,24 @@ test("legacy CFIHOS Discipline detail route converges to generic Document Types"
 test("RDL scope switch never falls back to CFIHOS content", async ({ page }) => {
   await page.goto("/classes/tag");
   const selector = page.getByRole("combobox", { name: "Active RDL search scope" });
+
   await selector.selectOption("water-desalination");
-  await expect(page.getByText("Water / Desalination RDL Extension", { exact: true })).toBeVisible();
-  await expect(page.getByText("WATERRDL-31000001", { exact: true })).toBeVisible();
+  let browse = page.locator(".rdl-release-browse");
+  await expect(browse).toBeVisible();
+  await expect(browse).toHaveAttribute("data-source-key", "water-desalination");
+  await expect(browse).toHaveAttribute("data-release-key", "water-desalination-2.0-candidate");
+  let search = browse.getByRole("searchbox", { name: "Search tag classes" });
+  await search.fill("WATERRDL-31000001");
+  await expect(browse.getByText("WATERRDL-31000001", { exact: true })).toBeVisible();
   await expect(page.getByText(/CFIHOS-30000001/)).toHaveCount(0);
 
   await selector.selectOption("ccus");
-  await expect(page.getByText("CCUSRDL-31000001", { exact: true })).toBeVisible();
+  browse = page.locator(".rdl-release-browse");
+  await expect(browse).toHaveAttribute("data-source-key", "ccus");
+  await expect(browse).toHaveAttribute("data-release-key", "ccus-2.0-candidate");
+  search = browse.getByRole("searchbox", { name: "Search tag classes" });
+  await search.fill("CCUSRDL-31000001");
+  await expect(browse.getByText("CCUSRDL-31000001", { exact: true })).toBeVisible();
   await expect(page.getByText(/WATERRDL-31000001/)).toHaveCount(0);
 });
 
