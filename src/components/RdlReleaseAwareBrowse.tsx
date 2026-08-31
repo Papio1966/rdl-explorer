@@ -1,4 +1,5 @@
 import {
+  Boxes,
   ChevronDown,
   ChevronRight,
   CircleAlert,
@@ -163,6 +164,14 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
 
   const source = getRdlSource(sourceKey);
   const release = getRdlRelease(sourceKey, releaseKey);
+  const singularTitle = entityType === "tag_class"
+    ? "Tag Class"
+    : entityType === "equipment_class"
+      ? "Equipment Class"
+      : title.endsWith("s")
+        ? title.slice(0, -1)
+        : title;
+  const EmptyIcon = entityType === "equipment_class" ? Boxes : Tags;
 
   function openRecord(record: RdlSearchRecord) {
     navigate(
@@ -241,8 +250,8 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
 
       <section className="rdl-release-browse-detail-panel">
         <div className="rdl-release-browse-empty-selection">
-          <div className="rdl-release-browse-empty-icon"><Tags size={28} /></div>
-          <h2>Select a {title.endsWith("s") ? title.slice(0, -1) : title}</h2>
+          <div className="rdl-release-browse-empty-icon"><EmptyIcon size={28} /></div>
+          <h2>Select a {singularTitle}</h2>
           <p>
             Browse the release hierarchy or search by engineering name or native identifier.
             Selecting an entity opens its canonical release-aware detail.

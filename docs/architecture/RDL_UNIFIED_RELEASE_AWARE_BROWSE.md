@@ -30,3 +30,25 @@ Malformed cycles or disconnected hierarchy fragments must not hide entities; unr
 ## Release status
 
 No UI routing decision may branch on `draft`, `candidate`, `reviewed`, `superseded`, or similar lifecycle labels. Those labels remain provenance/governance metadata.
+
+## RDL-034.2 — Equipment Class convergence
+
+The shared class-browse boundary now covers both normalized class entity types:
+
+```text
+/classes/tag
+/classes/equipment
+      |
+      +-- CFIHOS -----------------> existing specialist browse page
+      |
+      '-- Water / CCUS -----------> RdlReleaseAwareBrowse
+                                     |-- exact sourceKey
+                                     |-- exact releaseKey
+                                     |-- explicit entityType
+                                     |-- authoritative entity_parent hierarchy
+                                     '-- canonical release-aware detail
+```
+
+Water / Desalination 2.0 candidate contains 50 Equipment Classes with 49 parent relationships. CCUS 2.0 candidate contains 61 Equipment Classes with 60 parent relationships. Each therefore forms a complete rooted hierarchy without inferred parentage.
+
+The generic shell may vary labels and decorative iconography by entity type, but source identity or release lifecycle status never selects a different navigation model.
