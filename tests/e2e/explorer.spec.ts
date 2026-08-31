@@ -269,13 +269,13 @@ test("legacy CFIHOS Tag Class detail route converges to generic detail", async (
     "href",
     "#rdl-properties",
   );
-  await expect(contents.getByRole("link", { name: "Required Documents", exact: true })).toHaveAttribute(
-    "href",
-    "#rdl-required-documents",
-  );
+
+  // RDL-032.3C: no empty optional relationship section.
+  // CFIHOS-30000521 has no Tag / Model_Part row in "document required per class".
+  await expect(contents.getByRole("link", { name: "Required Documents", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Required Documents", level: 2 })).toHaveCount(0);
 
   await expect(page.getByRole("heading", { name: "Related Equipment Classes", level: 2 })).toHaveCount(1);
-  await expect(page.getByRole("heading", { name: "Required Documents", level: 2 })).toHaveCount(1);
   await expect(page.getByRole("heading", { name: "Information Requirements", level: 2 })).toHaveCount(1);
   await expect(page.getByRole("heading", { name: "Source Standards", level: 2 })).toHaveCount(1);
 
@@ -287,8 +287,18 @@ test("legacy CFIHOS Tag Class detail route converges to generic detail", async (
   await showAllProperties.click();
   await expect(page.getByRole("button", { name: "Show less", exact: true }).first()).toBeVisible();
   expect(await propertyCards.count()).toBeGreaterThan(10);
-});
 
+  // RDL-032.3C: authoritative Tag requirements remain visible when they exist.
+  await page.goto("/classes/tag/CFIHOS-30000912");
+  await expect(page).toHaveURL(/\/rdl\/cfihos\/cfihos-2\.0\/tag_class\/CFIHOS-30000912$/);
+  const requiredContents = page.getByRole("navigation", { name: "On this page" });
+  await expect(requiredContents.getByRole("link", { name: "Required Documents", exact: true })).toHaveAttribute(
+    "href",
+    "#rdl-required-documents",
+  );
+  await expect(page.getByRole("heading", { name: "Required Documents", level: 2 })).toHaveCount(1);
+  await expect(page.locator("#rdl-required-documents .rdl-detail-relationship-card")).toHaveCount(5);
+});
 test("legacy CFIHOS Document Type detail route converges to generic detail", async ({ page }) => {
   await page.goto("/documents/CFIHOS-70000007");
   await expect(page).toHaveURL(/\/rdl\/cfihos\/cfihos-2\.0\/document_type\/CFIHOS-70000007$/);

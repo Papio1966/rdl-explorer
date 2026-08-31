@@ -10,6 +10,20 @@ const explorerE2e = read("tests/e2e/explorer.spec.ts");
 const convergenceE2e = read("tests/e2e/rdl-legacy-route-convergence.spec.ts");
 const packageJson = read("package.json");
 
+const workbook = JSON.parse(read("public/cfihos-workbook.json")) as {
+  sheets: Record<string, { rows: Array<Record<string, unknown>> }>;
+};
+const classDocumentRows = workbook.sheets["document required per class"]?.rows ?? [];
+const normalize = (value: unknown) => String(value ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+const tagDocumentRows = (classId: string) => classDocumentRows.filter((row) => {
+  const rowClassId = String(row["tag or equipment class CFIHOS unique code"] ?? "").trim();
+  const assetType = normalize(row["asset type reference"]);
+  return rowClassId === classId && (assetType === "tag" || assetType === "model_part" || assetType === "model/part");
+});
+
+must(tagDocumentRows("CFIHOS-30000521").length === 0, "CFIHOS-30000521 unexpectedly gained an authoritative Tag/Model_Part document requirement");
+must(tagDocumentRows("CFIHOS-30000912").length > 10, "CFIHOS-30000912 no longer proves authoritative Tag Required Documents parity");
+
 const routeExpectations = [
   ["/classes/tag/:tagClassId", "tag_class", "tagClassId"],
   ["/classes/equipment/:equipmentClassId", "equipment_class", "equipmentClassId"],
@@ -56,6 +70,8 @@ must(redirect.includes("replace"), "legacy redirect should replace browser histo
 must(!redirect.includes("getDefaultReleaseKey"), "legacy redirect must not infer the CFIHOS release from a mutable default");
 
 must(explorerE2e.includes("legacy CFIHOS Tag Class detail route converges to generic detail"), "Explorer regression suite does not validate Tag Class convergence");
+must(explorerE2e.includes("RDL-032.3C: no empty optional relationship section"), "Explorer regression suite does not enforce truthful omission of empty optional sections");
+must(explorerE2e.includes("CFIHOS-30000912") && explorerE2e.includes("RDL-032.3C: authoritative Tag requirements remain visible"), "Explorer regression suite does not prove Tag Required Documents when authoritative rows exist");
 must(explorerE2e.includes("#rdl-properties"), "Explorer regression suite still expects specialist Tag Class anchors");
 must(explorerE2e.includes("#rdl-units-of-measure"), "Explorer regression suite still expects specialist Property anchors");
 must(explorerE2e.includes("#rdl-property-mappings"), "Explorer regression suite still expects specialist Source Standard anchors");
