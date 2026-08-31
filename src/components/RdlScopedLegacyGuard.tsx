@@ -9,11 +9,12 @@ type Props = { children: ReactNode; entityType?: string; title: string; speciali
 
 export function RdlScopedLegacyGuard({ children, entityType, title, specialized = false }: Props) {
   const { scope, releaseKey } = useRdlScope();
+  const usesSharedClassBrowse = !specialized && (entityType === "tag_class" || entityType === "equipment_class");
   const [records, setRecords] = useState<RdlSearchRecord[] | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    if (scope === "cfihos" || scope === "all" || (entityType === "tag_class" && !specialized)) return;
+    if (scope === "cfihos" || scope === "all" || usesSharedClassBrowse) return;
     let active = true;
     setRecords(null);
     setFailed(false);
@@ -21,13 +22,13 @@ export function RdlScopedLegacyGuard({ children, entityType, title, specialized 
       .then((items) => active && setRecords(items.filter((item) => item.sourceKey === scope && item.releaseKey === releaseKey && (!entityType || item.entityType === entityType))))
       .catch(() => active && setFailed(true));
     return () => { active = false; };
-  }, [scope, releaseKey, entityType, specialized]);
+  }, [scope, releaseKey, entityType, usesSharedClassBrowse]);
 
   const source = getRdlSource(scope);
   const release = getRdlRelease(scope, releaseKey ?? undefined);
   if (scope === "cfihos" || scope === "all") return <>{children}</>;
 
-  if (entityType === "tag_class" && !specialized) {
+  if (usesSharedClassBrowse && entityType) {
     if (!releaseKey) {
       return (
         <div className="content-page rdl-scope-guard-page">
