@@ -56,6 +56,9 @@ const component = read("src/components/RdlRelationshipSection.tsx");
 must(component.includes("DISCLOSURE_THRESHOLD = 10") && component.includes("COLLAPSED_COUNT = 5"), "progressive disclosure contract changed");
 must(component.includes('aria-expanded={expanded}') && component.includes("Show less"), "accessible progressive disclosure controls missing");
 
+const entityCss = read("src/pages/RdlEntityPage.css");
+must(entityCss.includes(".rdl-rich-entity-page .rdl-entity-source small") && entityCss.includes(".rdl-rich-entity-page .rdl-entity-source span") && entityCss.includes("color: #52615c"), "RDL source metadata contrast repair missing");
+
 const packageJson = read("package.json");
 must(packageJson.includes('"generate:rdl-relationship-index"') && packageJson.includes('"test:rdl-031"'), "RDL-031 package scripts missing");
 

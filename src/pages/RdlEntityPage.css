@@ -43,3 +43,9 @@
 @media(max-width:760px){
   .rdl-detail-contents{flex-direction:column;gap:7px}.rdl-detail-relationship-card{grid-template-columns:1fr}.rdl-detail-relationship-meta{padding-top:8px;border-top:1px solid #e6ecea}.rdl-detail-provenance{grid-template-columns:1fr}.rdl-detail-provenance dt{margin-top:5px;font-weight:750}
 }
+
+/* RDL-031.8: WCAG AA contrast repair for the release/source metadata card. */
+.rdl-rich-entity-page .rdl-entity-source small,
+.rdl-rich-entity-page .rdl-entity-source span {
+  color: #52615c;
+}
