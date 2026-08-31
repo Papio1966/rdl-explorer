@@ -13,6 +13,10 @@ export const WATER_DESALINATION_V2_CFIHOS_FORMAT_PROFILE: RdlWorkbookMappingProf
   releaseStatus: "candidate",
   workbookPath: "data/rdl/water-desalination/releases/Water_Desalination_RDL_Extension_CFIHOS_Format_v2.0_Candidate_ReleaseSafe.xlsx",
   sourceUri: "repo://data/rdl/water-desalination/releases/Water_Desalination_RDL_Extension_CFIHOS_Format_v2.0_Candidate_ReleaseSafe.xlsx",
+  fields: {
+    ...CCUS_CFIHOS_FORMAT_PROFILE.fields,
+    sourceStandardName: ["source standard code"],
+  },
   identityAudit: {
     fromReleaseKey: "water-desalination-0.1-draft",
     auditPath: "data/rdl/audits/RDL-030_release_safety_audit.json",

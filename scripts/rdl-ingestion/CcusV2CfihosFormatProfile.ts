@@ -11,6 +11,10 @@ export const CCUS_V2_CFIHOS_FORMAT_PROFILE: RdlWorkbookMappingProfile = {
   releaseStatus: "candidate",
   workbookPath: "data/rdl/ccus/releases/CCUS_RDL_Extension_CFIHOS_Format_v2.0_Candidate_ReleaseSafe.xlsx",
   sourceUri: "repo://data/rdl/ccus/releases/CCUS_RDL_Extension_CFIHOS_Format_v2.0_Candidate_ReleaseSafe.xlsx",
+  fields: {
+    ...CCUS_CFIHOS_FORMAT_PROFILE.fields,
+    sourceStandardName: ["source standard code"],
+  },
   identityAudit: {
     fromReleaseKey: "ccus-0.1-draft",
     auditPath: "data/rdl/audits/RDL-030_release_safety_audit.json",

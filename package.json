@@ -28,6 +28,7 @@
     "db:ingest:water-desalination": "bash scripts/db-ingest-water-desalination.sh",
     "db:test:rdl-008": "bash scripts/db-test-rdl-008.sh",
     "generate:rdl-search-index": "tsx scripts/generate-rdl-search-index.ts",
+    "generate:rdl-relationship-index": "tsx scripts/generate-rdl-relationship-index.ts",
     "db:test:rdl-009": "bash scripts/db-test-rdl-009.sh",
     "generate:rdl-intelligence": "tsx scripts/generate-cross-rdl-intelligence.ts",
     "db:seed:rdl-010": "bash scripts/db-seed-rdl-010.sh",
@@ -73,7 +74,8 @@
     "db:finalize:rdl-030": "bash scripts/db-finalize-rdl-030.sh",
     "db:test:rdl-030": "bash scripts/db-test-rdl-030.sh",
     "db:ingest:ccus:v2": "bash scripts/db-ingest-ccus-v2.sh",
-    "db:ingest:water-desalination:v2": "bash scripts/db-ingest-water-desalination-v2.sh"
+    "db:ingest:water-desalination:v2": "bash scripts/db-ingest-water-desalination-v2.sh",
+    "test:rdl-031": "tsx scripts/test-rdl-031-rich-navigation.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",
