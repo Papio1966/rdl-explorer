@@ -14,13 +14,18 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getRdlRelease, getRdlSource, rdlEntityRoute } from "../rdl/catalog";
 import {
   loadRdlRelationshipIndex,
   type RdlRelationshipIndexRecord,
 } from "../rdl/entityDetail";
-import { loadRdlSearchIndex, type RdlSearchRecord } from "../rdl/search";
+import {
+  loadRdlSearchIndex,
+  recordMatchesRdlQuery,
+  type RdlBrowseFacetValue,
+  type RdlSearchRecord,
+} from "../rdl/search";
 import "./RdlReleaseAwareBrowse.css";
 
 type Props = {
@@ -49,6 +54,13 @@ type BrowsePresentation = {
   singularTitle: string;
   searchLabel: string;
   icon: ReactNode;
+};
+
+type FacetOption = RdlBrowseFacetValue & { count: number };
+type FacetDefinition = {
+  key: string;
+  label: string;
+  options: FacetOption[];
 };
 
 function presentationFor(entityType: string, title: string): BrowsePresentation {
@@ -140,8 +152,44 @@ function buildHierarchy(
   return { roots, hierarchyRelationshipCount: hierarchyRows.length };
 }
 
+function facetLabel(key: string): string {
+  return key
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (character) => character.toLocaleUpperCase());
+}
+
+function buildFacetDefinitions(records: RdlSearchRecord[]): FacetDefinition[] {
+  const facets = new Map<string, Map<string, FacetOption>>();
+
+  for (const record of records) {
+    for (const [key, facet] of Object.entries(record.facets ?? {})) {
+      if (!facet.value.trim()) continue;
+      const options = facets.get(key) ?? new Map<string, FacetOption>();
+      const existing = options.get(facet.value);
+      if (existing) {
+        existing.count += 1;
+        if (!existing.label && facet.label) existing.label = facet.label;
+      } else {
+        options.set(facet.value, { ...facet, count: 1 });
+      }
+      facets.set(key, options);
+    }
+  }
+
+  return [...facets.entries()]
+    .map(([key, options]) => ({
+      key,
+      label: facetLabel(key),
+      options: [...options.values()].sort((a, b) =>
+        (a.label ?? a.value).localeCompare(b.label ?? b.value, undefined, { sensitivity: "base", numeric: true }),
+      ),
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
 export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title }: Props) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -181,24 +229,37 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
     };
   }, [sourceKey, releaseKey, entityType]);
 
+  const facetDefinitions = useMemo(
+    () => state.status === "success" ? buildFacetDefinitions(state.records) : [],
+    [state],
+  );
+  const searchParamKey = searchParams.toString();
+
+  const facetFilteredRecords = useMemo(() => {
+    if (state.status !== "success") return [];
+    if (!facetDefinitions.length) return state.records;
+    return state.records.filter((record) =>
+      facetDefinitions.every((facet) => {
+        const requested = searchParams.get(facet.key);
+        if (!requested || !facet.options.some((option) => option.value === requested)) return true;
+        return record.facets?.[facet.key]?.value === requested;
+      }),
+    );
+  }, [state, facetDefinitions, searchParamKey]);
+
   const hierarchy = useMemo(() => {
     if (state.status !== "success") return { roots: [], hierarchyRelationshipCount: 0 };
-    return buildHierarchy(state.records, state.relationships);
-  }, [state]);
+    return buildHierarchy(facetFilteredRecords, state.relationships);
+  }, [state, facetFilteredRecords]);
 
   const searchResults = useMemo(() => {
-    if (state.status !== "success") return [];
-    const query = searchQuery.trim().toLocaleLowerCase();
+    const query = searchQuery.trim();
     if (!query) return [];
-    return state.records
-      .filter((record) =>
-        [record.nativeIdentifier, record.name, record.definition].some((value) =>
-          value.toLocaleLowerCase().includes(query),
-        ),
-      )
+    return facetFilteredRecords
+      .filter((record) => recordMatchesRdlQuery(record, query))
       .sort(compareRecords)
       .slice(0, 100);
-  }, [searchQuery, state]);
+  }, [searchQuery, facetFilteredRecords]);
 
   const source = getRdlSource(sourceKey);
   const release = getRdlRelease(sourceKey, releaseKey);
@@ -213,6 +274,18 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
         record.nativeIdentifier,
       ),
     );
+  }
+
+  function selectedFacetValue(facet: FacetDefinition): string {
+    const requested = searchParams.get(facet.key);
+    return requested && facet.options.some((option) => option.value === requested) ? requested : "all";
+  }
+
+  function setFacetValue(facet: FacetDefinition, value: string) {
+    const next = new URLSearchParams(searchParams);
+    if (value === "all") next.delete(facet.key);
+    else next.set(facet.key, value);
+    setSearchParams(next, { replace: true });
   }
 
   if (state.status === "loading") {
@@ -243,7 +316,8 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
     : hasHierarchy
       ? `${title} hierarchy`
       : `${title} vocabulary`;
-  const flatRecords = [...state.records].sort(compareRecords);
+  const flatRecords = [...facetFilteredRecords].sort(compareRecords);
+  const activeFacetCount = facetDefinitions.filter((facet) => selectedFacetValue(facet) !== "all").length;
 
   return (
     <div
@@ -251,6 +325,7 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
       data-source-key={sourceKey}
       data-release-key={releaseKey}
       data-browse-mode={hasHierarchy ? "hierarchy" : "flat"}
+      data-filtered-record-count={facetFilteredRecords.length}
     >
       <aside className="rdl-release-browse-panel">
         <div className="rdl-release-browse-heading">
@@ -258,7 +333,11 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
             <div className="rdl-release-browse-eyebrow">{presentation.eyebrow}</div>
             <h1>{title}</h1>
           </div>
-          <div className="rdl-release-browse-count">{state.records.length}</div>
+          <div className="rdl-release-browse-count">
+            {facetFilteredRecords.length === state.records.length
+              ? state.records.length
+              : `${facetFilteredRecords.length}/${state.records.length}`}
+          </div>
         </div>
 
         <div className="rdl-release-browse-search">
@@ -277,6 +356,28 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
           )}
         </div>
 
+        {facetDefinitions.length > 0 && (
+          <div className="rdl-release-browse-facets" role="group" aria-label={`${title} filters`}>
+            {facetDefinitions.map((facet) => (
+              <label className="rdl-release-browse-facet" key={facet.key}>
+                <span>{facet.label}</span>
+                <select
+                  aria-label={`Filter ${title} by ${facet.label}`}
+                  value={selectedFacetValue(facet)}
+                  onChange={(event) => setFacetValue(facet, event.target.value)}
+                >
+                  <option value="all">All {facet.label.toLocaleLowerCase()} values</option>
+                  {facet.options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label ?? option.value} ({option.count})
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
+        )}
+
         <div
           className="rdl-release-browse-navigation"
           role={navigationRole}
@@ -284,7 +385,7 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
         >
           {searching ? (
             <RecordList records={searchResults} onSelect={openRecord} />
-          ) : state.records.length ? (
+          ) : facetFilteredRecords.length ? (
             hasHierarchy ? (
               hierarchy.roots.map((node) => (
                 <BrowseTreeNode
@@ -296,6 +397,8 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
             ) : (
               <RecordList records={flatRecords} onSelect={openRecord} />
             )
+          ) : activeFacetCount ? (
+            <div className="rdl-release-browse-search-empty">No {title.toLocaleLowerCase()} match the selected filters.</div>
           ) : (
             <div className="rdl-release-browse-search-empty">No {title.toLocaleLowerCase()} in this release.</div>
           )}
@@ -307,7 +410,7 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
           <div className="rdl-release-browse-empty-icon">{presentation.icon}</div>
           <h2>Select a {presentation.singularTitle}</h2>
           <p>
-            {hasHierarchy ? "Browse the release hierarchy" : "Browse the release vocabulary"} or search by engineering name or native identifier.
+            {hasHierarchy ? "Browse the release hierarchy" : "Browse the release vocabulary"} or search by engineering name, native identifier or projected metadata.
             Selecting an entity opens its canonical release-aware detail.
           </p>
           <small>
@@ -315,6 +418,7 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
             {hasHierarchy
               ? ` · ${hierarchy.hierarchyRelationshipCount} authoritative parent relationship${hierarchy.hierarchyRelationshipCount === 1 ? "" : "s"}`
               : " · flat release vocabulary"}
+            {activeFacetCount ? ` · ${activeFacetCount} active filter${activeFacetCount === 1 ? "" : "s"}` : ""}
           </small>
         </div>
       </section>
@@ -358,6 +462,7 @@ function BrowseTreeNode({ node, onSelect, depth = 0 }: BrowseTreeNodeProps) {
           onClick={() => onSelect(node.record)}
         >
           <span>{node.record.name}</span>
+          <RecordBadges record={node.record} compact />
         </button>
       </div>
       {expanded && node.children.length > 0 && (
@@ -392,12 +497,31 @@ function RecordList({ records, onSelect }: { records: RdlSearchRecord[]; onSelec
           className="rdl-release-browse-search-result"
           onClick={() => onSelect(record)}
         >
-          <span className="rdl-release-browse-search-result-name">{record.name}</span>
+          <span className="rdl-release-browse-search-result-heading">
+            <span className="rdl-release-browse-search-result-name">{record.name}</span>
+            <RecordBadges record={record} />
+          </span>
+          {(record.secondaryLabel || record.tertiaryLabel) && (
+            <span className="rdl-release-browse-search-result-meta">
+              {[record.secondaryLabel, record.tertiaryLabel].filter(Boolean).join(" · ")}
+            </span>
+          )}
           <span className="rdl-release-browse-search-result-code">{record.nativeIdentifier}</span>
         </button>
       </div>
     ))}
   </>;
+}
+
+function RecordBadges({ record, compact = false }: { record: RdlSearchRecord; compact?: boolean }) {
+  if (!record.badges?.length) return null;
+  return (
+    <span className={compact ? "rdl-release-browse-badges rdl-release-browse-badges-compact" : "rdl-release-browse-badges"}>
+      {record.badges.map((badge) => (
+        <span className="rdl-release-browse-badge" key={badge}>{compact && badge === "Abstract" ? "A" : badge}</span>
+      ))}
+    </span>
+  );
 }
 
 function StatusScreen({ icon, title, message }: { icon: ReactNode; title: string; message: string }) {
