@@ -4,9 +4,12 @@ import {
   ChevronDown,
   ChevronRight,
   CircleAlert,
+  Database,
   FileText,
   LoaderCircle,
+  Ruler,
   Search,
+  Shapes,
   Tags,
   X,
 } from "lucide-react";
@@ -58,6 +61,12 @@ function presentationFor(entityType: string, title: string): BrowsePresentation 
       return { eyebrow: "Information", singularTitle: "Document Type", searchLabel: "document types", icon: <FileText size={28} /> };
     case "property":
       return { eyebrow: "Reference", singularTitle: "Property", searchLabel: "properties", icon: <BookOpen size={28} /> };
+    case "source_standard":
+      return { eyebrow: "Reference", singularTitle: "Source Standard", searchLabel: "source standards", icon: <Database size={28} /> };
+    case "discipline":
+      return { eyebrow: "Information", singularTitle: "Discipline", searchLabel: "disciplines", icon: <Shapes size={28} /> };
+    case "unit_of_measure":
+      return { eyebrow: "Reference", singularTitle: "Unit of Measure", searchLabel: "units of measure", icon: <Ruler size={28} /> };
     default:
       return {
         eyebrow: "Reference",

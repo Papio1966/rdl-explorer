@@ -9,6 +9,9 @@ const sources = [
     equipmentId: "WATERRDL-30000001",
     documentId: "WATERRDL-70000001",
     propertyId: "WATERRDL-40000001",
+    standardId: "WATERRDL-90000001",
+    disciplineId: "CFIHOS-20000007",
+    unitId: "WATERRDL-60000001",
   },
   {
     source: "ccus",
@@ -17,6 +20,9 @@ const sources = [
     equipmentId: "CCUSRDL-30000001",
     documentId: "CCUSRDL-70000001",
     propertyId: "CCUSRDL-40000001",
+    standardId: "CCUSRDL-90000001",
+    disciplineId: "CFIHOS-20000007",
+    unitId: "CCUSRDL-65000001",
   },
 ] as const;
 
@@ -25,6 +31,9 @@ const browseTypes = [
   { path: "/classes/equipment", title: "Equipment Classes", searchName: "Search equipment classes", entityType: "equipment_class", idField: "equipmentId", mode: "hierarchy" },
   { path: "/documents", title: "Document Types", searchName: "Search document types", entityType: "document_type", idField: "documentId", mode: "flat" },
   { path: "/dictionary", title: "Data Dictionary", searchName: "Search properties", entityType: "property", idField: "propertyId", mode: "flat" },
+  { path: "/standards", title: "Source Standards", searchName: "Search source standards", entityType: "source_standard", idField: "standardId", mode: "flat" },
+  { path: "/disciplines", title: "Disciplines", searchName: "Search disciplines", entityType: "discipline", idField: "disciplineId", mode: "flat" },
+  { path: "/units", title: "Units of Measure", searchName: "Search units of measure", entityType: "unit_of_measure", idField: "unitId", mode: "flat" },
 ] as const;
 
 for (const browseType of browseTypes) {
@@ -50,8 +59,8 @@ for (const browseType of browseTypes) {
   }
 }
 
-test("Water shared browse shells have no serious or critical accessibility violations", async ({ page }) => {
-  for (const browseType of browseTypes) {
+for (const browseType of browseTypes) {
+  test(`Water ${browseType.title} shared browse has no serious or critical accessibility violations`, async ({ page }) => {
     await page.goto(browseType.path);
     await page.getByRole("combobox", { name: "Active RDL search scope" }).selectOption("water-desalination");
     const browse = page.locator(".rdl-release-browse");
@@ -60,5 +69,5 @@ test("Water shared browse shells have no serious or critical accessibility viola
     const results = await new AxeBuilder({ page }).analyze();
     const blocking = results.violations.filter((violation) => violation.impact === "serious" || violation.impact === "critical");
     expect(blocking, `${browseType.title}: ${blocking.map((violation) => `${violation.id}: ${violation.help}`).join("\n")}`).toEqual([]);
-  }
-});
+  });
+}

@@ -7,7 +7,7 @@ import { RdlReleaseAwareBrowse } from "./RdlReleaseAwareBrowse";
 
 type Props = { children: ReactNode; entityType?: string; title: string; specialized?: boolean };
 
-const SHARED_BROWSE_ENTITY_TYPES = new Set(["tag_class", "equipment_class", "document_type", "property"]);
+const SHARED_BROWSE_ENTITY_TYPES = new Set(["tag_class", "equipment_class", "document_type", "property", "source_standard", "discipline", "unit_of_measure"]);
 
 export function RdlScopedLegacyGuard({ children, entityType, title, specialized = false }: Props) {
   const { scope, releaseKey } = useRdlScope();
