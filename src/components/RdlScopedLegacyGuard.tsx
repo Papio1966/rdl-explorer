@@ -26,9 +26,20 @@ export function RdlScopedLegacyGuard({ children, entityType, title, specialized 
     return () => { active = false; };
   }, [scope, releaseKey, entityType, usesSharedBrowse]);
 
+  if (scope === "all") {
+    return (
+      <div className="content-page rdl-scope-guard-page">
+        <section className="enterprise-section-card rdl-scope-empty">
+          <h2>Select an RDL source</h2>
+          <p>{title} browsing is release-specific. Select an RDL source and release before browsing this vocabulary. Cross-source discovery remains available through global search.</p>
+          <Link className="enterprise-link-button" to="/rdls">Open RDL Catalogue</Link>
+        </section>
+      </div>
+    );
+  }
+
   const source = getRdlSource(scope);
   const release = getRdlRelease(scope, releaseKey ?? undefined);
-  if (scope === "cfihos" || scope === "all") return <>{children}</>;
 
   if (usesSharedBrowse && entityType) {
     if (!releaseKey) {
@@ -51,6 +62,9 @@ export function RdlScopedLegacyGuard({ children, entityType, title, specialized 
       />
     );
   }
+
+  // Non-shared CFIHOS specialist capabilities remain available until separately converged.
+  if (scope === "cfihos") return <>{children}</>;
 
   return (
     <div className="content-page rdl-scope-guard-page">
