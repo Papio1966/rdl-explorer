@@ -78,7 +78,8 @@
     "test:rdl-031": "tsx scripts/test-rdl-031-rich-navigation.ts",
     "test:rdl-032": "tsx scripts/test-rdl-032-unified-detail-parity.ts && tsx scripts/test-rdl-032-legacy-route-convergence.ts",
     "test:rdl-033": "tsx scripts/test-rdl-033-specialist-detail-retirement.ts",
-    "test:rdl-034": "tsx scripts/test-rdl-034-unified-browse-foundation.ts"
+    "test:rdl-034": "tsx scripts/test-rdl-034-unified-browse-foundation.ts",
+    "test:rdl-035": "tsx scripts/test-rdl-035-cfihos-browse-readiness.ts"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",
