@@ -72,10 +72,14 @@ const primaryTypes = [
 for (const entityType of primaryTypes) {
   must(guard.includes(`"${entityType}"`), `shared browse boundary lost ${entityType}`);
 }
-must(
-  guard.includes('if (scope === "cfihos" || scope === "all") return <>{children}</>;'),
-  "CFIHOS specialist browse boundary must remain in place during RDL-035.2",
-);
+must(!guard.includes('if (scope === "cfihos" || scope === "all") return <>{children}</>;'), "combined CFIHOS/all specialist browse branch survived cutover");
+must(guard.includes('if (scope === "all") {'), "all-scope browse must be handled explicitly");
+must(guard.includes("Select an RDL source"), "all-scope browse does not fail closed with a truthful source-selection message");
+must(!guard.includes('if (scope === "all") return <>{children}</>;'), "all-scope browse silently exposes CFIHOS specialist content");
+must(guard.includes('if (scope === "cfihos") return <>{children}</>;'), "non-shared CFIHOS specialist fallback was removed too early");
+const sharedBranchOffset = guard.indexOf('if (usesSharedBrowse && entityType)');
+const cfihosFallbackOffset = guard.indexOf('if (scope === "cfihos") return <>{children}</>;');
+must(sharedBranchOffset >= 0 && cfihosFallbackOffset > sharedBranchOffset, "CFIHOS shared browse branch does not take precedence over the specialist fallback");
 must(!browse.toLowerCase().includes("cfihos"), "generic browse shell must remain source-neutral");
 
 for (const field of ["aliases", "searchText", "secondaryLabel", "tertiaryLabel", "badges", "facets"]) {
@@ -149,7 +153,7 @@ for (const entityType of primaryTypes) {
 }
 assert.equal(totalParents, 1678, "CFIHOS same-type hierarchy relationship total changed");
 
-// The specialist pages remain the comparison baseline until RDL-035.3 cutover.
+// Specialist pages remain in the codebase as a parity baseline until the post-Chromium cleanup increment.
 for (const token of ["parentName", "...tagClass.synonyms", "node.abstract"]) must(tagPage.includes(token), `Tag Class specialist capability missing: ${token}`);
 for (const token of ["parentName", "existenceReason", "...equipmentClass.synonyms", "node.abstract"]) must(equipmentPage.includes(token), `Equipment specialist capability missing: ${token}`);
 for (const token of ["shortCode", "classification", "...documentType.synonyms"]) must(documentPage.includes(token), `Document Type specialist capability missing: ${token}`);
@@ -234,7 +238,7 @@ function assertAliasProjection(
     sourceRowsWithAliases,
     `${label} projected alias population does not match authoritative source population`,
   );
-  console.log(`RDL-035.2 ${label} aliases: source rows=${sourceRowsWithAliases}; projected rows=${projectedRowsWithAliases}`);
+  console.log(`RDL-035.3 ${label} aliases: source rows=${sourceRowsWithAliases}; projected rows=${projectedRowsWithAliases}`);
 }
 
 assertAliasProjection("Tag Class", "tag class", "tag_class", "CFIHOS unique code", ["tag class synonym", "tag class synonym name"]);
@@ -304,7 +308,7 @@ for (const [sourceKey, releaseKey, expectedCount] of [
   assert.equal(sourceUnits.length, expectedCount, `${releaseKey} Unit count changed during metadata projection`);
   must(sourceUnits.some((record) => record.facets?.dimension?.value), `${releaseKey} does not expose a generic Unit dimension facet`);
   must(sourceUnits.some((record) => record.secondaryLabel || record.tertiaryLabel || record.searchText?.length), `${releaseKey} does not expose generic Unit browse metadata`);
-  console.log(`RDL-035.2 ${sourceKey}: ${sourceUnits.length} Units; generic metadata and dimension facet projected`);
+  console.log(`RDL-035.3 ${sourceKey}: ${sourceUnits.length} Units; generic metadata and dimension facet projected`);
 }
 
 assert.equal(
@@ -312,9 +316,23 @@ assert.equal(
   "2159133bb2c02151cecbf4cf0fbba890463d4926feb7e9568379fb85e24d2927",
   "relationship index changed during browse-metadata projection",
 );
-must(
-  sha256("public/rdl-search-index.json") !== "38f2578fa2829dfb7d79c1e4ecb35528e2ccd2de06b5f7f58b2b1fcd82100bf6",
-  "search index still has the pre-RDL-035.2 thin-projection hash",
+assert.equal(
+  sha256("public/rdl-search-index.json"),
+  "646c8e6a2ce2550832f971c943a69fc467b3ac55d8fc563748364f82d757dfcb",
+  "search index changed during CFIHOS browse convergence",
 );
 
-console.log("PASS RDL-035.2 generic browse metadata projection: source-neutral aliases, labels, badges and Unit dimension facets are ready before CFIHOS cutover");
+for (const token of [
+  'source: "cfihos"',
+  'releaseKey: "cfihos-2.0"',
+  'CFIHOS metadata search',
+  'CFIHOS ${browseType.title} shared browse has no serious or critical accessibility violations',
+]) {
+  must(browserE2e.includes(token), `GitHub Chromium CFIHOS convergence proof missing: ${token}`);
+}
+
+for (const entityType of primaryTypes) {
+  const expected = expectations[entityType];
+  console.log(`RDL-035.3 CFIHOS ${expected.label}: records=${expected.records}; parents=${expected.parents}; mode=${expected.parents ? "hierarchy" : "flat"}`);
+}
+console.log("PASS RDL-035.3 CFIHOS shared browse convergence: seven primary browse routes use the source-neutral release-aware browser with metadata parity and truthful all-scope handling");

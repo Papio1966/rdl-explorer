@@ -6,6 +6,11 @@ test("core Explorer navigation is available", async ({ page }) => {
     page.getByRole("heading", { name: "Explore reference data. Understand the source.", level: 1 }),
   ).toBeVisible();
 
+  const scope = page.getByRole("combobox", { name: "Active RDL search scope" });
+  await expect(scope).toHaveValue("all");
+  await scope.selectOption("cfihos");
+  await expect(scope).toHaveValue("cfihos");
+
   await page.getByRole("button", { name: /Information/i }).click();
   await page.getByRole("link", { name: "Document Types", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Document Types", level: 1 })).toBeVisible();
