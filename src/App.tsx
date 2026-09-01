@@ -22,9 +22,6 @@ function lazyNamed<T extends Record<string, unknown>, K extends keyof T>(
 
 const HomePage = lazyNamed(() => import("./pages/HomePage"), "HomePage");
 const DataSourcePage = lazyNamed(() => import("./pages/DataSourcePage"), "DataSourcePage");
-const TagClassesPage = lazyNamed(() => import("./pages/TagClassesPage"), "TagClassesPage");
-const EquipmentClassesPage = lazyNamed(() => import("./pages/EquipmentClassesPage"), "EquipmentClassesPage");
-const DataDictionaryPage = lazyNamed(() => import("./pages/DataDictionaryPage"), "DataDictionaryPage");
 const DocumentSchemaInspectionPage = lazyNamed(
   () => import("./pages/DocumentSchemaInspectionPage"),
   "DocumentSchemaInspectionPage",
@@ -33,15 +30,11 @@ const SourceStandardsInspectionPage = lazyNamed(
   () => import("./pages/SourceStandardsInspectionPage"),
   "SourceStandardsInspectionPage",
 );
-const DocumentTypesPage = lazyNamed(() => import("./pages/DocumentTypesPage"), "DocumentTypesPage");
-const DisciplinesPage = lazyNamed(() => import("./pages/DisciplinesPage"), "DisciplinesPage");
-const SourceStandardsPage = lazyNamed(() => import("./pages/SourceStandardsPage"), "SourceStandardsPage");
 const LifecycleRequirementsPage = lazyNamed(
   () => import("./pages/LifecycleRequirementsPage"),
   "LifecycleRequirementsPage",
 );
 const DataModelPage = lazyNamed(() => import("./pages/DataModelPage"), "DataModelPage");
-const UnitsOfMeasurePage = lazyNamed(() => import("./pages/UnitsOfMeasurePage"), "UnitsOfMeasurePage");
 const ValidationPage = lazyNamed(() => import("./pages/ValidationPage"), "ValidationPage");
 const CisPreviewPage = lazyNamed(() => import("./pages/CisPreviewPage"), "CisPreviewPage");
 const CisBuilderPage = lazyNamed(() => import("./pages/CisBuilderPage"), "CisBuilderPage");
@@ -111,21 +104,21 @@ export default function App() {
             <Route path="/tenant-admin" element={<RdlTenantAdministrationPage />} />
             <Route path="/inspect/documents" element={<DocumentSchemaInspectionPage />} />
             <Route path="/inspect/standards" element={<SourceStandardsInspectionPage />} />
-            <Route path="/classes/tag" element={<RdlScopedLegacyGuard entityType="tag_class" title="Tag Classes"><TagClassesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/classes/tag" element={<RdlScopedLegacyGuard entityType="tag_class" title="Tag Classes" />} />
             <Route path="/classes/tag/:tagClassId" element={<RdlLegacyEntityRedirect entityType="tag_class" paramName="tagClassId" />} />
-            <Route path="/classes/equipment" element={<RdlScopedLegacyGuard entityType="equipment_class" title="Equipment Classes"><EquipmentClassesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/classes/equipment" element={<RdlScopedLegacyGuard entityType="equipment_class" title="Equipment Classes" />} />
             <Route path="/classes/equipment/:equipmentClassId" element={<RdlLegacyEntityRedirect entityType="equipment_class" paramName="equipmentClassId" />} />
-            <Route path="/documents" element={<RdlScopedLegacyGuard entityType="document_type" title="Document Types"><DocumentTypesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/documents" element={<RdlScopedLegacyGuard entityType="document_type" title="Document Types" />} />
             <Route path="/documents/:documentTypeId" element={<RdlLegacyEntityRedirect entityType="document_type" paramName="documentTypeId" />} />
-            <Route path="/disciplines" element={<RdlScopedLegacyGuard entityType="discipline" title="Disciplines"><DisciplinesPage /></RdlScopedLegacyGuard>} />
+            <Route path="/disciplines" element={<RdlScopedLegacyGuard entityType="discipline" title="Disciplines" />} />
             <Route path="/disciplines/:disciplineId" element={<RdlLegacyEntityRedirect entityType="discipline" paramName="disciplineId" />} />
             <Route path="/lifecycle" element={<Navigate to="/lifecycle/detailed-engineering" replace />} />
             <Route path="/lifecycle/:lifecyclePhase" element={<RdlScopedLegacyGuard title="Lifecycle Requirements" specialized><LifecycleRequirementsPage /></RdlScopedLegacyGuard>} />
-            <Route path="/dictionary" element={<RdlScopedLegacyGuard entityType="property" title="Data Dictionary"><DataDictionaryPage /></RdlScopedLegacyGuard>} />
+            <Route path="/dictionary" element={<RdlScopedLegacyGuard entityType="property" title="Data Dictionary" />} />
             <Route path="/dictionary/:propertyId" element={<RdlLegacyEntityRedirect entityType="property" paramName="propertyId" />} />
-            <Route path="/standards" element={<RdlScopedLegacyGuard entityType="source_standard" title="Source Standards"><SourceStandardsPage /></RdlScopedLegacyGuard>} />
+            <Route path="/standards" element={<RdlScopedLegacyGuard entityType="source_standard" title="Source Standards" />} />
             <Route path="/standards/:sourceStandardId" element={<RdlLegacyEntityRedirect entityType="source_standard" paramName="sourceStandardId" />} />
-            <Route path="/units" element={<RdlScopedLegacyGuard entityType="unit_of_measure" title="Units of Measure"><UnitsOfMeasurePage /></RdlScopedLegacyGuard>} />
+            <Route path="/units" element={<RdlScopedLegacyGuard entityType="unit_of_measure" title="Units of Measure" />} />
             <Route path="/units/:unitId" element={<RdlLegacyEntityRedirect entityType="unit_of_measure" paramName="unitId" />} />
             <Route path="/model" element={<RdlScopedLegacyGuard title="Data Model" specialized><DataModelPage /></RdlScopedLegacyGuard>} />
             <Route path="/validation" element={<ValidationPage />} />

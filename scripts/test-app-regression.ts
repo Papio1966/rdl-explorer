@@ -16,13 +16,6 @@ const cisBuilder = read("src/pages/CisBuilderPage.tsx");
 const assistant = read("src/pages/AssistantPage.tsx");
 const about = read("src/pages/AboutPage.tsx");
 const help = read("src/pages/HelpPage.tsx");
-const tagClasses = read("src/pages/TagClassesPage.tsx");
-const equipmentClasses = read("src/pages/EquipmentClassesPage.tsx");
-const documentTypes = read("src/pages/DocumentTypesPage.tsx");
-const dataDictionary = read("src/pages/DataDictionaryPage.tsx");
-const sourceStandards = read("src/pages/SourceStandardsPage.tsx");
-const disciplines = read("src/pages/DisciplinesPage.tsx");
-const unitsOfMeasure = read("src/pages/UnitsOfMeasurePage.tsx");
 const rdlRelationshipSection = read("src/components/RdlRelationshipSection.tsx");
 
 const productBoundary = read("docs/PRODUCT_BOUNDARY.md");
@@ -406,18 +399,28 @@ assert.ok(about.includes("controlled evaluation") && about.includes("pilot"), "A
 assert.ok(help.includes("Global RDL search is enabled") && help.includes("RDL scope") && help.includes("source and release provenance"), "User Guide must explain the enabled multi-RDL global-search pilot behavior");
 assert.ok(help.includes("Do not include confidential project information"), "Pilot feedback guidance must warn against confidential information");
 
-for (const [name, source, route] of [
-  ["Tag Classes", tagClasses, "/classes/tag/"],
-  ["Equipment Classes", equipmentClasses, "/classes/equipment/"],
-  ["Document Types", documentTypes, "/documents/"],
-  ["Data Dictionary", dataDictionary, "/dictionary/"],
-  ["Source Standards", sourceStandards, "/standards/"],
-  ["Disciplines", disciplines, "/disciplines/"],
-  ["Units of Measure", unitsOfMeasure, "/units/"],
-] as const) {
-  assert.ok(source.includes("useNavigate"), `${name} browse page must retain detail navigation`);
-  assert.ok(source.includes(route), `${name} browse page must retain its compatibility detail route`);
-  assert.ok(!source.includes("useParams"), `${name} browse page must not own route-param-driven specialist detail state`);
+for (const retiredPageName of [
+  "TagClassesPage",
+  "EquipmentClassesPage",
+  "DocumentTypesPage",
+  "DataDictionaryPage",
+  "SourceStandardsPage",
+  "DisciplinesPage",
+  "UnitsOfMeasurePage",
+]) {
+  assert.ok(!app.includes(retiredPageName), `Retired specialist browse import survived in App.tsx: ${retiredPageName}`);
+}
+
+for (const routeFragment of [
+  'path="/classes/tag" element={<RdlScopedLegacyGuard entityType="tag_class" title="Tag Classes" />}',
+  'path="/classes/equipment" element={<RdlScopedLegacyGuard entityType="equipment_class" title="Equipment Classes" />}',
+  'path="/documents" element={<RdlScopedLegacyGuard entityType="document_type" title="Document Types" />}',
+  'path="/dictionary" element={<RdlScopedLegacyGuard entityType="property" title="Data Dictionary" />}',
+  'path="/standards" element={<RdlScopedLegacyGuard entityType="source_standard" title="Source Standards" />}',
+  'path="/disciplines" element={<RdlScopedLegacyGuard entityType="discipline" title="Disciplines" />}',
+  'path="/units" element={<RdlScopedLegacyGuard entityType="unit_of_measure" title="Units of Measure" />}',
+]) {
+  assert.ok(app.includes(routeFragment), `Primary browse route is not directly owned by the shared release-aware guard: ${routeFragment}`);
 }
 
 assert.ok(rdlEntityPage.includes('aria-label="On this page"'), "Canonical RDL entity detail must expose an On this page navigator");
@@ -456,6 +459,6 @@ console.log("PASS RDL-007 multi-RDL foundation: CCUS mapping profile, provenance
 console.log("PASS RDL-008 genericity proof: Water / Desalination mapping, deterministic identifier derivation and three-RDL coexistence gates are present.");
 console.log("PASS RDL-009 multi-RDL UX: scope selection, package-aware global search, provenance routes and search repository gates are present.");
 console.log("PASS pilot readiness: status, provenance, honest search state and feedback route are present.");
-console.log("PASS canonical entity detail UX: specialist browse pages delegate detail rendering to the generic release-aware renderer.");
+console.log("PASS shared browse retirement: primary vocabulary routes are owned directly by the generic release-aware browser boundary.");
 console.log("PASS canonical detail accessibility: progressive disclosure remains anchored and accessible.");
 console.log("\nApplication regression checks passed.");

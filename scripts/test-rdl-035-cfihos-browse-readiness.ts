@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const read = (path: string) => readFileSync(path, "utf8");
 const must = (condition: boolean, message: string) => assert.ok(condition, message);
@@ -22,13 +22,6 @@ const browseCss = read("src/components/RdlReleaseAwareBrowse.css");
 const searchSource = read("src/rdl/search.ts");
 const generator = read("scripts/generate-rdl-search-index.ts");
 const browserE2e = read("tests/e2e/rdl-unified-browse.spec.ts");
-const tagPage = read("src/pages/TagClassesPage.tsx");
-const equipmentPage = read("src/pages/EquipmentClassesPage.tsx");
-const documentPage = read("src/pages/DocumentTypesPage.tsx");
-const propertyPage = read("src/pages/DataDictionaryPage.tsx");
-const standardPage = read("src/pages/SourceStandardsPage.tsx");
-const disciplinePage = read("src/pages/DisciplinesPage.tsx");
-const unitPage = read("src/pages/UnitsOfMeasurePage.tsx");
 
 const search = JSON.parse(read("public/rdl-search-index.json")) as Array<{
   sourceKey: string;
@@ -76,7 +69,7 @@ must(!guard.includes('if (scope === "cfihos" || scope === "all") return <>{child
 must(guard.includes('if (scope === "all") {'), "all-scope browse must be handled explicitly");
 must(guard.includes("Select an RDL source"), "all-scope browse does not fail closed with a truthful source-selection message");
 must(!guard.includes('if (scope === "all") return <>{children}</>;'), "all-scope browse silently exposes CFIHOS specialist content");
-must(guard.includes('if (scope === "cfihos") return <>{children}</>;'), "non-shared CFIHOS specialist fallback was removed too early");
+must(guard.includes('if (scope === "cfihos") return <>{children}</>;'), "non-shared CFIHOS specialist fallback must remain available for specialized capabilities");
 const sharedBranchOffset = guard.indexOf('if (usesSharedBrowse && entityType)');
 const cfihosFallbackOffset = guard.indexOf('if (scope === "cfihos") return <>{children}</>;');
 must(sharedBranchOffset >= 0 && cfihosFallbackOffset > sharedBranchOffset, "CFIHOS shared browse branch does not take precedence over the specialist fallback");
@@ -153,14 +146,18 @@ for (const entityType of primaryTypes) {
 }
 assert.equal(totalParents, 1678, "CFIHOS same-type hierarchy relationship total changed");
 
-// Specialist pages remain in the codebase as a parity baseline until the post-Chromium cleanup increment.
-for (const token of ["parentName", "...tagClass.synonyms", "node.abstract"]) must(tagPage.includes(token), `Tag Class specialist capability missing: ${token}`);
-for (const token of ["parentName", "existenceReason", "...equipmentClass.synonyms", "node.abstract"]) must(equipmentPage.includes(token), `Equipment specialist capability missing: ${token}`);
-for (const token of ["shortCode", "classification", "...documentType.synonyms"]) must(documentPage.includes(token), `Document Type specialist capability missing: ${token}`);
-for (const token of ["dataType", "unitOfMeasureDimensionCode", "picklistName", "existenceReason", "...property.synonyms"]) must(propertyPage.includes(token), `Property specialist capability missing: ${token}`);
-for (const token of ["standard.code", "standard.description"]) must(standardPage.includes(token), `Source Standard specialist capability missing: ${token}`);
-for (const token of ["discipline.code", "discipline.name", "discipline.description"]) must(disciplinePage.includes(token), `Discipline specialist capability missing: ${token}`);
-for (const token of ["uneceCommonCode", "unit.symbol", "dimensionFilter", "dimensionCode", "dimensionName", "systemCode", "systemName", "...unit.synonyms"]) must(unitPage.includes(token), `Unit specialist capability missing: ${token}`);
+// RDL-035.4 retires the old CFIHOS browse implementations only after Chromium parity was proven.
+for (const path of [
+  "src/pages/TagClassesPage.tsx",
+  "src/pages/EquipmentClassesPage.tsx",
+  "src/pages/DocumentTypesPage.tsx",
+  "src/pages/DataDictionaryPage.tsx",
+  "src/pages/SourceStandardsPage.tsx",
+  "src/pages/DisciplinesPage.tsx",
+  "src/pages/UnitsOfMeasurePage.tsx",
+]) {
+  must(!existsSync(path), `retired CFIHOS specialist browse page survived convergence: ${path}`);
+}
 
 const byType = (entityType: string) => cfihos.filter((item) => item.entityType === entityType);
 const tags = byType("tag_class");

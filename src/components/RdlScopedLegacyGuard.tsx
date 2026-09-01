@@ -5,7 +5,7 @@ import { useRdlScope } from "../rdl/RdlScopeContext";
 import { loadRdlSearchIndex, type RdlSearchRecord } from "../rdl/search";
 import { RdlReleaseAwareBrowse } from "./RdlReleaseAwareBrowse";
 
-type Props = { children: ReactNode; entityType?: string; title: string; specialized?: boolean };
+type Props = { children?: ReactNode; entityType?: string; title: string; specialized?: boolean };
 
 const SHARED_BROWSE_ENTITY_TYPES = new Set(["tag_class", "equipment_class", "document_type", "property", "source_standard", "discipline", "unit_of_measure"]);
 
