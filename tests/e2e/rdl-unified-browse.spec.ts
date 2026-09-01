@@ -1,5 +1,18 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+type RuntimeBrowseRecord = {
+  sourceKey: string;
+  releaseKey: string;
+  entityType: string;
+  nativeIdentifier: string;
+  name: string;
+  aliases?: string[];
+  searchText?: string[];
+  secondaryLabel?: string;
+  tertiaryLabel?: string;
+  facets?: Record<string, { value: string; label?: string }>;
+};
 
 const sources = [
   {
@@ -36,6 +49,21 @@ const browseTypes = [
   { path: "/units", title: "Units of Measure", searchName: "Search units of measure", entityType: "unit_of_measure", idField: "unitId", mode: "flat" },
 ] as const;
 
+async function runtimeRecord(page: Page, sourceKey: string, releaseKey: string): Promise<RuntimeBrowseRecord | null> {
+  return page.evaluate(async ({ sourceKey: source, releaseKey: release }) => {
+    const response = await fetch("/rdl-search-index.json");
+    if (!response.ok) throw new Error(`Unable to load runtime search index: ${response.status}`);
+    const records = await response.json() as RuntimeBrowseRecord[];
+    return records.find((record) =>
+      record.sourceKey === source &&
+      record.releaseKey === release &&
+      record.entityType === "unit_of_measure" &&
+      Boolean(record.facets?.dimension?.value) &&
+      Boolean(record.secondaryLabel || record.tertiaryLabel || record.searchText?.length || record.aliases?.length),
+    ) ?? null;
+  }, { sourceKey, releaseKey });
+}
+
 for (const browseType of browseTypes) {
   for (const scope of sources) {
     test(`${scope.source} ${browseType.title} use the shared browse navigation paradigm`, async ({ page }) => {
@@ -57,6 +85,37 @@ for (const browseType of browseTypes) {
       await expect(page).toHaveURL(new RegExp(`/rdl/${scope.routeSource}/[^/]+/${browseType.entityType}/${nativeIdentifier}$`));
     });
   }
+}
+
+for (const scope of sources) {
+  test(`${scope.source} Units of Measure expose source-neutral metadata search and dimension filtering`, async ({ page }) => {
+    await page.goto("/units");
+    await page.getByRole("combobox", { name: "Active RDL search scope" }).selectOption(scope.source);
+
+    const browse = page.locator(".rdl-release-browse");
+    await expect(browse).toBeVisible();
+    await expect(browse).toHaveAttribute("data-browse-mode", "flat");
+
+    const releaseKey = await browse.getAttribute("data-release-key");
+    expect(releaseKey).toBeTruthy();
+    const record = await runtimeRecord(page, scope.source, releaseKey!);
+    expect(record, `${scope.source} must expose at least one Unit metadata/facet record`).not.toBeNull();
+
+    const dimension = record!.facets!.dimension;
+    const facet = browse.getByRole("combobox", { name: "Filter Units of Measure by Dimension" });
+    await expect(facet).toBeVisible();
+    expect(await facet.locator("option").count()).toBeGreaterThan(1);
+
+    await facet.selectOption(dimension.value);
+    await expect.poll(() => new URL(page.url()).searchParams.get("dimension")).toBe(dimension.value);
+    await expect(browse).not.toHaveAttribute("data-filtered-record-count", "0");
+
+    const query = record!.secondaryLabel?.split(" · ")[0] || record!.tertiaryLabel || record!.searchText?.[0] || record!.aliases?.[0];
+    expect(query, `${scope.source} Unit metadata search anchor missing`).toBeTruthy();
+    const search = browse.getByRole("searchbox", { name: "Search units of measure" });
+    await search.fill(query!);
+    await expect(browse.getByText(record!.nativeIdentifier, { exact: true })).toBeVisible();
+  });
 }
 
 for (const browseType of browseTypes) {
