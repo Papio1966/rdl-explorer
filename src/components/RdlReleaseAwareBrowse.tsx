@@ -16,13 +16,9 @@ import {
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getRdlRelease, getRdlSource, rdlEntityRoute } from "../rdl/catalog";
-import { verifyRdlBrowseDualRead } from "../rdl/runtimeDualRead";
+import { loadRdlBrowseRuntime, type RdlBrowserReadMode } from "../rdl/runtimeDualRead";
+import type { RdlRelationshipIndexRecord } from "../rdl/entityDetail";
 import {
-  loadRdlRelationshipIndex,
-  type RdlRelationshipIndexRecord,
-} from "../rdl/entityDetail";
-import {
-  loadRdlSearchIndex,
   recordMatchesRdlQuery,
   type RdlBrowseFacetValue,
   type RdlSearchRecord,
@@ -47,6 +43,7 @@ type LoadState =
       status: "success";
       records: RdlSearchRecord[];
       relationships: RdlRelationshipIndexRecord[];
+      readMode: RdlBrowserReadMode;
     }
   | { status: "error"; message: string };
 
@@ -197,25 +194,10 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
   useEffect(() => {
     let active = true;
     setState({ status: "loading" });
-    Promise.all([loadRdlSearchIndex(), loadRdlRelationshipIndex()])
-      .then(async ([allRecords, allRelationships]) => {
+    loadRdlBrowseRuntime({ sourceKey, releaseKey, entityType })
+      .then(({ records, relationships, mode }) => {
         if (!active) return;
-        const records = allRecords.filter(
-          (item) =>
-            item.sourceKey === sourceKey &&
-            item.releaseKey === releaseKey &&
-            item.entityType === entityType,
-        );
-        const packageKeys = new Set(records.map((item) => item.packageKey));
-        const relationships = allRelationships.filter(
-          (item) =>
-            item.sourceKey === sourceKey &&
-            item.releaseKey === releaseKey &&
-            packageKeys.has(item.packageKey),
-        );
-        await verifyRdlBrowseDualRead({ sourceKey, releaseKey, entityType, records, relationships });
-        if (!active) return;
-        setState({ status: "success", records, relationships });
+        setState({ status: "success", records, relationships, readMode: mode });
       })
       .catch((error) => {
         if (!active) return;
@@ -296,7 +278,7 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
       <StatusScreen
         icon={<LoaderCircle className="rdl-release-browse-spinner" size={24} />}
         title={`Loading ${title}`}
-        message={`Building the ${source?.shortName ?? sourceKey} ${release?.versionLabel ?? releaseKey} browse view from the release-aware indexes…`}
+        message={`Building the ${source?.shortName ?? sourceKey} ${release?.versionLabel ?? releaseKey} browse view from the configured release-aware runtime…`}
       />
     );
   }
@@ -328,6 +310,7 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
       data-source-key={sourceKey}
       data-release-key={releaseKey}
       data-browse-mode={hasHierarchy ? "hierarchy" : "flat"}
+      data-read-mode={state.readMode}
       data-filtered-record-count={facetFilteredRecords.length}
     >
       <aside className="rdl-release-browse-panel">

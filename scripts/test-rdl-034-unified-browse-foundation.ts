@@ -40,12 +40,10 @@ must(guard.includes('item.releaseKey === releaseKey'), "remaining generic fallba
 must(guard.includes("CFIHOS data is never used as a silent fallback"), "existing fail-closed scope messaging was lost");
 
 for (const token of [
-  "loadRdlSearchIndex",
-  "loadRdlRelationshipIndex",
+  "loadRdlBrowseRuntime",
+  "sourceKey, releaseKey, entityType",
+  'data-read-mode={state.readMode}',
   'relationship.relationshipType === "entity_parent"',
-  "item.sourceKey === sourceKey",
-  "item.releaseKey === releaseKey",
-  "item.entityType === entityType",
   "rdlEntityRoute(",
   "record.releaseKey",
   "record.nativeIdentifier",
@@ -57,6 +55,8 @@ for (const token of [
 ]) {
   must(browse.includes(token), `release-aware browse foundation missing contract token: ${token}`);
 }
+
+must(!browse.includes("loadRdlSearchIndex") && !browse.includes("loadRdlRelationshipIndex"), "shared browse still directly loads JSON indexes after runtime cutover");
 
 for (const forbiddenStatusBranch of ['=== "candidate"', '=== "reviewed"', '=== "draft"', 'includes("candidate")', 'includes("reviewed")']) {
   must(!browse.includes(forbiddenStatusBranch), `navigation paradigm incorrectly branches on release status: ${forbiddenStatusBranch}`);

@@ -16,13 +16,15 @@ const dualSource = readFileSync(resolve(root, "src/rdl/runtimeDualRead.ts"), "ut
 const searchSource = readFileSync(resolve(root, "src/rdl/search.ts"), "utf8");
 const detailSource = readFileSync(resolve(root, "src/rdl/entityDetail.ts"), "utf8");
 
-assert.equal(parseRdlBrowserReadMode(), "json", "RDL-036.3 safe browser default must remain JSON");
+assert.equal(parseRdlBrowserReadMode(undefined, false), "json", "RDL-036.3 development/browser-test default must remain JSON-safe");
+assert.equal(parseRdlBrowserReadMode(undefined, true), "api", "RDL-036.4 production default must cut over to the runtime API");
 assert.equal(parseRdlBrowserReadMode("dual"), "dual");
-assert.throws(() => parseRdlBrowserReadMode("postgresql"), /Expected json or dual/);
-assert.ok(browseSource.includes("loadRdlSearchIndex") && browseSource.includes("loadRdlRelationshipIndex"), "shared browse must still load JSON as its authoritative read path");
-assert.ok(browseSource.includes("await verifyRdlBrowseDualRead"), "shared browse must verify dual-read parity before rendering in dual mode");
-assert.ok(browseSource.indexOf("await verifyRdlBrowseDualRead") < browseSource.indexOf('setState({ status: "success", records, relationships })'), "JSON browse state must only publish after dual-read verification");
-assert.ok(dualSource.includes('VITE_RDL_BROWSER_READ_MODE') && dualSource.includes('mode === "json"'), "browser dual-read mode must be explicit and JSON-safe by default");
+assert.equal(parseRdlBrowserReadMode("api"), "api");
+assert.throws(() => parseRdlBrowserReadMode("postgresql"), /Expected json, dual or api/);
+assert.ok(browseSource.includes("loadRdlBrowseRuntime"), "shared browse must delegate read authority to the runtime boundary");
+assert.ok(!browseSource.includes("loadRdlSearchIndex") && !browseSource.includes("loadRdlRelationshipIndex"), "shared browse must no longer load JSON indexes directly after cutover");
+assert.ok(browseSource.includes("data-read-mode={state.readMode}"), "shared browse must expose the configured read mode for diagnostics/E2E");
+assert.ok(dualSource.includes('VITE_RDL_BROWSER_READ_MODE') && dualSource.includes('mode === "json"') && dualSource.includes('mode === "api"'), "browser runtime modes must preserve JSON rollback and API authority");
 assert.ok(dualSource.includes('"/api/rdl-runtime/search"') && dualSource.includes('"/api/rdl-runtime/relationships"'), "dual-read must use the RDL-036.2 runtime API");
 assert.ok(dualSource.includes('relationshipType: "entity_parent"'), "browse dual-read must compare authoritative hierarchy relationships only");
 assert.ok(dualSource.includes("PAGE_LIMIT = 500"), "dual-read pagination must respect the RDL-036.2 API maximum");
