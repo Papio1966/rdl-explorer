@@ -247,6 +247,36 @@ export class RdlRuntimeProjectionRepository {
     };
   }
 
+  async projectSearchRecords(sourceKey: string, releaseKey: string): Promise<RdlRuntimeSearchRecord[]> {
+    const rawEntities = await this.loadEntities(sourceKey, releaseKey);
+    const entities: Entity[] = rawEntities.map((row) => ({
+      ...row,
+      metadata: row.normalized_metadata ?? {},
+      sourceSheet: sourceSheet(row.source_locator ?? {}),
+      context: contextOf(row),
+    }));
+    return this.projectSearch(entities);
+  }
+
+  async projectRelationshipRecords(sourceKey: string, releaseKey: string): Promise<RdlRuntimeRelationshipRecord[]> {
+    const [rawEntities, rawRelationships] = await Promise.all([
+      this.loadEntities(sourceKey, releaseKey),
+      this.loadRelationships(sourceKey, releaseKey),
+    ]);
+    const entities: Entity[] = rawEntities.map((row) => ({
+      ...row,
+      metadata: row.normalized_metadata ?? {},
+      sourceSheet: sourceSheet(row.source_locator ?? {}),
+      context: contextOf(row),
+    }));
+    const relationships: Relationship[] = rawRelationships.map((row) => ({
+      ...row,
+      sourceSheet: sourceSheet(row.source_locator ?? {}),
+      context: contextOf(row),
+    }));
+    return this.projectRelationships(entities, relationships);
+  }
+
   private projectSearch(entities: Entity[]): RdlRuntimeSearchRecord[] {
     return entities
       .filter((entity) => SEARCH_ENTITY_TYPES.has(entity.entity_type_code))
