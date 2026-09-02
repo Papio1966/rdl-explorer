@@ -16,6 +16,7 @@ import {
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getRdlRelease, getRdlSource, rdlEntityRoute } from "../rdl/catalog";
+import { verifyRdlBrowseDualRead } from "../rdl/runtimeDualRead";
 import {
   loadRdlRelationshipIndex,
   type RdlRelationshipIndexRecord,
@@ -197,7 +198,7 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
     let active = true;
     setState({ status: "loading" });
     Promise.all([loadRdlSearchIndex(), loadRdlRelationshipIndex()])
-      .then(([allRecords, allRelationships]) => {
+      .then(async ([allRecords, allRelationships]) => {
         if (!active) return;
         const records = allRecords.filter(
           (item) =>
@@ -212,6 +213,8 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
             item.releaseKey === releaseKey &&
             packageKeys.has(item.packageKey),
         );
+        await verifyRdlBrowseDualRead({ sourceKey, releaseKey, entityType, records, relationships });
+        if (!active) return;
         setState({ status: "success", records, relationships });
       })
       .catch((error) => {
