@@ -89,6 +89,17 @@ export async function loadRdlEntityDetail(
   nativeIdentifier: string,
 ): Promise<RdlEntityDetailProjection | null> {
   const [entities, relationships] = await Promise.all([loadRdlSearchIndex(), loadRdlRelationshipIndex()]);
+  return projectRdlEntityDetail(entities, relationships, sourceKey, releaseKey, entityType, nativeIdentifier);
+}
+
+export function projectRdlEntityDetail(
+  entities: RdlSearchRecord[],
+  relationships: RdlRelationshipIndexRecord[],
+  sourceKey: string,
+  releaseKey: string,
+  entityType: string,
+  nativeIdentifier: string,
+): RdlEntityDetailProjection | null {
   const record = entities.find((item) =>
     item.sourceKey === sourceKey
     && item.releaseKey === releaseKey
