@@ -1,15 +1,16 @@
 import { Database, Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { entityTypeLabel, getDefaultReleaseKey, getRdlRelease, getRdlSource, rdlEntityRoute, RDL_SOURCES, type RdlScopeKey } from "../rdl/catalog";
 import { useRdlScope } from "../rdl/RdlScopeContext";
-import { loadRdlSearchIndex, searchRdlRecords, type RdlSearchRecord } from "../rdl/search";
+import { loadRdlGlobalSearchRuntime } from "../rdl/runtimeSearch";
+import type { RdlSearchRecord } from "../rdl/search";
 
 export function RdlSearchPage() {
   const [params, setParams] = useSearchParams();
   const { scope, setScope, releaseKey: contextReleaseKey, setReleaseKey } = useRdlScope();
-  const [index, setIndex] = useState<RdlSearchRecord[]>([]);
-  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const [results, setResults] = useState<RdlSearchRecord[]>([]);
+  const [state, setState] = useState<"loading" | "ready" | "error">("ready");
   const query = params.get("q") ?? "";
   const requestedSource = params.get("source") ?? scope;
   const source: RdlScopeKey = requestedSource === "all" || RDL_SOURCES.some((item) => item.key === requestedSource) ? requestedSource as RdlScopeKey : "all";
@@ -22,15 +23,31 @@ export function RdlSearchPage() {
   );
 
   useEffect(() => {
-    loadRdlSearchIndex().then((records) => { setIndex(records); setState("ready"); }).catch(() => setState("error"));
-  }, []);
+    let active = true;
+    if (!query.trim()) {
+      setResults([]);
+      setState("ready");
+      return () => { active = false; };
+    }
+    setState("loading");
+    loadRdlGlobalSearchRuntime({ query, source, releaseKey })
+      .then((runtime) => {
+        if (!active) return;
+        setResults(runtime.results);
+        setState("ready");
+      })
+      .catch(() => {
+        if (!active) return;
+        setResults([]);
+        setState("error");
+      });
+    return () => { active = false; };
+  }, [query, source, releaseKey]);
 
   useEffect(() => {
     setScope(source);
     if (source !== "all" && releaseKey) setReleaseKey(releaseKey);
   }, [setScope, setReleaseKey, source, releaseKey]);
-
-  const results = useMemo(() => searchRdlRecords(index, query, source, releaseKey), [index, query, source, releaseKey]);
 
   function search(value: string) {
     const next = new URLSearchParams(params);
@@ -59,8 +76,8 @@ export function RdlSearchPage() {
         {sourceDefinition && releaseKey && <label>Release <select aria-label="Release" value={releaseKey} onChange={(event) => { const next = new URLSearchParams(params); next.set("release", event.target.value); setParams(next); }}>{sourceDefinition.releases.map((release) => <option key={release.key} value={release.key}>{release.versionLabel} · {release.status}</option>)}</select></label>}
         {state === "ready" && query && <span>{results.length} result{results.length === 1 ? "" : "s"}{results.length === 80 ? " (first 80)" : ""}</span>}
       </div>
-      {state === "loading" && <div className="rdl-search-state" role="status">Loading RDL search index…</div>}
-      {state === "error" && <div className="rdl-search-state" role="alert">The RDL search index could not be loaded.</div>}
+      {state === "loading" && <div className="rdl-search-state" role="status">Searching RDL libraries…</div>}
+      {state === "error" && <div className="rdl-search-state" role="alert">The RDL runtime search could not be loaded.</div>}
       {state === "ready" && !query && <div className="rdl-search-state"><Search size={24} /><strong>Search the loaded libraries</strong><span>Choose a source and release, then search by engineering name or native identifier.</span></div>}
       {state === "ready" && query && !results.length && <div className="rdl-search-state"><strong>No matching RDL entities</strong><span>Try a broader term, release or source scope.</span></div>}
       <div className="rdl-search-results">

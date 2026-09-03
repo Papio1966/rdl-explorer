@@ -72,12 +72,10 @@ export class RdlRuntimeReadService {
     const input = normalizeSearchQuery(query);
     const release = await this.requireRelease(input.sourceKey, input.releaseKey);
     const records = await this.projection.projectSearchRecords(input.sourceKey, input.releaseKey);
-    const term = input.q.toLocaleLowerCase();
-    const filtered = records.filter((record) => {
-      if (input.entityType && record.entityType !== input.entityType) return false;
-      if (!term) return true;
-      return searchableText(record).includes(term);
-    });
+    const scoped = input.entityType
+      ? records.filter((record) => record.entityType === input.entityType)
+      : records;
+    const filtered = input.q ? rankRuntimeSearchRecords(scoped, input.q) : scoped;
     return page(release, filtered, input.offset, input.limit);
   }
 
@@ -163,19 +161,56 @@ function boundedInteger(name: string, value: unknown, fallback: number, minimum:
   return parsed;
 }
 
-function searchableText(record: RdlRuntimeSearchRecord) {
-  const facets = Object.values(record.facets ?? {}).flatMap((facet) => [facet.value, facet.label]);
+function runtimeSearchableValues(record: RdlRuntimeSearchRecord): string[] {
+  const facetValues = Object.values(record.facets ?? {}).flatMap((facet) => [facet.value, facet.label ?? ""]);
   return [
     record.nativeIdentifier,
     record.name,
     record.definition,
+    record.entityType.replaceAll("_", " "),
     ...(record.aliases ?? []),
     ...(record.searchText ?? []),
-    record.secondaryLabel,
-    record.tertiaryLabel,
+    record.secondaryLabel ?? "",
+    record.tertiaryLabel ?? "",
     ...(record.badges ?? []),
-    ...facets,
-  ].map(text).join("\n").toLocaleLowerCase();
+    ...facetValues,
+  ].filter((value) => Boolean(value.trim()));
+}
+
+function rankRuntimeSearchRecords(records: RdlRuntimeSearchRecord[], query: string): RdlRuntimeSearchRecord[] {
+  const terms = query.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
+  if (!terms.length) return [];
+  const exactQuery = query.toLocaleLowerCase().trim();
+
+  return records
+    .map((record) => {
+      const id = record.nativeIdentifier.toLocaleLowerCase();
+      const name = record.name.toLocaleLowerCase();
+      const definition = record.definition.toLocaleLowerCase();
+      const aliases = (record.aliases ?? []).map((value) => value.toLocaleLowerCase());
+      const searchable = runtimeSearchableValues(record).join(" ").toLocaleLowerCase();
+      if (!terms.every((term) => searchable.includes(term))) return null;
+      let score = 0;
+      if (id === exactQuery) score += 100;
+      if (name === exactQuery) score += 90;
+      if (id.startsWith(exactQuery)) score += 60;
+      if (name.startsWith(exactQuery)) score += 50;
+      if (aliases.some((alias) => alias === exactQuery)) score += 45;
+      if (name.includes(exactQuery)) score += 30;
+      if (aliases.some((alias) => alias.includes(exactQuery))) score += 20;
+      if (definition.includes(exactQuery)) score += 10;
+      score += terms.reduce(
+        (sum, term) => sum
+          + (id.includes(term) ? 6 : 0)
+          + (name.includes(term) ? 4 : 0)
+          + (aliases.some((alias) => alias.includes(term)) ? 3 : 0),
+        0,
+      );
+      return { record, score };
+    })
+    .filter((candidate): candidate is { record: RdlRuntimeSearchRecord; score: number } => candidate !== null)
+    .sort((a, b) => b.score - a.score || a.record.name.localeCompare(b.record.name) || a.record.sourceKey.localeCompare(b.record.sourceKey))
+    .map(({ record }) => record);
 }
 
 function page<T>(release: RdlRuntimeReleaseContext, records: T[], offset: number, limit: number): RdlRuntimePage<T> {
