@@ -47,7 +47,10 @@ const entityDetail=read("src/rdl/entityDetail.ts");
 const guard=read("src/components/RdlScopedLegacyGuard.tsx");
 must(search.includes("record.releaseKey === getDefaultReleaseKey") && search.includes("record.releaseKey === releaseKey"),"search release isolation missing");
 must(searchPage.includes('params.get("release")') && searchPage.includes("rdlEntityRoute(result.sourceKey, result.releaseKey"),"search does not preserve explicit release context");
-must(entityPage.includes("loadRdlEntityDetail(sourceKey, releaseKey, entityType, nativeIdentifier)"),"generic entity page does not pass explicit release identity to the detail projection");
+const preservesExplicitDetailIdentity =
+  entityPage.includes("loadRdlEntityDetail(sourceKey, releaseKey, entityType, nativeIdentifier)")
+  || entityPage.includes("loadRdlEntityDetailRuntime({ sourceKey, releaseKey, entityType, nativeIdentifier })");
+must(preservesExplicitDetailIdentity,"generic entity page does not pass explicit release identity to the detail projection");
 must(
   entityDetail.includes("item.sourceKey === sourceKey")
     && entityDetail.includes("item.releaseKey === releaseKey")
