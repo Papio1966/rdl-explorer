@@ -99,7 +99,9 @@ export class RdlRuntimeReadService {
   async relationships(query: RdlRuntimeRelationshipQuery): Promise<RdlRuntimePage<RdlRuntimeRelationshipRecord>> {
     const input = normalizeRelationshipQuery(query);
     const release = await this.requireRelease(input.sourceKey, input.releaseKey);
-    const records = await this.projection.projectRelationshipRecords(input.sourceKey, input.releaseKey);
+    const records = input.relationshipType === "entity_parent"
+      ? await this.projection.projectEntityParentRecords(input.sourceKey, input.releaseKey)
+      : await this.projection.projectRelationshipRecords(input.sourceKey, input.releaseKey);
     const filtered = records.filter((record) => {
       if (input.relationshipType && record.relationshipType !== input.relationshipType) return false;
       if (input.sourceEntityType && record.sourceEntityType !== input.sourceEntityType) return false;
