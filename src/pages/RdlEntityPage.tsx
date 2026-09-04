@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { RdlRelationshipSection } from "../components/RdlRelationshipSection";
 import { entityTypeLabel, getDefaultReleaseKey, getRdlRelease, getRdlSource } from "../rdl/catalog";
-import { loadRdlEntityDetail, type RdlDetailLinkedEntity, type RdlEntityDetailProjection } from "../rdl/entityDetail";
+import { type RdlDetailLinkedEntity, type RdlEntityDetailProjection } from "../rdl/entityDetail";
+import { loadRdlEntityDetailRuntime } from "../rdl/runtimeDetail";
 import "./RdlEntityPage.css";
 
 type LoadState =
@@ -36,7 +37,7 @@ export function RdlEntityPage() {
   useEffect(() => {
     let active = true;
     setState({ status: "loading" });
-    loadRdlEntityDetail(sourceKey, releaseKey, entityType, nativeIdentifier)
+    loadRdlEntityDetailRuntime({ sourceKey, releaseKey, entityType, nativeIdentifier })
       .then((detail) => {
         if (!active) return;
         setState(detail ? { status: "ready", detail } : { status: "missing" });

@@ -5,6 +5,12 @@ import {
   type RdlRuntimeRelationshipRecord,
   type RdlRuntimeSearchRecord,
 } from "./RdlRuntimeProjectionRepository.ts";
+import {
+  projectRdlEntityDetail,
+  type RdlEntityDetailProjection,
+  type RdlRelationshipIndexRecord,
+} from "../../src/rdl/entityDetail.ts";
+import type { RdlSearchRecord } from "../../src/rdl/search.ts";
 
 export const RDL_RUNTIME_PAGE_DEFAULT = 100;
 export const RDL_RUNTIME_PAGE_MAX = 500;
@@ -45,6 +51,17 @@ export type RdlRuntimeRelationshipQuery = {
   targetNativeIdentifier?: string;
   offset?: number;
   limit?: number;
+};
+
+export type RdlRuntimeDetailQuery = {
+  sourceKey: string;
+  releaseKey: string;
+  entityType: string;
+  nativeIdentifier: string;
+};
+
+export type RdlRuntimeDetailResult = RdlRuntimeReleaseContext & {
+  detail: RdlEntityDetailProjection | null;
 };
 
 type ReleaseRow = {
@@ -92,6 +109,41 @@ export class RdlRuntimeReadService {
       return true;
     });
     return page(release, filtered, input.offset, input.limit);
+  }
+
+  async detail(query: RdlRuntimeDetailQuery): Promise<RdlRuntimeDetailResult> {
+    const input = normalizeDetailQuery(query);
+    const release = await this.requireRelease(input.sourceKey, input.releaseKey);
+
+    // RDL-037.2 deliberately reuses the already-proven full release projection once
+    // per detail request. The pure rich-detail projector is shared with the JSON
+    // rollback path, so there is one semantic implementation for both authorities.
+    const projection = await this.projection.project(input.sourceKey, input.releaseKey);
+    if (projection.searchRecords.some((record) => record.packageKey !== release.packageKey)
+      || projection.relationshipRecords.some((record) => record.packageKey !== release.packageKey)) {
+      throw new Error("RDL runtime detail projection changed package identity during the read.");
+    }
+
+    const detail = projectRdlEntityDetail(
+      projection.searchRecords as unknown as RdlSearchRecord[],
+      projection.relationshipRecords as RdlRelationshipIndexRecord[],
+      input.sourceKey,
+      input.releaseKey,
+      input.entityType,
+      input.nativeIdentifier,
+    );
+
+    if (detail && (
+      detail.record.sourceKey !== release.sourceKey
+      || detail.record.releaseKey !== release.releaseKey
+      || detail.record.packageKey !== release.packageKey
+      || detail.record.entityType !== input.entityType
+      || detail.record.nativeIdentifier !== input.nativeIdentifier
+    )) {
+      throw new Error("RDL runtime detail projection escaped the requested identity boundary.");
+    }
+
+    return { ...release, detail };
   }
 
   async requireRelease(sourceKey: string, releaseKey: string): Promise<RdlRuntimeReleaseContext> {
@@ -143,6 +195,15 @@ function normalizeRelationshipQuery(query: RdlRuntimeRelationshipQuery) {
     targetNativeIdentifier: text(query.targetNativeIdentifier),
     offset: boundedInteger("offset", query.offset, 0, 0, 1_000_000),
     limit: boundedInteger("limit", query.limit, RDL_RUNTIME_PAGE_DEFAULT, 1, RDL_RUNTIME_PAGE_MAX),
+  };
+}
+
+function normalizeDetailQuery(query: RdlRuntimeDetailQuery) {
+  return {
+    sourceKey: required("sourceKey", query.sourceKey),
+    releaseKey: required("releaseKey", query.releaseKey),
+    entityType: required("entityType", query.entityType),
+    nativeIdentifier: required("nativeIdentifier", query.nativeIdentifier),
   };
 }
 
