@@ -277,6 +277,47 @@ export class RdlRuntimeProjectionRepository {
     return this.projectRelationships(entities, relationships);
   }
 
+  async projectEntityParentRecords(sourceKey: string, releaseKey: string): Promise<RdlRuntimeRelationshipRecord[]> {
+    const { sourceFilter, releaseFilter } = filters(sourceKey, releaseKey);
+    const rows = await this.client.query<RelationshipRow>(`
+      WITH selected_packages AS (
+        SELECT DISTINCT ON (r.release_id)
+          p.package_id, p.package_key, s.source_key, s.name AS source_name,
+          r.release_key, r.release_status, r.version_label
+        FROM rdl.rdl_package p
+        JOIN rdl.rdl_release r ON r.release_id = p.release_id
+        JOIN rdl.rdl_source s ON s.source_id = r.source_id
+        WHERE p.package_status = 'validated'
+          ${sourceFilter}
+          ${releaseFilter}
+        ORDER BY r.release_id, p.package_id DESC
+      )
+      SELECT sp.source_key, sp.source_name, sp.release_key, sp.release_status, sp.version_label, sp.package_key,
+             rel.relationship_type_code,
+             src.entity_type_code AS source_type, src.native_identifier AS source_identifier,
+             tgt.entity_type_code AS target_type, tgt.native_identifier AS target_identifier,
+             '{}'::jsonb AS attributes, rel.source_locator
+      FROM selected_packages sp
+      JOIN rdl.rdl_relationship rel ON rel.package_id = sp.package_id
+      JOIN rdl.rdl_entity src ON src.entity_id = rel.source_entity_id
+      JOIN rdl.rdl_entity tgt ON tgt.entity_id = rel.target_entity_id
+      WHERE rel.relationship_type_code = 'entity_parent'
+      ORDER BY sp.source_key, sp.release_key, src.entity_type_code, src.native_identifier,
+               tgt.entity_type_code, tgt.native_identifier, rel.relationship_id
+    `);
+
+    return rows.map((row) => ({
+      ...contextOf(row),
+      relationshipType: 'entity_parent',
+      sourceEntityType: row.source_type,
+      sourceNativeIdentifier: row.source_identifier,
+      targetEntityType: row.target_type,
+      targetNativeIdentifier: row.target_identifier,
+      attributes: {},
+      sourceSheet: sourceSheet(row.source_locator ?? {}),
+    }));
+  }
+
   private projectSearch(entities: Entity[]): RdlRuntimeSearchRecord[] {
     return entities
       .filter((entity) => SEARCH_ENTITY_TYPES.has(entity.entity_type_code))
