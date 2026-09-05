@@ -1,7 +1,7 @@
 import {
-  getCfihosWorksheetRows,
-  type CfihosWorksheetRow,
-} from "../workbook";
+  loadCfihosClassRelationshipSource,
+  type CfihosClassRelationshipSource,
+} from "../runtimeCompatibility";
 import {
   normalizeOptionalString,
   normalizeRequiredString,
@@ -13,8 +13,6 @@ import type {
 } from "../model/classRelationship";
 import { cfihosRepository } from "./CfihosRepository";
 import { cfihosEquipmentRepository } from "./CfihosEquipmentRepository";
-
-const RELATIONSHIP_SHEET = "tag equipment class relationshi";
 
 type ClassRelationshipRepositoryState = {
   sourceRelationships: CfihosTagEquipmentClassRelationship[];
@@ -33,8 +31,15 @@ type ClassRelationshipRepositoryState = {
   diagnostics: CfihosClassRelationshipDiagnostics;
 };
 
+type ClassRelationshipSourceLoader = () => Promise<CfihosClassRelationshipSource>;
+
 export class CfihosClassRelationshipRepository {
   private state: ClassRelationshipRepositoryState | null = null;
+  private readonly sourceLoader: ClassRelationshipSourceLoader;
+
+  constructor(sourceLoader: ClassRelationshipSourceLoader = loadCfihosClassRelationshipSource) {
+    this.sourceLoader = sourceLoader;
+  }
 
   private loadingPromise:
     | Promise<ClassRelationshipRepositoryState>
@@ -112,13 +117,13 @@ export class CfihosClassRelationshipRepository {
   }
 
   private async loadState(): Promise<ClassRelationshipRepositoryState> {
-    const [rows, tagClasses, equipmentClasses] = await Promise.all([
-      getCfihosWorksheetRows(RELATIONSHIP_SHEET),
+    const [source, tagClasses, equipmentClasses] = await Promise.all([
+      this.sourceLoader(),
       cfihosRepository.getTagClasses(),
       cfihosEquipmentRepository.getEquipmentClasses(),
     ]);
 
-    const sourceRelationships = this.buildRelationships(rows);
+    const sourceRelationships = this.buildRelationships(source.rows);
 
     const tagLookup = buildClassLookup(tagClasses);
     const equipmentLookup = buildClassLookup(equipmentClasses);
@@ -258,7 +263,7 @@ export class CfihosClassRelationshipRepository {
   }
 
   private buildRelationships(
-    rows: CfihosWorksheetRow[],
+    rows: CfihosClassRelationshipSource["rows"],
   ): CfihosTagEquipmentClassRelationship[] {
     return rows
       .map(

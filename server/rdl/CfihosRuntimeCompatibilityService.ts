@@ -26,6 +26,26 @@ export type CfihosHandoverEventCompatibilityResult = {
   lifecycleRelationshipsWithAnyStatusCount: number;
 };
 
+export type CfihosClassRelationshipCompatibilityItem = {
+  tagClassId: string;
+  tagClassName: string;
+  equipmentClassId: string;
+  equipmentClassName: string;
+  mappingReason: string | null;
+  sourceLocator: Record<string, unknown>;
+};
+
+export type CfihosClassRelationshipCompatibilityResult = {
+  sourceKey: string;
+  sourceName: string;
+  releaseKey: string;
+  versionLabel: string;
+  packageKey: string;
+  contentSha256: string;
+  sourceUri: string | null;
+  items: CfihosClassRelationshipCompatibilityItem[];
+};
+
 type PackageRow = {
   package_id: string;
   source_key: string;
@@ -42,6 +62,15 @@ type HandoverRow = {
   name: string;
   definition: string | null;
   reporting_sequence: string | null;
+  source_locator: Record<string, unknown>;
+};
+
+type ClassRelationshipRow = {
+  tag_class_id: string;
+  tag_class_name: string;
+  equipment_class_id: string;
+  equipment_class_name: string;
+  mapping_reason: string | null;
   source_locator: Record<string, unknown>;
 };
 
@@ -139,6 +168,67 @@ export class CfihosRuntimeCompatibilityService {
       })),
       lifecycleRelationshipCount,
       lifecycleRelationshipsWithAnyStatusCount,
+    };
+  }
+
+  async classRelationships(input: {
+    sourceKey: string;
+    releaseKey: string;
+  }): Promise<CfihosClassRelationshipCompatibilityResult> {
+    const sourceKey = required("sourceKey", input.sourceKey);
+    const releaseKey = required("releaseKey", input.releaseKey);
+    if (sourceKey !== "cfihos") {
+      throw new RdlRuntimeReadInputError(
+        `CFIHOS compatibility reads require sourceKey 'cfihos', received '${sourceKey}'.`,
+      );
+    }
+
+    const packageRow = await this.requireValidatedPackage(sourceKey, releaseKey);
+    const packageId = Number(packageRow.package_id);
+    if (!Number.isSafeInteger(packageId) || packageId <= 0) {
+      throw new Error("Validated CFIHOS package returned an invalid package identifier.");
+    }
+
+    const contentSha256 = text(packageRow.content_sha256);
+    if (!contentSha256) {
+      throw new Error("Validated CFIHOS package is missing its source content SHA-256.");
+    }
+
+    const rows = await this.client.query<ClassRelationshipRow>(`
+      SELECT source.native_identifier AS tag_class_id,
+             source.name AS tag_class_name,
+             target.native_identifier AS equipment_class_id,
+             target.name AS equipment_class_name,
+             NULLIF(BTRIM(COALESCE(rel.attributes->>'reason', '')), '') AS mapping_reason,
+             rel.source_locator
+      FROM rdl.rdl_relationship rel
+      JOIN rdl.rdl_entity source ON source.entity_id = rel.source_entity_id
+      JOIN rdl.rdl_entity target ON target.entity_id = rel.target_entity_id
+      WHERE rel.package_id = ${packageId}
+        AND rel.relationship_type_code = 'tag_equipment_mapping'
+        AND source.entity_type_code = 'tag_class'
+        AND target.entity_type_code = 'equipment_class'
+        AND COALESCE(rel.source_locator->>'sheet', '') = 'tag equipment class relationshi'
+      ORDER BY source.native_identifier, target.native_identifier,
+               COALESCE(rel.attributes->>'reason', '')
+    `);
+
+    return {
+      sourceKey: packageRow.source_key,
+      sourceName: packageRow.source_name,
+      releaseKey: packageRow.release_key,
+      versionLabel: packageRow.version_label,
+      packageKey: packageRow.package_key,
+      contentSha256,
+      sourceUri: packageRow.source_uri,
+      items: rows.map((row: ClassRelationshipRow) => ({
+        tagClassId: text(row.tag_class_id),
+        tagClassName: text(row.tag_class_name),
+        equipmentClassId: text(row.equipment_class_id),
+        equipmentClassName: text(row.equipment_class_name),
+        mappingReason: nullableText(row.mapping_reason),
+        sourceLocator: row.source_locator ?? {},
+      })),
     };
   }
 
