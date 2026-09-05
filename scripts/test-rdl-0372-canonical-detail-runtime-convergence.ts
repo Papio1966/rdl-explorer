@@ -76,7 +76,8 @@ assert.ok(runtimeDetailSource.includes("record.packageKey !== payload.packageKey
 
 assert.ok(serviceSource.includes("async detail(query: RdlRuntimeDetailQuery)"), "server runtime service must expose exact canonical detail reads");
 assert.ok(serviceSource.includes("normalizeDetailQuery") && serviceSource.includes('required("entityType"') && serviceSource.includes('required("nativeIdentifier"'), "detail service must require explicit entity identity");
-assert.ok(serviceSource.includes("this.projection.project(input.sourceKey, input.releaseKey)"), "detail service must use the proven PostgreSQL release projection exactly once");
+assert.ok(serviceSource.includes("this.projection.projectDetailProjection("), "detail service must use the targeted PostgreSQL canonical-detail projection");
+assert.ok(!serviceSource.includes("this.projection.project(input.sourceKey, input.releaseKey)"), "canonical detail must not regress to release-wide projection materialization");
 assert.ok(serviceSource.includes("projectRdlEntityDetail("), "server detail authority must reuse the same rich-detail projector as JSON rollback");
 assert.ok(serviceSource.includes("detail.record.packageKey !== release.packageKey"), "server detail authority must fail closed across package identity changes");
 assert.ok(handlerSource.includes('"rdl-runtime-detail/v1"'), "detail API schema version must be explicit");
