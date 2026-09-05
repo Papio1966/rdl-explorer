@@ -4,7 +4,7 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, resolve } from "node:path";
 import { promisify } from "node:util";
-import * as XLSX from "xlsx";
+import { readWorkbook, worksheetRows, type WorkbookData } from "./rdl-ingestion/workbookReader.ts";
 import { CFIHOS_SOURCE } from "../src/cfihos/source";
 
 const outputPath = resolve("public/validation-snapshot.json");
@@ -71,10 +71,10 @@ async function loadWorkbookBytes(): Promise<WorkbookInput> {
 
 function text(value: unknown): string { return String(value ?? "").trim(); }
 function key(value: unknown): string { return text(value).toLowerCase(); }
-function rows(workbook: XLSX.WorkBook, sheet: string): Record<string, unknown>[] {
-  const ws = workbook.Sheets[sheet];
+function rows(workbook: WorkbookData, sheet: string): Record<string, unknown>[] {
+  const ws = workbook.sheets[sheet];
   if (!ws) throw new Error(`Worksheet not found: ${sheet}`);
-  return XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: null, raw: false });
+  return worksheetRows<Record<string, unknown>>(ws);
 }
 function countDuplicates(values: string[]): number {
   const counts = new Map<string, number>();
@@ -89,7 +89,7 @@ async function main() {
   const input = await loadWorkbookBytes();
   const bytes = input.bytes;
   const fingerprint = createHash("sha256").update(bytes).digest("hex");
-  const workbook = XLSX.read(bytes, { type: "buffer" });
+  const workbook = await readWorkbook(bytes);
 
   const master = rows(workbook, "RDL master object");
   const tagRows = rows(workbook, "tag class");
@@ -166,7 +166,7 @@ async function main() {
       workbookSha256: fingerprint,
       validatedAt: generatedAt.slice(0, 10),
       generatedAt,
-      worksheetCount: workbook.SheetNames.length,
+      worksheetCount: workbook.sheetNames.length,
     },
     summary: [
       { value: `${families.size}/${families.size}`, label: "RDL object families classified", tone: "normal" },

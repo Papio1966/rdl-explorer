@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
-import * as XLSX from "xlsx";
+import { readWorkbook, worksheetRows } from "./rdl-ingestion/workbookReader.ts";
 import { CCUS_CFIHOS_FORMAT_PROFILE } from "./rdl-ingestion/CcusCfihosFormatProfile.ts";
 import { CCUS_V2_CFIHOS_FORMAT_PROFILE } from "./rdl-ingestion/CcusV2CfihosFormatProfile.ts";
 import { WATER_DESALINATION_PROFILE } from "./rdl-ingestion/WaterDesalinationProfile.ts";
@@ -229,17 +229,17 @@ function genericBrowseMetadata(entityType: string, row: Row, get: (field: string
   }
 }
 
-function addProfile(profile: RdlWorkbookMappingProfile) {
+async function addProfile(profile: RdlWorkbookMappingProfile) {
   const projectedStatus = profile.releaseKey.endsWith("0.1-draft") ? "superseded" : profile.releaseStatus;
   const bytes = readFileSync(profile.workbookPath);
   const sha = createHash("sha256").update(bytes).digest("hex");
   const packageKey = `${profile.sourceKey}-${profile.versionLabel.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-${sha.slice(0, 12)}`;
-  const workbook = XLSX.read(bytes, { type: "buffer" });
+  const workbook = await readWorkbook(bytes);
   const rows = (key: string): Row[] => {
     const sheetName = profile.sheetNames[key];
     if (!sheetName) return [];
-    const sheet = workbook.Sheets[sheetName];
-    return sheet ? XLSX.utils.sheet_to_json<Row>(sheet, { defval: null, raw: false }) : [];
+    const sheet = workbook.sheets[sheetName];
+    return sheet ? worksheetRows<Row>(sheet) : [];
   };
   const mapped = (row: Row, field: string) => mappedText(row, profile.fields[field] ?? [field]);
 
@@ -336,10 +336,10 @@ for (const [sheet, entityType, idField, nameField, definitionField] of cfihosSpe
   }
 }
 
-addProfile(CCUS_CFIHOS_FORMAT_PROFILE);
-addProfile(CCUS_V2_CFIHOS_FORMAT_PROFILE);
-addProfile(WATER_DESALINATION_PROFILE);
-addProfile(WATER_DESALINATION_V2_CFIHOS_FORMAT_PROFILE);
+await addProfile(CCUS_CFIHOS_FORMAT_PROFILE);
+await addProfile(CCUS_V2_CFIHOS_FORMAT_PROFILE);
+await addProfile(WATER_DESALINATION_PROFILE);
+await addProfile(WATER_DESALINATION_V2_CFIHOS_FORMAT_PROFILE);
 
 const records = [...output.values()].sort(
   (a, b) =>

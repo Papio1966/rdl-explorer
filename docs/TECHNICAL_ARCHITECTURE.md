@@ -56,7 +56,7 @@ It contains source URL, generation timestamp, SHA-256, sheet names, headers and 
 
 `script/generate-workbook-snapshot.ts` (repository path: `scripts/generate-workbook-snapshot.ts`) downloads the official workbook, calculates SHA-256, parses the workbook in Node and writes the browser runtime snapshot.
 
-`xlsx` is intentionally a development-only dependency. The runtime-isolation regression test exists to prevent it from returning to `src/` or `api/`.
+`read-excel-file` is intentionally a development-only dependency behind `scripts/rdl-ingestion/workbookReader.ts`. The runtime-isolation regression test exists to prevent any XLSX parser from entering `src/` or `api/`.
 
 The generator uses Node HTTPS first and can fall back to operating-system `curl` trust where enterprise certificate chains prevent Node fetch from succeeding.
 
@@ -185,9 +185,9 @@ The deterministic suite protects architectural contracts, server-side Assistant 
 - Upstream CFIHOS updates require explicit regeneration/review.
 - CIS contract overrides remain separate from the source baseline.
 
-### Known dependency risk
+### Development-time workbook parser
 
-SheetJS `xlsx` remains a development dependency for controlled generation/validation and has known npm advisories. There is no npm fix available for the installed line at the time of writing. Runtime isolation materially reduces exposure, but replacement of the development-time parser remains a maintenance backlog item.
+RDL-039 retires SheetJS `xlsx@0.18.5` and routes controlled generation/validation through the maintained `read-excel-file` package behind one repository-local compatibility adapter. Workbook parsing remains outside the browser/API runtime, and generated release artifacts remain the reviewed runtime boundary.
 
 ## 14. Architectural decisions to preserve
 
@@ -203,7 +203,6 @@ SheetJS `xlsx` remains a development dependency for controlled generation/valida
 
 Potential hardening items include:
 
-- replace development-time SheetJS parser with a maintained alternative
 - split/normalize the large workbook JSON snapshot by domain/worksheet
 - extend API usage telemetry and governance reporting beyond the current server-side rate/cost controls
 - formalize release/versioning conventions beyond the current audit baseline
