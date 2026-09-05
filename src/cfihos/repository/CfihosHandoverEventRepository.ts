@@ -1,7 +1,8 @@
+import type { CfihosWorksheetRow } from "../workbook";
 import {
-  getCfihosWorksheetRows,
-  type CfihosWorksheetRow,
-} from "../workbook";
+  loadCfihosHandoverEventSource,
+  type CfihosHandoverEventSource,
+} from "../runtimeCompatibility";
 import {
   normalizeOptionalString,
   normalizeRequiredString,
@@ -11,9 +12,6 @@ import type {
   CfihosHandoverEventDiagnostics,
   CfihosLifecyclePhaseKey,
 } from "../model/handoverEvent";
-import { cfihosDocumentRepository } from "./CfihosDocumentRepository";
-
-const HANDOVER_EVENT_SHEET = "handover event";
 
 const EXPECTED_PHASE_ORDER: CfihosLifecyclePhaseKey[] = [
   "detailed-engineering",
@@ -31,6 +29,13 @@ type HandoverEventRepositoryState = {
 export class CfihosHandoverEventRepository {
   private state: HandoverEventRepositoryState | null = null;
   private loadingPromise: Promise<HandoverEventRepositoryState> | null = null;
+  private readonly sourceLoader: () => Promise<CfihosHandoverEventSource>;
+
+  constructor(
+    sourceLoader: () => Promise<CfihosHandoverEventSource> = loadCfihosHandoverEventSource,
+  ) {
+    this.sourceLoader = sourceLoader;
+  }
 
   async initialize(): Promise<void> {
     await this.getState();
@@ -59,10 +64,8 @@ export class CfihosHandoverEventRepository {
   }
 
   private async loadState(): Promise<HandoverEventRepositoryState> {
-    const [rows, relationships] = await Promise.all([
-      getCfihosWorksheetRows(HANDOVER_EVENT_SHEET),
-      cfihosDocumentRepository.getRelationships(),
-    ]);
+    const source = await this.sourceLoader();
+    const rows = source.rows;
 
     const rawEvents = rows
       .map((row) => this.buildEvent(row))
@@ -94,17 +97,6 @@ export class CfihosHandoverEventRepository {
           event.reportingSequence === index + 1,
       );
 
-    const lifecycleRelationshipsWithAnyStatusCount = relationships.filter(
-      (relationship) =>
-        Boolean(
-          relationship.requiredStatusDetailedEngineering ||
-            relationship.requiredStatusConstruction ||
-            relationship.requiredStatusCommissioning ||
-            relationship.requiredStatusStartup ||
-            relationship.requiredStatusOperations,
-        ),
-    ).length;
-
     const diagnostics: CfihosHandoverEventDiagnostics = {
       sourceRowCount: rows.length,
       eventCount: events.length,
@@ -122,8 +114,9 @@ export class CfihosHandoverEventRepository {
       missingExpectedLifecyclePhaseCount: missingExpectedLifecyclePhases.length,
       unmappedEventCount: unmappedEventNames.length,
       sequenceMatchesLifecycleOrder,
-      lifecycleRelationshipCount: relationships.length,
-      lifecycleRelationshipsWithAnyStatusCount,
+      lifecycleRelationshipCount: source.lifecycleRelationshipCount,
+      lifecycleRelationshipsWithAnyStatusCount:
+        source.lifecycleRelationshipsWithAnyStatusCount,
       missingExpectedLifecyclePhases,
       unmappedEventNames,
       events,
