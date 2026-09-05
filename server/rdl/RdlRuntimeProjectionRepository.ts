@@ -101,6 +101,7 @@ const unique = (values: unknown[]) => [...new Set(values.map(text).filter(Boolea
 const splitAliases = (value: unknown) => unique(text(value).split(/[;|\n]+/));
 const sourceSheet = (locator: Record<string, unknown>) => text(locator.sheet);
 const entityKey = (type: string, id: string) => `${type}|${id}`;
+const isClassEntityType = (type: string) => ["class", "tag_class", "equipment_class"].includes(type);
 const compactAttributes = (values: Record<string, unknown>): Record<string, string> => Object.fromEntries(
   Object.entries(values).map(([key, value]) => [key, text(value)] as const).filter(([, value]) => Boolean(value)),
 );
@@ -316,6 +317,256 @@ export class RdlRuntimeProjectionRepository {
       attributes: {},
       sourceSheet: sourceSheet(row.source_locator ?? {}),
     }));
+  }
+
+  async projectDetailProjection(
+    sourceKey: string,
+    releaseKey: string,
+    entityType: string,
+    nativeIdentifier: string,
+  ): Promise<RdlRuntimeProjection> {
+    const rawEntities = await this.loadEntities(sourceKey, releaseKey);
+    const entities: Entity[] = rawEntities.map((row) => ({
+      ...row,
+      metadata: row.normalized_metadata ?? {},
+      sourceSheet: sourceSheet(row.source_locator ?? {}),
+      context: contextOf(row),
+    }));
+    const anchor = entities.find((entity) =>
+      entity.entity_type_code === entityType && entity.native_identifier === nativeIdentifier
+    );
+    if (!anchor) return { searchRecords: [], relationshipRecords: [] };
+
+    const rawRelationships = await this.loadDetailRelationships(sourceKey, releaseKey, entityType, nativeIdentifier);
+    const relationships: Relationship[] = rawRelationships.map((row) => ({
+      ...row,
+      sourceSheet: sourceSheet(row.source_locator ?? {}),
+      context: contextOf(row),
+    }));
+    const closure = this.detailEntityClosure(entities, relationships, anchor);
+    const projected = this.projectRelationships(closure, relationships);
+    return {
+      searchRecords: this.projectSearch(closure),
+      relationshipRecords: this.projectDetailRelationships(projected, anchor),
+    };
+  }
+
+  private detailEntityClosure(entities: Entity[], relationships: Relationship[], anchor: Entity): Entity[] {
+    const allByKey = new Map(entities.map((entity) => [entityKey(entity.entity_type_code, entity.native_identifier), entity]));
+    const kept = new Map<string, Entity>();
+    const add = (type: string, id: unknown) => {
+      const key = entityKey(type, text(id));
+      const entity = allByKey.get(key);
+      if (entity) kept.set(key, entity);
+      return entity;
+    };
+    const addRequirementRefs = (requirement: Entity) => {
+      const m = requirement.metadata;
+      const classId = text(m.classId);
+      if (classId) add("tag_class", classId) || add("equipment_class", classId);
+      add("property", m.propertyId);
+      add("document_type", m.documentId);
+      add("source_standard", m.sourceStandardId);
+    };
+    const addMappingRefs = (mapping: Entity) => {
+      const m = mapping.metadata;
+      add("property", m.propertyId);
+      add("source_standard", m.sourceStandardId);
+    };
+
+    add(anchor.entity_type_code, anchor.native_identifier);
+    for (const relationship of relationships) {
+      add(relationship.source_type, relationship.source_identifier);
+      add(relationship.target_type, relationship.target_identifier);
+      const attrs = relationship.attributes ?? {};
+      const requirement = add("information_requirement", attrs.requirementId);
+      if (requirement) addRequirementRefs(requirement);
+      add("source_standard", attrs.sourceStandardId);
+      add("unit_of_measure", attrs.siUnitId);
+      add("unit_of_measure", attrs.imperialUnitId);
+    }
+
+    const anchorType = anchor.entity_type_code;
+    const anchorId = anchor.native_identifier;
+
+    if (anchorType === "property") {
+      const property = anchor;
+      const isCfihos = property.context.sourceKey === "cfihos";
+      const propertyRefs = isCfihos
+        ? unique([property.metadata.dimensionId, property.metadata.dimensionCode])
+        : unique([property.metadata.unitId, property.metadata.dimensionReference]);
+      for (const unit of entities.filter((entity) => entity.entity_type_code === "unit_of_measure")) {
+        const unitRefs = isCfihos
+          ? unique([unit.metadata.dimensionId, unit.metadata.dimensionCode, unit.metadata.dimensionName])
+          : unique([unit.metadata.dimensionName, unit.metadata.dimensionReference]);
+        if ((!isCfihos && same(property.metadata.unitId, unit.native_identifier))
+          || propertyRefs.some((left) => unitRefs.some((right) => same(left, right)))) {
+          add("unit_of_measure", unit.native_identifier);
+        }
+      }
+      const controlledListReference = text(property.metadata.controlledListId);
+      if (controlledListReference) {
+        for (const controlled of entities.filter((entity) => entity.entity_type_code === "controlled_value")) {
+          const listId = text(controlled.metadata.controlledListId);
+          const listName = text(controlled.metadata.controlledListName);
+          const matches = isCfihos
+            ? same(controlledListReference, listId)
+            : (same(controlledListReference, listId) || same(controlledListReference, listName));
+          if (matches) {
+            add("controlled_value", controlled.native_identifier);
+            add("source_standard", controlled.metadata.sourceStandardId);
+          }
+        }
+      }
+      for (const mapping of entities.filter((entity) => entity.entity_type_code === "source_mapping" && same(entity.metadata.propertyId, anchorId))) {
+        kept.set(entityKey(mapping.entity_type_code, mapping.native_identifier), mapping);
+        addMappingRefs(mapping);
+      }
+      for (const requirement of entities.filter((entity) => entity.entity_type_code === "information_requirement" && same(entity.metadata.propertyId, anchorId))) {
+        kept.set(entityKey(requirement.entity_type_code, requirement.native_identifier), requirement);
+        addRequirementRefs(requirement);
+      }
+    }
+
+    if (anchorType === "source_standard") {
+      for (const mapping of entities.filter((entity) => entity.entity_type_code === "source_mapping" && same(entity.metadata.sourceStandardId, anchorId))) {
+        kept.set(entityKey(mapping.entity_type_code, mapping.native_identifier), mapping);
+        addMappingRefs(mapping);
+      }
+      for (const controlled of entities.filter((entity) => entity.entity_type_code === "controlled_value" && same(entity.metadata.sourceStandardId, anchorId))) {
+        add("controlled_value", controlled.native_identifier);
+      }
+      for (const requirement of entities.filter((entity) => entity.entity_type_code === "information_requirement" && same(entity.metadata.sourceStandardId, anchorId))) {
+        kept.set(entityKey(requirement.entity_type_code, requirement.native_identifier), requirement);
+        addRequirementRefs(requirement);
+      }
+    }
+
+    if (isClassEntityType(anchorType)) {
+      for (const requirement of entities.filter((entity) => entity.entity_type_code === "information_requirement" && same(entity.metadata.classId, anchorId))) {
+        kept.set(entityKey(requirement.entity_type_code, requirement.native_identifier), requirement);
+        addRequirementRefs(requirement);
+      }
+    }
+
+    if (anchorType === "document_type") {
+      for (const requirement of entities.filter((entity) => entity.entity_type_code === "information_requirement" && same(entity.metadata.documentId, anchorId))) {
+        kept.set(entityKey(requirement.entity_type_code, requirement.native_identifier), requirement);
+        addRequirementRefs(requirement);
+      }
+    }
+
+    if (anchorType === "controlled_value") add("source_standard", anchor.metadata.sourceStandardId);
+    if (anchorType === "information_requirement") addRequirementRefs(anchor);
+
+    // Requirements introduced indirectly by a class-document row must be present for
+    // the existing projection logic to derive the same rich-detail edges.
+    for (const entity of [...kept.values()]) {
+      if (entity.entity_type_code === "information_requirement") addRequirementRefs(entity);
+    }
+
+    return [...kept.values()];
+  }
+
+  private projectDetailRelationships(
+    relationships: RdlRuntimeRelationshipRecord[],
+    anchor: Entity,
+  ): RdlRuntimeRelationshipRecord[] {
+    const kept = new Set<RdlRuntimeRelationshipRecord>();
+    const anchorType = anchor.entity_type_code;
+    const anchorId = anchor.native_identifier;
+    for (const relationship of relationships) {
+      if ((relationship.sourceEntityType === anchorType && relationship.sourceNativeIdentifier === anchorId)
+        || (relationship.targetEntityType === anchorType && relationship.targetNativeIdentifier === anchorId)) {
+        kept.add(relationship);
+      }
+    }
+
+    if (isClassEntityType(anchorType)) {
+      const visited = new Set<string>();
+      let currentId = anchorId;
+      while (currentId && !visited.has(currentId)) {
+        visited.add(currentId);
+        for (const relationship of relationships) {
+          if (relationship.relationshipType === "class_property"
+            && relationship.sourceEntityType === anchorType
+            && relationship.sourceNativeIdentifier === currentId) {
+            kept.add(relationship);
+          }
+        }
+        const parent = relationships.find((relationship) =>
+          relationship.relationshipType === "entity_parent"
+          && relationship.sourceEntityType === anchorType
+          && relationship.sourceNativeIdentifier === currentId
+          && relationship.targetEntityType === anchorType
+        );
+        if (!parent) break;
+        kept.add(parent);
+        currentId = parent.targetNativeIdentifier;
+      }
+    }
+
+    return relationships.filter((relationship) => kept.has(relationship));
+  }
+
+  private async loadDetailRelationships(
+    sourceKey: string,
+    releaseKey: string,
+    entityType: string,
+    nativeIdentifier: string,
+  ): Promise<RelationshipRow[]> {
+    return this.client.query<RelationshipRow>(`
+      WITH RECURSIVE selected_package AS (
+        SELECT p.package_id, p.package_key, s.source_key, s.name AS source_name,
+               r.release_key, r.release_status, r.version_label
+        FROM rdl.rdl_package p
+        JOIN rdl.rdl_release r ON r.release_id = p.release_id
+        JOIN rdl.rdl_source s ON s.source_id = r.source_id
+        WHERE p.package_status = 'validated'
+          AND s.source_key = ${sqlLiteral(sourceKey)}
+          AND r.release_key = ${sqlLiteral(releaseKey)}
+        ORDER BY p.package_id DESC
+        LIMIT 1
+      ),
+      ancestors AS (
+        SELECT e.entity_id, e.package_id, e.entity_type_code, e.native_identifier, 0 AS depth
+        FROM selected_package sp
+        JOIN rdl.rdl_entity e ON e.package_id = sp.package_id
+        WHERE e.entity_type_code = ${sqlLiteral(entityType)}
+          AND e.native_identifier = ${sqlLiteral(nativeIdentifier)}
+        UNION ALL
+        SELECT parent.entity_id, parent.package_id, parent.entity_type_code, parent.native_identifier, a.depth + 1
+        FROM ancestors a
+        JOIN rdl.rdl_relationship rel
+          ON rel.package_id = a.package_id
+         AND rel.source_entity_id = a.entity_id
+         AND rel.relationship_type_code = 'entity_parent'
+        JOIN rdl.rdl_entity parent
+          ON parent.entity_id = rel.target_entity_id
+         AND parent.package_id = a.package_id
+         AND parent.entity_type_code = a.entity_type_code
+        WHERE a.depth < 50
+      ),
+      neighborhood_relationships AS (
+        SELECT DISTINCT rel.relationship_id
+        FROM ancestors a
+        JOIN rdl.rdl_relationship rel
+          ON rel.package_id = a.package_id
+         AND (rel.source_entity_id = a.entity_id OR rel.target_entity_id = a.entity_id)
+      )
+      SELECT sp.source_key, sp.source_name, sp.release_key, sp.release_status, sp.version_label, sp.package_key,
+             rel.relationship_type_code,
+             src.entity_type_code AS source_type, src.native_identifier AS source_identifier,
+             tgt.entity_type_code AS target_type, tgt.native_identifier AS target_identifier,
+             rel.attributes, rel.source_locator
+      FROM selected_package sp
+      JOIN neighborhood_relationships nr ON true
+      JOIN rdl.rdl_relationship rel ON rel.relationship_id = nr.relationship_id AND rel.package_id = sp.package_id
+      JOIN rdl.rdl_entity src ON src.entity_id = rel.source_entity_id
+      JOIN rdl.rdl_entity tgt ON tgt.entity_id = rel.target_entity_id
+      ORDER BY rel.relationship_type_code, src.entity_type_code, src.native_identifier,
+               tgt.entity_type_code, tgt.native_identifier, rel.relationship_id
+    `);
   }
 
   private projectSearch(entities: Entity[]): RdlRuntimeSearchRecord[] {

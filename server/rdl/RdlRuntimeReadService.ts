@@ -117,10 +117,15 @@ export class RdlRuntimeReadService {
     const input = normalizeDetailQuery(query);
     const release = await this.requireRelease(input.sourceKey, input.releaseKey);
 
-    // RDL-037.2 deliberately reuses the already-proven full release projection once
-    // per detail request. The pure rich-detail projector is shared with the JSON
-    // rollback path, so there is one semantic implementation for both authorities.
-    const projection = await this.projection.project(input.sourceKey, input.releaseKey);
+    // RDL-038.3 keeps the pure rich-detail projector as the single semantic authority,
+    // but supplies only the exact entity neighborhood and inheritance closure required
+    // for this canonical identity instead of materializing the complete release graph.
+    const projection = await this.projection.projectDetailProjection(
+      input.sourceKey,
+      input.releaseKey,
+      input.entityType,
+      input.nativeIdentifier,
+    );
     if (projection.searchRecords.some((record) => record.packageKey !== release.packageKey)
       || projection.relationshipRecords.some((record) => record.packageKey !== release.packageKey)) {
       throw new Error("RDL runtime detail projection changed package identity during the read.");
