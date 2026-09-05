@@ -10,7 +10,7 @@ CFIHOS Explorer is currently a pre-production/UAT React + TypeScript application
 
 The following controls are architectural requirements:
 
-1. Do not reintroduce XLSX parsing into `src/` or `api/`. SheetJS is development-only and is used by controlled generation/validation scripts.
+1. Do not introduce XLSX parsing into `src/` or `api/`. `read-excel-file` is development-only and is used behind the shared controlled generation/validation adapter.
 2. Treat `public/cfihos-workbook.json` as a generated, reviewed release artifact. An upstream workbook change must not silently change production data.
 3. Preserve the locked CFIHOS baseline in the CIS Builder. Contract decisions are recorded as explicit overrides; they do not mutate CFIHOS.
 4. Keep `OPENAI_API_KEY` server-side. It must never be placed in browser code, committed to Git, or exposed in screenshots/logs.
@@ -288,12 +288,12 @@ npm audit
 npm outdated
 ```
 
-Do not run `npm audit fix --force` without review. At the time this guide was written, `xlsx` is retained as a development-only dependency for controlled snapshot/validation scripts and has known advisories with no npm fix available. It must not be imported under `src/` or `api/`.
+Do not run `npm audit fix --force` without review. RDL-039 replaced the retired SheetJS development parser with pinned `read-excel-file@9.3.10`. The parser must remain development-only and must not be imported under `src/` or `api/`.
 
 Verify runtime isolation with:
 
 ```bash
-grep -R 'from "xlsx"\|require("xlsx")' --line-number src api
+grep -R -E 'from ["\x27](xlsx|read-excel-file)|require\(["\x27](xlsx|read-excel-file)' --line-number src api
 ```
 
 Expected result: no matches.
@@ -354,7 +354,7 @@ Do not rely on browser local storage as the sole durable copy of a CIS. Users sh
 | CFIHOS data missing | Confirm `public/cfihos-workbook.json` exists and is valid |
 | Upstream monitor fails | Inspect workflow logs and uploaded change-report artifact |
 | Node download fails on enterprise network | Generator/checker can fall back to OS `curl` trust |
-| `npm audit` reports `xlsx` | Confirm it remains dev-only and absent from `src/`/`api/`; do not force-upgrade blindly |
+| workbook-parser dependency advisory | Confirm the parser remains dev-only and absent from `src/`/`api/`; assess the pinned parser deliberately and do not force-upgrade blindly |
 
 ## 12. Handover checklist
 

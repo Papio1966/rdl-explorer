@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
-import * as XLSX from "xlsx";
+import { readWorkbook, worksheetHeaders, worksheetRows } from "./rdl-ingestion/workbookReader.ts";
 import { CFIHOS_SOURCE } from "../src/cfihos/source";
 
 const execFileAsync = promisify(execFile);
@@ -89,30 +89,21 @@ async function downloadWorkbook(url: string): Promise<{ bytes: Buffer; mode: "fe
   }
 }
 
-function worksheetHeaders(worksheet: XLSX.WorkSheet): string[] {
-  const values = XLSX.utils.sheet_to_json<unknown[]>(worksheet, { header: 1, defval: null, raw: false });
-  const headerRow = values[0];
-  if (!Array.isArray(headerRow)) return [];
-  return headerRow
-    .map((value) => (value === null || value === undefined ? "" : String(value).trim()))
-    .filter(Boolean);
-}
-
-function snapshotFromBytes(bytes: Buffer, sha256: string): WorkbookSnapshot {
-  const workbook = XLSX.read(bytes, { type: "buffer" });
+async function snapshotFromBytes(bytes: Buffer, sha256: string): Promise<WorkbookSnapshot> {
+  const workbook = await readWorkbook(bytes);
   const sheets: WorkbookSnapshot["sheets"] = {};
-  for (const sheetName of workbook.SheetNames) {
-    const worksheet = workbook.Sheets[sheetName];
+  for (const sheetName of workbook.sheetNames) {
+    const worksheet = workbook.sheets[sheetName];
     if (!worksheet) continue;
     sheets[sheetName] = {
       headers: worksheetHeaders(worksheet),
-      rows: XLSX.utils.sheet_to_json<WorksheetRow>(worksheet, { defval: null, raw: false }),
+      rows: worksheetRows<WorksheetRow>(worksheet),
     };
   }
   return {
     schema: "cfihos-workbook-snapshot-v1",
     source: { url: CFIHOS_SOURCE.officialUrl, generatedAt: new Date().toISOString(), sha256 },
-    sheetNames: workbook.SheetNames,
+    sheetNames: workbook.sheetNames,
     sheets,
   };
 }
@@ -196,7 +187,7 @@ async function main() {
     return;
   }
 
-  const upstream = snapshotFromBytes(bytes, upstreamSha256);
+  const upstream = await snapshotFromBytes(bytes, upstreamSha256);
   const addedSheets = upstream.sheetNames.filter((name) => !committed.sheetNames.includes(name));
   const removedSheets = committed.sheetNames.filter((name) => !upstream.sheetNames.includes(name));
   const domains = Object.fromEntries(

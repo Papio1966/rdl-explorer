@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import * as XLSX from "xlsx";
+import { readWorkbook, worksheetRows } from "./workbookReader.ts";
 import type { RdlWorkbookMappingProfile } from "./RdlWorkbookMappingProfile.ts";
 import { mappedText } from "./RdlWorkbookMappingProfile.ts";
 
@@ -45,11 +45,11 @@ function stableDerivedId(sourceKey: string, kind: string, parts: string[]): stri
   return `${sourceKey}:${kind}:${digest}`;
 }
 
-export function generateCfihosFormatSql(profile: RdlWorkbookMappingProfile): string {
+export async function generateCfihosFormatSql(profile: RdlWorkbookMappingProfile): Promise<string> {
   const path = resolve(profile.workbookPath);
   const bytes = readFileSync(path);
   const sha256 = createHash("sha256").update(bytes).digest("hex");
-  const workbook = XLSX.read(bytes, { type: "buffer" });
+  const workbook = await readWorkbook(bytes);
   const identityAudit = profile.identityAudit
     ? (() => {
         const auditBytes = readFileSync(resolve(profile.identityAudit.auditPath));
@@ -63,9 +63,9 @@ export function generateCfihosFormatSql(profile: RdlWorkbookMappingProfile): str
   const rows = (key: string): Row[] => {
     const sheetName = profile.sheetNames[key];
     if (!sheetName) return [];
-    const worksheet = workbook.Sheets[sheetName];
+    const worksheet = workbook.sheets[sheetName];
     if (!worksheet) return [];
-    return XLSX.utils.sheet_to_json<Row>(worksheet, { defval: null, raw: false });
+    return worksheetRows<Row>(worksheet);
   };
   const f = profile.fields;
   const t = (row: Row, field: string) => mappedText(row, f[field] ?? [field]);
@@ -79,7 +79,7 @@ export function generateCfihosFormatSql(profile: RdlWorkbookMappingProfile): str
   emit(`INSERT INTO rdl.rdl_source (source_key, name, description, publisher, authoritative_uri, status) VALUES (${sql(profile.sourceKey)}, ${sql(profile.sourceName)}, ${sql(profile.sourceDescription)}, ${sql(profile.publisher)}, ${sql(profile.sourceUri)}, 'active') ON CONFLICT (source_key) DO UPDATE SET name=EXCLUDED.name, description=EXCLUDED.description, publisher=EXCLUDED.publisher, authoritative_uri=EXCLUDED.authoritative_uri, updated_at=now();`);
   emit(`INSERT INTO rdl.rdl_release (source_id, release_key, version_label, release_status, notes) SELECT source_id, ${sql(profile.releaseKey)}, ${sql(profile.versionLabel)}, ${sql(persistedReleaseStatus)}, ${sql(`Loaded through mapping profile ${profile.profileKey}.`)} FROM rdl.rdl_source WHERE source_key=${sql(profile.sourceKey)} ON CONFLICT (source_id, release_key) DO UPDATE SET version_label=EXCLUDED.version_label, release_status=EXCLUDED.release_status, notes=EXCLUDED.notes;`);
   emit(`SELECT rdl.assert_release_package_fingerprint(${sql(profile.sourceKey)}, ${sql(profile.releaseKey)}, ${sql(sha256)});`);
-  emit(`INSERT INTO rdl.rdl_package (release_id, package_key, package_kind, package_status, source_uri, content_sha256, manifest, validated_at) SELECT release_id, ${sql(packageKey)}, 'normalized', 'validated', ${sql(profile.sourceUri)}, ${sql(sha256)}, ${jsonSql({ profileKey: profile.profileKey, adapterVersion: profile.adapterVersion, workbookFile: profile.workbookPath, sourceSha256: sha256, sheetCount: workbook.SheetNames.length, ...(identityAudit ? { identityAuditFromReleaseKey: identityAudit.fromReleaseKey, identityAuditPath: identityAudit.auditPath, identityAuditSha256: identityAudit.auditSha256 } : {}) })}, now() FROM rdl.rdl_release r JOIN rdl.rdl_source s ON s.source_id=r.source_id WHERE s.source_key=${sql(profile.sourceKey)} AND r.release_key=${sql(profile.releaseKey)} ON CONFLICT (package_key) DO UPDATE SET package_status='validated', validated_at=COALESCE(rdl.rdl_package.validated_at, now());`);
+  emit(`INSERT INTO rdl.rdl_package (release_id, package_key, package_kind, package_status, source_uri, content_sha256, manifest, validated_at) SELECT release_id, ${sql(packageKey)}, 'normalized', 'validated', ${sql(profile.sourceUri)}, ${sql(sha256)}, ${jsonSql({ profileKey: profile.profileKey, adapterVersion: profile.adapterVersion, workbookFile: profile.workbookPath, sourceSha256: sha256, sheetCount: workbook.sheetNames.length, ...(identityAudit ? { identityAuditFromReleaseKey: identityAudit.fromReleaseKey, identityAuditPath: identityAudit.auditPath, identityAuditSha256: identityAudit.auditSha256 } : {}) })}, now() FROM rdl.rdl_release r JOIN rdl.rdl_source s ON s.source_id=r.source_id WHERE s.source_key=${sql(profile.sourceKey)} AND r.release_key=${sql(profile.releaseKey)} ON CONFLICT (package_key) DO UPDATE SET package_status='validated', validated_at=COALESCE(rdl.rdl_package.validated_at, now());`);
   emit(`DELETE FROM rdl.rdl_relationship WHERE package_id=(SELECT package_id FROM rdl.rdl_package WHERE package_key=${sql(packageKey)});`);
   emit(`DELETE FROM rdl.rdl_entity WHERE package_id=(SELECT package_id FROM rdl.rdl_package WHERE package_key=${sql(packageKey)});`);
   emit(`DELETE FROM ingestion.ingestion_run WHERE package_id=(SELECT package_id FROM rdl.rdl_package WHERE package_key=${sql(packageKey)});`);
@@ -239,7 +239,7 @@ export function generateCfihosFormatSql(profile: RdlWorkbookMappingProfile): str
   });
 
   emit(`SELECT rdl.assert_source_release_identity(${sql(packageKey)});`);
-  emit(`INSERT INTO ingestion.ingestion_run (package_id, source_uri, content_sha256, adapter_key, adapter_version, status, completed_at, validation_summary) SELECT package_id, ${sql(profile.sourceUri)}, ${sql(sha256)}, ${sql(profile.profileKey)}, ${sql(profile.adapterVersion)}, 'completed', now(), ${jsonSql({ mappingProfile: profile.profileKey, workbookSheets: workbook.SheetNames.length, identityAuditRequired: Boolean(identityAudit), identityAuditSha256: identityAudit?.auditSha256 ?? null })} FROM rdl.rdl_package WHERE package_key=${sql(packageKey)};`);
+  emit(`INSERT INTO ingestion.ingestion_run (package_id, source_uri, content_sha256, adapter_key, adapter_version, status, completed_at, validation_summary) SELECT package_id, ${sql(profile.sourceUri)}, ${sql(sha256)}, ${sql(profile.profileKey)}, ${sql(profile.adapterVersion)}, 'completed', now(), ${jsonSql({ mappingProfile: profile.profileKey, workbookSheets: workbook.sheetNames.length, identityAuditRequired: Boolean(identityAudit), identityAuditSha256: identityAudit?.auditSha256 ?? null })} FROM rdl.rdl_package WHERE package_key=${sql(packageKey)};`);
   emit("COMMIT;");
   return out.join("\n")+"\n";
 }

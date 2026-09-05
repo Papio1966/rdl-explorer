@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import * as XLSX from "xlsx";
+import { readWorkbook, worksheetRows } from "./rdl-ingestion/workbookReader.ts";
 import { getRdlDatabaseConfig } from "../server/db/config.ts";
 import { PsqlJsonClient } from "../server/db/PsqlJsonClient.ts";
 import { PostgresRdlRepository } from "../server/rdl/PostgresRdlRepository.ts";
@@ -11,11 +11,11 @@ import { mappedText } from "./rdl-ingestion/RdlWorkbookMappingProfile.ts";
 const profile = WATER_DESALINATION_PROFILE;
 const bytes = readFileSync(profile.workbookPath);
 const sha256 = createHash("sha256").update(bytes).digest("hex");
-const workbook = XLSX.read(bytes, { type: "buffer" });
+const workbook = await readWorkbook(bytes);
 type Row = Record<string, unknown>;
 const rows = (key: string): Row[] => {
-  const ws = workbook.Sheets[profile.sheetNames[key]];
-  return ws ? XLSX.utils.sheet_to_json<Row>(ws, { defval: null, raw: false }) : [];
+  const ws = workbook.sheets[profile.sheetNames[key]];
+  return ws ? worksheetRows<Row>(ws) : [];
 };
 const f = profile.fields;
 const t = (row: Row, field: string) => mappedText(row, f[field] ?? [field]);

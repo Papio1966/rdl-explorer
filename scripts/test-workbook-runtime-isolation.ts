@@ -2,8 +2,8 @@ import { readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const workbookSource = await readFile(resolve("src/cfihos/workbook.ts"), "utf8");
-if (/from\s+["']xlsx["']|require\(["']xlsx["']\)/.test(workbookSource)) {
-  throw new Error("FAIL runtime isolation: src/cfihos/workbook.ts still imports xlsx.");
+if (/from\s+["'](?:xlsx|read-excel-file(?:\/[^"']+)*)["']|require\(["'](?:xlsx|read-excel-file(?:\/[^"']+)*)["']\)/.test(workbookSource)) {
+  throw new Error("FAIL runtime isolation: src/cfihos/workbook.ts imports a development-time XLSX parser.");
 }
 
 const snapshotPath = resolve("public/cfihos-workbook.json");

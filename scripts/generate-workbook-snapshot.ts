@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
-import * as XLSX from "xlsx";
+import { readWorkbook, worksheetHeaders, worksheetRows } from "./rdl-ingestion/workbookReader.ts";
 import { CFIHOS_SOURCE } from "../src/cfihos/source";
 
 const execFileAsync = promisify(execFile);
@@ -67,37 +67,20 @@ async function downloadWorkbook(url: string): Promise<{ bytes: Buffer; mode: "fe
   }
 }
 
-function worksheetHeaders(worksheet: XLSX.WorkSheet): string[] {
-  const values = XLSX.utils.sheet_to_json<unknown[]>(worksheet, {
-    header: 1,
-    defval: null,
-    raw: false,
-  });
-  const headerRow = values[0];
-  if (!Array.isArray(headerRow)) return [];
-
-  return headerRow
-    .map((value) => (value === null || value === undefined ? "" : String(value).trim()))
-    .filter((value) => value.length > 0);
-}
-
 async function main() {
   console.log(`Downloading ${CFIHOS_SOURCE.officialUrl}`);
   const { bytes, mode } = await downloadWorkbook(CFIHOS_SOURCE.officialUrl);
   const sha256 = createHash("sha256").update(bytes).digest("hex");
-  const workbook = XLSX.read(bytes, { type: "buffer" });
+  const workbook = await readWorkbook(bytes);
 
   const sheets: WorkbookSnapshot["sheets"] = {};
-  for (const sheetName of workbook.SheetNames) {
-    const worksheet = workbook.Sheets[sheetName];
+  for (const sheetName of workbook.sheetNames) {
+    const worksheet = workbook.sheets[sheetName];
     if (!worksheet) continue;
 
     sheets[sheetName] = {
       headers: worksheetHeaders(worksheet),
-      rows: XLSX.utils.sheet_to_json<WorksheetRow>(worksheet, {
-        defval: null,
-        raw: false,
-      }),
+      rows: worksheetRows<WorksheetRow>(worksheet),
     };
   }
 
@@ -108,7 +91,7 @@ async function main() {
       generatedAt: new Date().toISOString(),
       sha256,
     },
-    sheetNames: workbook.SheetNames,
+    sheetNames: workbook.sheetNames,
     sheets,
   };
 
