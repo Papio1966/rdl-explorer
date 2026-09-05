@@ -46,6 +46,38 @@ export type CfihosClassRelationshipCompatibilityResult = {
   items: CfihosClassRelationshipCompatibilityItem[];
 };
 
+export type CfihosUnitOfMeasureCompatibilityItem = {
+  id: string;
+  name: string;
+  metadata: Record<string, unknown>;
+  sourceLocator: Record<string, unknown>;
+};
+
+export type CfihosUnitPropertyReferenceCompatibilityItem = {
+  siUnitId: string | null;
+  imperialUnitId: string | null;
+  sourceLocator: Record<string, unknown>;
+};
+
+export type CfihosPropertyDimensionReferenceCompatibilityItem = {
+  dimensionId: string | null;
+  sourceLocator: Record<string, unknown>;
+};
+
+export type CfihosUnitOfMeasureCompatibilityResult = {
+  sourceKey: string;
+  sourceName: string;
+  releaseKey: string;
+  versionLabel: string;
+  packageKey: string;
+  contentSha256: string;
+  sourceUri: string | null;
+  items: CfihosUnitOfMeasureCompatibilityItem[];
+  tagPropertyReferences: CfihosUnitPropertyReferenceCompatibilityItem[];
+  equipmentPropertyReferences: CfihosUnitPropertyReferenceCompatibilityItem[];
+  propertyDimensionReferences: CfihosPropertyDimensionReferenceCompatibilityItem[];
+};
+
 type PackageRow = {
   package_id: string;
   source_key: string;
@@ -71,6 +103,24 @@ type ClassRelationshipRow = {
   equipment_class_id: string;
   equipment_class_name: string;
   mapping_reason: string | null;
+  source_locator: Record<string, unknown>;
+};
+
+type UnitOfMeasureRow = {
+  native_identifier: string;
+  name: string;
+  normalized_metadata: Record<string, unknown>;
+  source_locator: Record<string, unknown>;
+};
+
+type UnitPropertyReferenceRow = {
+  si_unit_id: string | null;
+  imperial_unit_id: string | null;
+  source_locator: Record<string, unknown>;
+};
+
+type PropertyDimensionReferenceRow = {
+  dimension_id: string | null;
   source_locator: Record<string, unknown>;
 };
 
@@ -227,6 +277,104 @@ export class CfihosRuntimeCompatibilityService {
         equipmentClassId: text(row.equipment_class_id),
         equipmentClassName: text(row.equipment_class_name),
         mappingReason: nullableText(row.mapping_reason),
+        sourceLocator: row.source_locator ?? {},
+      })),
+    };
+  }
+
+  async unitsOfMeasure(input: {
+    sourceKey: string;
+    releaseKey: string;
+  }): Promise<CfihosUnitOfMeasureCompatibilityResult> {
+    const sourceKey = required("sourceKey", input.sourceKey);
+    const releaseKey = required("releaseKey", input.releaseKey);
+    if (sourceKey !== "cfihos") {
+      throw new RdlRuntimeReadInputError(
+        `CFIHOS compatibility reads require sourceKey 'cfihos', received '${sourceKey}'.`,
+      );
+    }
+
+    const packageRow = await this.requireValidatedPackage(sourceKey, releaseKey);
+    const packageId = Number(packageRow.package_id);
+    if (!Number.isSafeInteger(packageId) || packageId <= 0) {
+      throw new Error("Validated CFIHOS package returned an invalid package identifier.");
+    }
+
+    const contentSha256 = text(packageRow.content_sha256);
+    if (!contentSha256) {
+      throw new Error("Validated CFIHOS package is missing its source content SHA-256.");
+    }
+
+    const [units, tagReferences, equipmentReferences, propertyDimensions] = await Promise.all([
+      this.client.query<UnitOfMeasureRow>(`
+        SELECT e.native_identifier, e.name, e.normalized_metadata, e.source_locator
+        FROM rdl.rdl_entity e
+        WHERE e.package_id = ${packageId}
+          AND e.entity_type_code = 'unit_of_measure'
+          AND COALESCE(e.source_locator->>'sheet', '') = 'unit of measure'
+        ORDER BY e.entity_id
+      `),
+      this.client.query<UnitPropertyReferenceRow>(`
+        SELECT NULLIF(BTRIM(COALESCE(rel.attributes->>'siUnitId', '')), '') AS si_unit_id,
+               NULLIF(BTRIM(COALESCE(rel.attributes->>'imperialUnitId', '')), '') AS imperial_unit_id,
+               rel.source_locator
+        FROM rdl.rdl_relationship rel
+        JOIN rdl.rdl_entity source ON source.entity_id = rel.source_entity_id
+        WHERE rel.package_id = ${packageId}
+          AND rel.relationship_type_code = 'class_property'
+          AND source.entity_type_code = 'tag_class'
+          AND COALESCE(rel.source_locator->>'sheet', '') = 'tag class property'
+        ORDER BY rel.relationship_id
+      `),
+      this.client.query<UnitPropertyReferenceRow>(`
+        SELECT NULLIF(BTRIM(COALESCE(rel.attributes->>'siUnitId', '')), '') AS si_unit_id,
+               NULLIF(BTRIM(COALESCE(rel.attributes->>'imperialUnitId', '')), '') AS imperial_unit_id,
+               rel.source_locator
+        FROM rdl.rdl_relationship rel
+        JOIN rdl.rdl_entity source ON source.entity_id = rel.source_entity_id
+        WHERE rel.package_id = ${packageId}
+          AND rel.relationship_type_code = 'class_property'
+          AND source.entity_type_code = 'equipment_class'
+          AND COALESCE(rel.source_locator->>'sheet', '') = 'equipment class property'
+        ORDER BY rel.relationship_id
+      `),
+      this.client.query<PropertyDimensionReferenceRow>(`
+        SELECT NULLIF(BTRIM(COALESCE(e.normalized_metadata->>'dimensionId', '')), '') AS dimension_id,
+               e.source_locator
+        FROM rdl.rdl_entity e
+        WHERE e.package_id = ${packageId}
+          AND e.entity_type_code = 'property'
+          AND COALESCE(e.source_locator->>'sheet', '') = 'property'
+        ORDER BY e.entity_id
+      `),
+    ]);
+
+    return {
+      sourceKey: packageRow.source_key,
+      sourceName: packageRow.source_name,
+      releaseKey: packageRow.release_key,
+      versionLabel: packageRow.version_label,
+      packageKey: packageRow.package_key,
+      contentSha256,
+      sourceUri: packageRow.source_uri,
+      items: units.map((row: UnitOfMeasureRow) => ({
+        id: text(row.native_identifier),
+        name: text(row.name),
+        metadata: row.normalized_metadata ?? {},
+        sourceLocator: row.source_locator ?? {},
+      })),
+      tagPropertyReferences: tagReferences.map((row: UnitPropertyReferenceRow) => ({
+        siUnitId: nullableText(row.si_unit_id),
+        imperialUnitId: nullableText(row.imperial_unit_id),
+        sourceLocator: row.source_locator ?? {},
+      })),
+      equipmentPropertyReferences: equipmentReferences.map((row: UnitPropertyReferenceRow) => ({
+        siUnitId: nullableText(row.si_unit_id),
+        imperialUnitId: nullableText(row.imperial_unit_id),
+        sourceLocator: row.source_locator ?? {},
+      })),
+      propertyDimensionReferences: propertyDimensions.map((row: PropertyDimensionReferenceRow) => ({
+        dimensionId: nullableText(row.dimension_id),
         sourceLocator: row.source_locator ?? {},
       })),
     };
