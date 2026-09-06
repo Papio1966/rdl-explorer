@@ -1,7 +1,7 @@
 import {
-  getCfihosWorksheetRows,
-  type CfihosWorksheetRow,
-} from "../workbook";
+  loadCfihosUnitOfMeasureSource,
+  type CfihosUnitOfMeasureSource,
+} from "../runtimeCompatibility";
 import {
   normalizeOptionalString,
   normalizeRequiredString,
@@ -19,9 +19,17 @@ type RepositoryState = {
   diagnostics: CfihosUnitOfMeasureDiagnostics;
 };
 
+type UnitOfMeasureSourceLoader = () => Promise<CfihosUnitOfMeasureSource>;
+type UnitOfMeasureSourceRow = CfihosUnitOfMeasureSource["unitRows"][number];
+
 export class CfihosUnitOfMeasureRepository {
   private state: RepositoryState | null = null;
   private loadingPromise: Promise<RepositoryState> | null = null;
+  private readonly sourceLoader: UnitOfMeasureSourceLoader;
+
+  constructor(sourceLoader: UnitOfMeasureSourceLoader = loadCfihosUnitOfMeasureSource) {
+    this.sourceLoader = sourceLoader;
+  }
 
   async initialize(): Promise<void> {
     await this.getState();
@@ -69,13 +77,8 @@ export class CfihosUnitOfMeasureRepository {
   }
 
   private async loadState(): Promise<RepositoryState> {
-    const [unitRows, tagPropertyRows, equipmentPropertyRows, propertyRows] =
-      await Promise.all([
-        getCfihosWorksheetRows("unit of measure"),
-        getCfihosWorksheetRows("tag class property"),
-        getCfihosWorksheetRows("equipment class property"),
-        getCfihosWorksheetRows("property"),
-      ]);
+    const source = await this.sourceLoader();
+    const { unitRows, tagPropertyRows, equipmentPropertyRows, propertyRows } = source;
 
     const units = this.buildUnits(unitRows);
     const unitsById = new Map<string, CfihosUnitOfMeasure>();
@@ -115,7 +118,7 @@ export class CfihosUnitOfMeasureRepository {
     };
   }
 
-  private buildUnits(rows: CfihosWorksheetRow[]): CfihosUnitOfMeasure[] {
+  private buildUnits(rows: UnitOfMeasureSourceRow[]): CfihosUnitOfMeasure[] {
     return rows
       .map((row): CfihosUnitOfMeasure => ({
         id: normalizeRequiredString(
@@ -170,9 +173,9 @@ export class CfihosUnitOfMeasureRepository {
   private buildDiagnostics(
     units: CfihosUnitOfMeasure[],
     unitsById: Map<string, CfihosUnitOfMeasure>,
-    tagPropertyRows: CfihosWorksheetRow[],
-    equipmentPropertyRows: CfihosWorksheetRow[],
-    propertyRows: CfihosWorksheetRow[],
+    tagPropertyRows: UnitOfMeasureSourceRow[],
+    equipmentPropertyRows: UnitOfMeasureSourceRow[],
+    propertyRows: UnitOfMeasureSourceRow[],
   ): CfihosUnitOfMeasureDiagnostics {
     const unitIdCounts = countValues(units.map((unit) => normalizeId(unit.id)));
     const unitNameCounts = countValues(
@@ -262,7 +265,7 @@ function compareUnits(a: CfihosUnitOfMeasure, b: CfihosUnitOfMeasure): number {
   });
 }
 
-function rowValue(row: CfihosWorksheetRow, candidates: string[]): unknown {
+function rowValue(row: UnitOfMeasureSourceRow, candidates: string[]): unknown {
   for (const candidate of candidates) {
     if (Object.prototype.hasOwnProperty.call(row, candidate)) {
       return row[candidate];
@@ -280,7 +283,7 @@ function rowValue(row: CfihosWorksheetRow, candidates: string[]): unknown {
   return null;
 }
 
-function collectIds(rows: CfihosWorksheetRow[], candidates: string[]): string[] {
+function collectIds(rows: UnitOfMeasureSourceRow[], candidates: string[]): string[] {
   return rows
     .map((row) => normalizeOptionalString(rowValue(row, candidates)))
     .filter((value): value is string => Boolean(value));

@@ -14,6 +14,10 @@ const CFIHOS_SOURCE_KEY = "cfihos";
 const CFIHOS_RELEASE_KEY = "cfihos-2.0";
 const HANDOVER_EVENT_SHEET = "handover event";
 const CLASS_RELATIONSHIP_SHEET = "tag equipment class relationshi";
+const UNIT_OF_MEASURE_SHEET = "unit of measure";
+const TAG_PROPERTY_SHEET = "tag class property";
+const EQUIPMENT_PROPERTY_SHEET = "equipment class property";
+const PROPERTY_SHEET = "property";
 
 type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
@@ -79,6 +83,53 @@ export type CfihosClassRelationshipRuntimeOptions = {
   reference?: CfihosClassRelationshipSource;
 };
 
+export type CfihosUnitOfMeasureSource = {
+  unitRows: CfihosWorksheetRow[];
+  tagPropertyRows: CfihosWorksheetRow[];
+  equipmentPropertyRows: CfihosWorksheetRow[];
+  propertyRows: CfihosWorksheetRow[];
+  sourceSha256: string | null;
+  packageKey: string | null;
+};
+
+type RuntimeUnitOfMeasureItem = {
+  id: string;
+  name: string;
+  metadata: Record<string, unknown>;
+  sourceLocator: Record<string, unknown>;
+};
+
+type RuntimeUnitPropertyReference = {
+  siUnitId: string | null;
+  imperialUnitId: string | null;
+  sourceLocator: Record<string, unknown>;
+};
+
+type RuntimePropertyDimensionReference = {
+  dimensionId: string | null;
+  sourceLocator: Record<string, unknown>;
+};
+
+type RuntimeUnitOfMeasureResponse = {
+  schemaVersion: string;
+  sourceKey: string;
+  releaseKey: string;
+  versionLabel: string;
+  packageKey: string;
+  contentSha256: string;
+  sourceUri: string | null;
+  items: RuntimeUnitOfMeasureItem[];
+  tagPropertyReferences: RuntimeUnitPropertyReference[];
+  equipmentPropertyReferences: RuntimeUnitPropertyReference[];
+  propertyDimensionReferences: RuntimePropertyDimensionReference[];
+};
+
+export type CfihosUnitOfMeasureRuntimeOptions = {
+  mode?: RdlBrowserReadMode;
+  fetcher?: FetchLike;
+  reference?: CfihosUnitOfMeasureSource;
+};
+
 export type CfihosHandoverEventRuntimeOptions = {
   mode?: RdlBrowserReadMode;
   fetcher?: FetchLike;
@@ -122,6 +173,246 @@ export async function loadCfihosClassRelationshipSource(
   );
   compareClassRelationshipSources(reference, runtime);
   return runtime;
+}
+
+export async function loadCfihosUnitOfMeasureSource(
+  options: CfihosUnitOfMeasureRuntimeOptions = {},
+): Promise<CfihosUnitOfMeasureSource> {
+  const mode = options.mode ?? getRdlBrowserReadMode();
+  const fetcher = options.fetcher ?? fetch;
+
+  if (mode === "api") {
+    return fetchUnitOfMeasureRuntimeSource(fetcher, unitOfMeasureRuntimeFailure);
+  }
+
+  const reference = options.reference ?? await loadUnitOfMeasureSnapshotReference();
+  if (mode === "json") return reference;
+
+  const runtime = await fetchUnitOfMeasureRuntimeSource(fetcher, unitOfMeasureDualFailure);
+  compareUnitOfMeasureSources(reference, runtime);
+  return runtime;
+}
+
+async function loadUnitOfMeasureSnapshotReference(): Promise<CfihosUnitOfMeasureSource> {
+  const workbook = await loadCfihosWorkbook();
+  const unitSheet = workbook.sheets[UNIT_OF_MEASURE_SHEET];
+  const tagPropertySheet = workbook.sheets[TAG_PROPERTY_SHEET];
+  const equipmentPropertySheet = workbook.sheets[EQUIPMENT_PROPERTY_SHEET];
+  const propertySheet = workbook.sheets[PROPERTY_SHEET];
+  if (!unitSheet || !tagPropertySheet || !equipmentPropertySheet || !propertySheet) {
+    throw new RdlBrowserRuntimeReadError(
+      "The CFIHOS workbook snapshot is missing one or more Unit of Measure dependency worksheets.",
+    );
+  }
+
+  return {
+    unitRows: unitSheet.rows,
+    tagPropertyRows: tagPropertySheet.rows,
+    equipmentPropertyRows: equipmentPropertySheet.rows,
+    propertyRows: propertySheet.rows,
+    sourceSha256: String(workbook.source.sha256 ?? "").trim() || null,
+    packageKey: null,
+  };
+}
+
+async function fetchUnitOfMeasureRuntimeSource(
+  fetcher: FetchLike,
+  failure: (detail: string) => Error,
+): Promise<CfihosUnitOfMeasureSource> {
+  const params = new URLSearchParams({
+    sourceKey: CFIHOS_SOURCE_KEY,
+    releaseKey: CFIHOS_RELEASE_KEY,
+  });
+  const path = `/api/rdl-runtime/cfihos-units-of-measure?${params.toString()}`;
+  const response = await fetcher(path);
+  if (!response.ok) throw failure(`${path} returned HTTP ${response.status}`);
+
+  const payload = await response.json() as RuntimeUnitOfMeasureResponse;
+  if (payload.schemaVersion !== "rdl-cfihos-units-of-measure/v1") {
+    throw failure(
+      `${path} returned schema '${payload.schemaVersion}' instead of 'rdl-cfihos-units-of-measure/v1'`,
+    );
+  }
+  if (payload.sourceKey !== CFIHOS_SOURCE_KEY || payload.releaseKey !== CFIHOS_RELEASE_KEY) {
+    throw failure(`${path} returned a different source/release scope`);
+  }
+  if (!String(payload.packageKey ?? "").trim()) {
+    throw failure(`${path} returned no package identity`);
+  }
+  if (!String(payload.contentSha256 ?? "").trim()) {
+    throw failure(`${path} returned no source content SHA-256`);
+  }
+  if (
+    !Array.isArray(payload.items)
+    || !Array.isArray(payload.tagPropertyReferences)
+    || !Array.isArray(payload.equipmentPropertyReferences)
+    || !Array.isArray(payload.propertyDimensionReferences)
+  ) {
+    throw failure(`${path} returned an invalid Unit of Measure compatibility collection`);
+  }
+
+  const unitRows = payload.items.map((item, index): CfihosWorksheetRow => {
+    if (!item || typeof item !== "object") {
+      throw failure(`${path} returned an invalid Unit of Measure item at index ${index}`);
+    }
+    if (!String(item.id ?? "").trim() || !String(item.name ?? "").trim()) {
+      throw failure(`${path} returned an incomplete Unit of Measure identity at index ${index}`);
+    }
+    const sheet = String(item.sourceLocator?.sheet ?? "").trim();
+    if (sheet !== UNIT_OF_MEASURE_SHEET) {
+      throw failure(`${path} returned Unit of Measure provenance from sheet '${sheet || "missing"}'`);
+    }
+    const metadata = item.metadata ?? {};
+    return {
+      "CFIHOS unique code": item.id,
+      "UNECE code": metadata.uneceCode,
+      "unit of measure name": item.name,
+      "unit of measure symbol": metadata.symbol,
+      "unit of measure dimension code CFIHOS unique code": metadata.dimensionId,
+      "unit of measure dimension code": metadata.dimensionCode,
+      "unit of measure dimension name": metadata.dimensionName,
+      "measurement system code CFIHOS unique code": metadata.measurementSystemId,
+      "measurement system code": metadata.measurementSystemCode,
+      "measurement system name": metadata.measurementSystemName,
+      "unit of measure synonym name": metadata.synonym,
+    };
+  });
+
+  const tagPropertyRows = payload.tagPropertyReferences.map((item, index): CfihosWorksheetRow => {
+    assertRuntimeReference(item, TAG_PROPERTY_SHEET, path, `tag property reference ${index}`, failure);
+    return {
+      "SI unit of measure CFIHOS unique code": item.siUnitId,
+      "imperial unit of measure CFIHOS unique code": item.imperialUnitId,
+    };
+  });
+  const equipmentPropertyRows = payload.equipmentPropertyReferences.map((item, index): CfihosWorksheetRow => {
+    assertRuntimeReference(item, EQUIPMENT_PROPERTY_SHEET, path, `equipment property reference ${index}`, failure);
+    return {
+      "SI unit of measure CFIHOS unique code": item.siUnitId,
+      "imperial unit of measure CFIHOS unique code": item.imperialUnitId,
+    };
+  });
+  const propertyRows = payload.propertyDimensionReferences.map((item, index): CfihosWorksheetRow => {
+    if (!item || typeof item !== "object") {
+      throw failure(`${path} returned an invalid property dimension reference at index ${index}`);
+    }
+    const sheet = String(item.sourceLocator?.sheet ?? "").trim();
+    if (sheet !== PROPERTY_SHEET) {
+      throw failure(`${path} returned property dimension provenance from sheet '${sheet || "missing"}'`);
+    }
+    return {
+      "unit of measure dimension code CFIHOS unique code": item.dimensionId,
+    };
+  });
+
+  return {
+    unitRows,
+    tagPropertyRows,
+    equipmentPropertyRows,
+    propertyRows,
+    sourceSha256: payload.contentSha256,
+    packageKey: payload.packageKey,
+  };
+}
+
+function assertRuntimeReference(
+  item: RuntimeUnitPropertyReference,
+  expectedSheet: string,
+  path: string,
+  label: string,
+  failure: (detail: string) => Error,
+) {
+  if (!item || typeof item !== "object") {
+    throw failure(`${path} returned an invalid ${label}`);
+  }
+  const sheet = String(item.sourceLocator?.sheet ?? "").trim();
+  if (sheet !== expectedSheet) {
+    throw failure(`${path} returned ${label} provenance from sheet '${sheet || "missing"}'`);
+  }
+}
+
+function compareUnitOfMeasureSources(
+  reference: CfihosUnitOfMeasureSource,
+  runtime: CfihosUnitOfMeasureSource,
+) {
+  if (reference.sourceSha256 && runtime.sourceSha256 !== reference.sourceSha256) {
+    throw unitOfMeasureDualMismatch(
+      `source SHA expected=${reference.sourceSha256} actual=${runtime.sourceSha256 ?? "missing"}`,
+    );
+  }
+  if (stableJson(normalizeUnitRows(reference.unitRows)) !== stableJson(normalizeUnitRows(runtime.unitRows))) {
+    throw unitOfMeasureDualMismatch("Unit of Measure row semantics differ");
+  }
+  if (stableJson(normalizeUnitReferences(reference.tagPropertyRows)) !== stableJson(normalizeUnitReferences(runtime.tagPropertyRows))) {
+    throw unitOfMeasureDualMismatch("Tag Class property Unit of Measure references differ");
+  }
+  if (stableJson(normalizeUnitReferences(reference.equipmentPropertyRows)) !== stableJson(normalizeUnitReferences(runtime.equipmentPropertyRows))) {
+    throw unitOfMeasureDualMismatch("Equipment Class property Unit of Measure references differ");
+  }
+  if (stableJson(normalizePropertyDimensions(reference.propertyRows)) !== stableJson(normalizePropertyDimensions(runtime.propertyRows))) {
+    throw unitOfMeasureDualMismatch("Property dimension references differ");
+  }
+}
+
+function normalizeUnitRows(rows: CfihosWorksheetRow[]) {
+  return rows
+    .map((row) => ({
+      id: text(rowValue(row, ["CFIHOS unique code", "unit of measure CFIHOS unique code"])),
+      uneceCommonCode: nullableText(rowValue(row, ["UNECE code", "UNECE Common Code", "UNECE common code"])),
+      name: text(rowValue(row, ["unit of measure name"])),
+      symbol: nullableText(rowValue(row, ["unit of measure symbol"])),
+      dimensionId: nullableText(rowValue(row, ["unit of measure dimension code CFIHOS unique code", "unit of measure dimension CFIHOS unique code"])),
+      dimensionCode: nullableText(rowValue(row, ["unit of measure dimension code"])),
+      dimensionName: nullableText(rowValue(row, ["unit of measure dimension name"])),
+      systemId: nullableText(rowValue(row, ["measurement system code CFIHOS unique code", "unit of measure system CFIHOS unique code", "unit of measure system code CFIHOS unique code"])),
+      systemCode: nullableText(rowValue(row, ["measurement system code", "unit of measure system code", "unit of measure system"])),
+      systemName: nullableText(rowValue(row, ["measurement system name", "unit of measure system name"])),
+      synonyms: normalizeDelimited(rowValue(row, ["unit of measure synonym name"])),
+    }))
+    .filter((row) => row.id && row.name)
+    .sort((a, b) => a.id.localeCompare(b.id));
+}
+
+function normalizeUnitReferences(rows: CfihosWorksheetRow[]) {
+  return rows
+    .map((row) => ({
+      siUnitId: nullableText(rowValue(row, ["SI unit of measure CFIHOS unique code"])),
+      imperialUnitId: nullableText(rowValue(row, ["imperial unit of measure CFIHOS unique code"])),
+    }))
+    .filter((row) => row.siUnitId || row.imperialUnitId)
+    .sort((a, b) =>
+      String(a.siUnitId ?? "").localeCompare(String(b.siUnitId ?? ""))
+      || String(a.imperialUnitId ?? "").localeCompare(String(b.imperialUnitId ?? ""))
+    );
+}
+
+function normalizePropertyDimensions(rows: CfihosWorksheetRow[]) {
+  return rows
+    .map((row) => nullableText(rowValue(row, ["unit of measure dimension code CFIHOS unique code"])))
+    .filter((value): value is string => Boolean(value))
+    .sort();
+}
+
+function normalizeDelimited(value: unknown): string[] {
+  const raw = text(value);
+  if (!raw) return [];
+  if (Array.isArray(value)) return value.map(text).filter(Boolean);
+  return raw.split(/[;,|]/).map((item) => item.trim()).filter(Boolean);
+}
+
+function rowValue(row: CfihosWorksheetRow, candidates: string[]): unknown {
+  for (const candidate of candidates) {
+    if (Object.prototype.hasOwnProperty.call(row, candidate)) return row[candidate];
+  }
+  const normalizedCandidates = new Set(candidates.map(normalizeHeader));
+  for (const [key, value] of Object.entries(row)) {
+    if (normalizedCandidates.has(normalizeHeader(key))) return value;
+  }
+  return null;
+}
+
+function normalizeHeader(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 async function loadClassRelationshipSnapshotReference(): Promise<CfihosClassRelationshipSource> {
@@ -417,6 +708,30 @@ function stableJson(value: unknown): string {
     return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableJson(record[key])}`).join(",")}}`;
   }
   return JSON.stringify(value) ?? "null";
+}
+
+function unitOfMeasureDualMismatch(detail: string) {
+  const error = new RdlBrowserDualReadError(
+    `CFIHOS Unit of Measure dual-read mismatch: ${detail}`,
+  );
+  console.error(error.message);
+  return error;
+}
+
+function unitOfMeasureDualFailure(detail: string) {
+  const error = new RdlBrowserDualReadError(
+    `CFIHOS Unit of Measure dual-read could not confirm PostgreSQL parity: ${detail}`,
+  );
+  console.error(error.message);
+  return error;
+}
+
+function unitOfMeasureRuntimeFailure(detail: string) {
+  const error = new RdlBrowserRuntimeReadError(
+    `CFIHOS Unit of Measure runtime API read failed: ${detail}`,
+  );
+  console.error(error.message);
+  return error;
 }
 
 function classRelationshipDualMismatch(detail: string) {
