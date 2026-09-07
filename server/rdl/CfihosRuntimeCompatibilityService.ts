@@ -78,6 +78,54 @@ export type CfihosUnitOfMeasureCompatibilityResult = {
   propertyDimensionReferences: CfihosPropertyDimensionReferenceCompatibilityItem[];
 };
 
+
+export type CfihosPropertyCompatibilityItem = {
+  id: string;
+  name: string;
+  definition: string | null;
+  metadata: Record<string, unknown>;
+  sourceLocator: Record<string, unknown>;
+};
+
+export type CfihosPropertyTagClassCompatibilityItem = CfihosPropertyCompatibilityItem;
+
+export type CfihosPropertyAssignmentCompatibilityItem = {
+  tagClassId: string;
+  tagClassName: string;
+  propertyId: string;
+  propertyName: string;
+  siUnitId: string | null;
+  siUnitName: string | null;
+  imperialUnitId: string | null;
+  imperialUnitName: string | null;
+  sourceLocator: Record<string, unknown>;
+};
+
+export type CfihosPropertyPicklistValueCompatibilityItem = {
+  picklistId: string;
+  picklistName: string;
+  id: string;
+  code: string;
+  description: string | null;
+  sourceStandardId: string | null;
+  sourceStandardCode: string | null;
+  sourceLocator: Record<string, unknown>;
+};
+
+export type CfihosPropertyCompatibilityResult = {
+  sourceKey: string;
+  sourceName: string;
+  releaseKey: string;
+  versionLabel: string;
+  packageKey: string;
+  contentSha256: string;
+  sourceUri: string | null;
+  items: CfihosPropertyCompatibilityItem[];
+  tagClasses: CfihosPropertyTagClassCompatibilityItem[];
+  tagClassPropertyAssignments: CfihosPropertyAssignmentCompatibilityItem[];
+  picklistValues: CfihosPropertyPicklistValueCompatibilityItem[];
+};
+
 type PackageRow = {
   package_id: string;
   source_key: string;
@@ -127,6 +175,40 @@ type PropertyDimensionReferenceRow = {
 type LifecycleRelationshipCountRow = {
   relationship_count: string;
   relationships_with_any_status_count: string;
+};
+
+
+type PropertyRow = {
+  native_identifier: string;
+  name: string;
+  definition: string | null;
+  normalized_metadata: Record<string, unknown>;
+  source_locator: Record<string, unknown>;
+};
+
+type PropertyTagClassRow = PropertyRow;
+
+type PropertyAssignmentRow = {
+  tag_class_id: string;
+  tag_class_name: string;
+  property_id: string;
+  property_name: string;
+  si_unit_id: string | null;
+  si_unit_name: string | null;
+  imperial_unit_id: string | null;
+  imperial_unit_name: string | null;
+  source_locator: Record<string, unknown>;
+};
+
+type PropertyPicklistValueRow = {
+  picklist_id: string;
+  picklist_name: string;
+  value_id: string;
+  value_code: string;
+  value_description: string | null;
+  source_standard_id: string | null;
+  source_standard_code: string | null;
+  source_locator: Record<string, unknown>;
 };
 
 const text = (value: unknown) => String(value ?? "").trim();
@@ -375,6 +457,138 @@ export class CfihosRuntimeCompatibilityService {
       })),
       propertyDimensionReferences: propertyDimensions.map((row: PropertyDimensionReferenceRow) => ({
         dimensionId: nullableText(row.dimension_id),
+        sourceLocator: row.source_locator ?? {},
+      })),
+    };
+  }
+
+
+  async properties(input: {
+    sourceKey: string;
+    releaseKey: string;
+  }): Promise<CfihosPropertyCompatibilityResult> {
+    const sourceKey = required("sourceKey", input.sourceKey);
+    const releaseKey = required("releaseKey", input.releaseKey);
+    if (sourceKey !== "cfihos") {
+      throw new RdlRuntimeReadInputError(
+        `CFIHOS compatibility reads require sourceKey 'cfihos', received '${sourceKey}'.`,
+      );
+    }
+
+    const packageRow = await this.requireValidatedPackage(sourceKey, releaseKey);
+    const packageId = Number(packageRow.package_id);
+    if (!Number.isSafeInteger(packageId) || packageId <= 0) {
+      throw new Error("Validated CFIHOS package returned an invalid package identifier.");
+    }
+    const contentSha256 = text(packageRow.content_sha256);
+    if (!contentSha256) {
+      throw new Error("Validated CFIHOS package is missing its source content SHA-256.");
+    }
+
+    const [properties, tagClasses, assignments, picklistValues] = await Promise.all([
+      this.client.query<PropertyRow>(`
+        SELECT e.native_identifier, e.name, e.definition,
+               e.normalized_metadata, e.source_locator
+        FROM rdl.rdl_entity e
+        WHERE e.package_id = ${packageId}
+          AND e.entity_type_code = 'property'
+          AND COALESCE(e.source_locator->>'sheet', '') = 'property'
+        ORDER BY NULLIF(e.source_locator->>'row', '')::int, e.entity_id
+      `),
+      this.client.query<PropertyTagClassRow>(`
+        SELECT e.native_identifier, e.name, e.definition,
+               e.normalized_metadata, e.source_locator
+        FROM rdl.rdl_entity e
+        WHERE e.package_id = ${packageId}
+          AND e.entity_type_code = 'tag_class'
+          AND COALESCE(e.source_locator->>'sheet', '') = 'tag class'
+        ORDER BY NULLIF(e.source_locator->>'row', '')::int, e.entity_id
+      `),
+      this.client.query<PropertyAssignmentRow>(`
+        SELECT tc.native_identifier AS tag_class_id,
+               tc.name AS tag_class_name,
+               p.native_identifier AS property_id,
+               p.name AS property_name,
+               NULLIF(BTRIM(COALESCE(rel.attributes->>'siUnitId', '')), '') AS si_unit_id,
+               NULLIF(BTRIM(COALESCE(rel.attributes->>'siUnitName', '')), '') AS si_unit_name,
+               NULLIF(BTRIM(COALESCE(rel.attributes->>'imperialUnitId', '')), '') AS imperial_unit_id,
+               NULLIF(BTRIM(COALESCE(rel.attributes->>'imperialUnitName', '')), '') AS imperial_unit_name,
+               rel.source_locator
+        FROM rdl.rdl_relationship rel
+        JOIN rdl.rdl_entity tc ON tc.entity_id = rel.source_entity_id
+        JOIN rdl.rdl_entity p ON p.entity_id = rel.target_entity_id
+        WHERE rel.package_id = ${packageId}
+          AND rel.relationship_type_code = 'class_property'
+          AND tc.entity_type_code = 'tag_class'
+          AND p.entity_type_code = 'property'
+          AND COALESCE(rel.source_locator->>'sheet', '') = 'tag class property'
+        ORDER BY NULLIF(rel.source_locator->>'row', '')::int, rel.relationship_id
+      `),
+      this.client.query<PropertyPicklistValueRow>(`
+        SELECT cl.native_identifier AS picklist_id,
+               COALESCE(
+                 NULLIF(BTRIM(COALESCE(cv.normalized_metadata->>'controlledListName', '')), ''),
+                 cl.name
+               ) AS picklist_name,
+               cv.native_identifier AS value_id,
+               cv.name AS value_code,
+               cv.definition AS value_description,
+               NULLIF(BTRIM(COALESCE(cv.normalized_metadata->>'sourceStandardId', '')), '') AS source_standard_id,
+               NULLIF(BTRIM(COALESCE(cv.normalized_metadata->>'sourceStandardCode', '')), '') AS source_standard_code,
+               cv.source_locator
+        FROM rdl.rdl_relationship rel
+        JOIN rdl.rdl_entity cl ON cl.entity_id = rel.source_entity_id
+        JOIN rdl.rdl_entity cv ON cv.entity_id = rel.target_entity_id
+        WHERE rel.package_id = ${packageId}
+          AND rel.relationship_type_code = 'controlled_list_value'
+          AND cl.entity_type_code = 'controlled_list'
+          AND cv.entity_type_code = 'controlled_value'
+          AND COALESCE(rel.source_locator->>'sheet', '') = 'property picklist values'
+        ORDER BY NULLIF(rel.source_locator->>'row', '')::int, rel.relationship_id
+      `),
+    ]);
+
+    return {
+      sourceKey: packageRow.source_key,
+      sourceName: packageRow.source_name,
+      releaseKey: packageRow.release_key,
+      versionLabel: packageRow.version_label,
+      packageKey: packageRow.package_key,
+      contentSha256,
+      sourceUri: packageRow.source_uri,
+      items: properties.map((row) => ({
+        id: text(row.native_identifier),
+        name: text(row.name),
+        definition: nullableText(row.definition),
+        metadata: row.normalized_metadata ?? {},
+        sourceLocator: row.source_locator ?? {},
+      })),
+      tagClasses: tagClasses.map((row) => ({
+        id: text(row.native_identifier),
+        name: text(row.name),
+        definition: nullableText(row.definition),
+        metadata: row.normalized_metadata ?? {},
+        sourceLocator: row.source_locator ?? {},
+      })),
+      tagClassPropertyAssignments: assignments.map((row) => ({
+        tagClassId: text(row.tag_class_id),
+        tagClassName: text(row.tag_class_name),
+        propertyId: text(row.property_id),
+        propertyName: text(row.property_name),
+        siUnitId: nullableText(row.si_unit_id),
+        siUnitName: nullableText(row.si_unit_name),
+        imperialUnitId: nullableText(row.imperial_unit_id),
+        imperialUnitName: nullableText(row.imperial_unit_name),
+        sourceLocator: row.source_locator ?? {},
+      })),
+      picklistValues: picklistValues.map((row) => ({
+        picklistId: text(row.picklist_id),
+        picklistName: text(row.picklist_name),
+        id: text(row.value_id),
+        code: text(row.value_code),
+        description: nullableText(row.value_description),
+        sourceStandardId: nullableText(row.source_standard_id),
+        sourceStandardCode: nullableText(row.source_standard_code),
         sourceLocator: row.source_locator ?? {},
       })),
     };
