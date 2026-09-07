@@ -18,6 +18,8 @@ const UNIT_OF_MEASURE_SHEET = "unit of measure";
 const TAG_PROPERTY_SHEET = "tag class property";
 const EQUIPMENT_PROPERTY_SHEET = "equipment class property";
 const PROPERTY_SHEET = "property";
+const TAG_CLASS_SHEET = "tag class";
+const PROPERTY_PICKLIST_VALUE_SHEET = "property picklist values";
 
 type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
@@ -136,6 +138,75 @@ export type CfihosHandoverEventRuntimeOptions = {
   reference?: CfihosHandoverEventSource;
 };
 
+
+export type CfihosPropertySource = {
+  propertyRows: CfihosWorksheetRow[];
+  tagClassRows: CfihosWorksheetRow[];
+  tagClassPropertyRows: CfihosWorksheetRow[];
+  picklistValueRows: CfihosWorksheetRow[];
+  sourceSha256: string | null;
+  packageKey: string | null;
+};
+
+type RuntimePropertyItem = {
+  id: string;
+  name: string;
+  definition: string | null;
+  metadata: Record<string, unknown>;
+  sourceLocator: Record<string, unknown>;
+};
+
+type RuntimePropertyTagClassItem = {
+  id: string;
+  name: string;
+  definition: string | null;
+  metadata: Record<string, unknown>;
+  sourceLocator: Record<string, unknown>;
+};
+
+type RuntimePropertyAssignmentItem = {
+  tagClassId: string;
+  tagClassName: string;
+  propertyId: string;
+  propertyName: string;
+  siUnitId: string | null;
+  siUnitName: string | null;
+  imperialUnitId: string | null;
+  imperialUnitName: string | null;
+  sourceLocator: Record<string, unknown>;
+};
+
+type RuntimePropertyPicklistValueItem = {
+  picklistId: string;
+  picklistName: string;
+  id: string;
+  code: string;
+  description: string | null;
+  sourceStandardId: string | null;
+  sourceStandardCode: string | null;
+  sourceLocator: Record<string, unknown>;
+};
+
+type RuntimePropertyResponse = {
+  schemaVersion: string;
+  sourceKey: string;
+  releaseKey: string;
+  versionLabel: string;
+  packageKey: string;
+  contentSha256: string;
+  sourceUri: string | null;
+  items: RuntimePropertyItem[];
+  tagClasses: RuntimePropertyTagClassItem[];
+  tagClassPropertyAssignments: RuntimePropertyAssignmentItem[];
+  picklistValues: RuntimePropertyPicklistValueItem[];
+};
+
+export type CfihosPropertyRuntimeOptions = {
+  mode?: RdlBrowserReadMode;
+  fetcher?: FetchLike;
+  reference?: CfihosPropertySource;
+};
+
 export async function loadCfihosHandoverEventSource(
   options: CfihosHandoverEventRuntimeOptions = {},
 ): Promise<CfihosHandoverEventSource> {
@@ -191,6 +262,250 @@ export async function loadCfihosUnitOfMeasureSource(
   const runtime = await fetchUnitOfMeasureRuntimeSource(fetcher, unitOfMeasureDualFailure);
   compareUnitOfMeasureSources(reference, runtime);
   return runtime;
+}
+
+
+export async function loadCfihosPropertySource(
+  options: CfihosPropertyRuntimeOptions = {},
+): Promise<CfihosPropertySource> {
+  const mode = options.mode ?? getRdlBrowserReadMode();
+  const fetcher = options.fetcher ?? fetch;
+
+  if (mode === "api") {
+    return fetchPropertyRuntimeSource(fetcher, propertyRuntimeFailure);
+  }
+
+  const reference = options.reference ?? await loadPropertySnapshotReference();
+  if (mode === "json") return reference;
+
+  const runtime = await fetchPropertyRuntimeSource(fetcher, propertyDualFailure);
+  comparePropertySources(reference, runtime);
+  return runtime;
+}
+
+
+async function loadPropertySnapshotReference(): Promise<CfihosPropertySource> {
+  const workbook = await loadCfihosWorkbook();
+  const propertySheet = workbook.sheets[PROPERTY_SHEET];
+  const tagClassSheet = workbook.sheets[TAG_CLASS_SHEET];
+  const tagPropertySheet = workbook.sheets[TAG_PROPERTY_SHEET];
+  const picklistValueSheet = workbook.sheets[PROPERTY_PICKLIST_VALUE_SHEET];
+  if (!propertySheet || !tagClassSheet || !tagPropertySheet || !picklistValueSheet) {
+    throw new RdlBrowserRuntimeReadError(
+      "The CFIHOS workbook snapshot is missing one or more Property dependency worksheets.",
+    );
+  }
+
+  return {
+    propertyRows: propertySheet.rows,
+    tagClassRows: tagClassSheet.rows,
+    tagClassPropertyRows: tagPropertySheet.rows,
+    picklistValueRows: picklistValueSheet.rows,
+    sourceSha256: String(workbook.source.sha256 ?? "").trim() || null,
+    packageKey: null,
+  };
+}
+
+async function fetchPropertyRuntimeSource(
+  fetcher: FetchLike,
+  failure: (detail: string) => Error,
+): Promise<CfihosPropertySource> {
+  const params = new URLSearchParams({
+    sourceKey: CFIHOS_SOURCE_KEY,
+    releaseKey: CFIHOS_RELEASE_KEY,
+  });
+  const path = `/api/rdl-runtime/cfihos-properties?${params.toString()}`;
+  const response = await fetcher(path);
+  if (!response.ok) throw failure(`${path} returned HTTP ${response.status}`);
+
+  const payload = await response.json() as RuntimePropertyResponse;
+  if (payload.schemaVersion !== "rdl-cfihos-properties/v1") {
+    throw failure(
+      `${path} returned schema '${payload.schemaVersion}' instead of 'rdl-cfihos-properties/v1'`,
+    );
+  }
+  if (payload.sourceKey !== CFIHOS_SOURCE_KEY || payload.releaseKey !== CFIHOS_RELEASE_KEY) {
+    throw failure(`${path} returned a different source/release scope`);
+  }
+  if (!String(payload.packageKey ?? "").trim()) throw failure(`${path} returned no package identity`);
+  if (!String(payload.contentSha256 ?? "").trim()) throw failure(`${path} returned no source content SHA-256`);
+  if (!Array.isArray(payload.items)
+    || !Array.isArray(payload.tagClasses)
+    || !Array.isArray(payload.tagClassPropertyAssignments)
+    || !Array.isArray(payload.picklistValues)) {
+    throw failure(`${path} returned an invalid Property compatibility collection`);
+  }
+
+  const propertyRows = payload.items.map((item, index): CfihosWorksheetRow => {
+    if (!item || typeof item !== "object" || !String(item.id ?? "").trim() || !String(item.name ?? "").trim()) {
+      throw failure(`${path} returned an invalid Property item at index ${index}`);
+    }
+    if (String(item.sourceLocator?.sheet ?? "").trim() !== PROPERTY_SHEET) {
+      throw failure(`${path} returned Property provenance outside '${PROPERTY_SHEET}'`);
+    }
+    const metadata = item.metadata ?? {};
+    return {
+      "CFIHOS unique code": item.id,
+      "property name": item.name,
+      "property definition": item.definition,
+      "property data type": metadata.dataType,
+      "property data type length": metadata.dataTypeLength,
+      "unit of measure dimension code CFIHOS unique code": metadata.dimensionId,
+      "unit of measure dimension code": metadata.dimensionCode,
+      "property picklist name CFIHOS unique code": metadata.controlledListId,
+      "property picklist name": metadata.controlledListName,
+      "property existence reason description": metadata.existenceReason,
+      "property synonym name": metadata.synonym,
+    };
+  });
+
+  const tagClassRows = payload.tagClasses.map((item, index): CfihosWorksheetRow => {
+    if (!item || typeof item !== "object" || !String(item.id ?? "").trim() || !String(item.name ?? "").trim()) {
+      throw failure(`${path} returned an invalid Tag Class item at index ${index}`);
+    }
+    if (String(item.sourceLocator?.sheet ?? "").trim() !== TAG_CLASS_SHEET) {
+      throw failure(`${path} returned Tag Class provenance outside '${TAG_CLASS_SHEET}'`);
+    }
+    const metadata = item.metadata ?? {};
+    return {
+      "CFIHOS unique code": item.id,
+      "tag class name": item.name,
+      "tag class definition": item.definition,
+      "parent tag class name": metadata.parentName,
+      "abstract class indicator": metadata.abstract,
+      "tag number format": metadata.tagNumberFormat,
+      "equipment expected to be installed indicator": metadata.equipmentExpectedInstalled,
+      "tag class existence reason description": metadata.existenceReason,
+      "tag class synonym": metadata.synonym,
+    };
+  });
+
+  const tagClassPropertyRows = payload.tagClassPropertyAssignments.map((item, index): CfihosWorksheetRow => {
+    if (!item || typeof item !== "object" || !String(item.tagClassId ?? "").trim() || !String(item.propertyId ?? "").trim()) {
+      throw failure(`${path} returned an invalid Tag Class Property assignment at index ${index}`);
+    }
+    if (String(item.sourceLocator?.sheet ?? "").trim() !== TAG_PROPERTY_SHEET) {
+      throw failure(`${path} returned Tag Class Property provenance outside '${TAG_PROPERTY_SHEET}'`);
+    }
+    return {
+      "tag class CFIHOS unique code": item.tagClassId,
+      "tag class name": item.tagClassName,
+      "property CFIHOS unique code": item.propertyId,
+      "property name": item.propertyName,
+      "SI unit of measure CFIHOS unique code": item.siUnitId,
+      "SI unit of measure name": item.siUnitName,
+      "imperial unit of measure CFIHOS unique code": item.imperialUnitId,
+      "imperial unit of measure name": item.imperialUnitName,
+    };
+  });
+
+  const picklistValueRows = payload.picklistValues.map((item, index): CfihosWorksheetRow => {
+    if (!item || typeof item !== "object" || !String(item.picklistId ?? "").trim() || !String(item.id ?? "").trim()) {
+      throw failure(`${path} returned an invalid Property picklist value at index ${index}`);
+    }
+    if (String(item.sourceLocator?.sheet ?? "").trim() !== PROPERTY_PICKLIST_VALUE_SHEET) {
+      throw failure(`${path} returned Property picklist provenance outside '${PROPERTY_PICKLIST_VALUE_SHEET}'`);
+    }
+    return {
+      "property picklist CFIHOS unique code": item.picklistId,
+      "property picklist name": item.picklistName,
+      "property picklist value CFIHOS unique code": item.id,
+      "property picklist value code": item.code,
+      "property picklist value description": item.description,
+      "Source standard CFIHOS unique code": item.sourceStandardId,
+      "source standard code": item.sourceStandardCode,
+    };
+  });
+
+  return {
+    propertyRows,
+    tagClassRows,
+    tagClassPropertyRows,
+    picklistValueRows,
+    sourceSha256: payload.contentSha256,
+    packageKey: payload.packageKey,
+  };
+}
+
+function comparePropertySources(reference: CfihosPropertySource, runtime: CfihosPropertySource) {
+  if (reference.sourceSha256 && runtime.sourceSha256 !== reference.sourceSha256) {
+    throw propertyDualMismatch(
+      `source SHA expected=${reference.sourceSha256} actual=${runtime.sourceSha256 ?? "missing"}`,
+    );
+  }
+  if (stableJson(normalizePropertyRows(reference.propertyRows)) !== stableJson(normalizePropertyRows(runtime.propertyRows))) {
+    throw propertyDualMismatch("Property row semantics differ");
+  }
+  if (stableJson(normalizeTagClassRows(reference.tagClassRows)) !== stableJson(normalizeTagClassRows(runtime.tagClassRows))) {
+    throw propertyDualMismatch("Tag Class dependency semantics differ");
+  }
+  if (stableJson(normalizeTagClassPropertyRows(reference.tagClassPropertyRows)) !== stableJson(normalizeTagClassPropertyRows(runtime.tagClassPropertyRows))) {
+    throw propertyDualMismatch("Tag Class Property assignment semantics differ");
+  }
+  if (stableJson(normalizePicklistValueRows(reference.picklistValueRows)) !== stableJson(normalizePicklistValueRows(runtime.picklistValueRows))) {
+    throw propertyDualMismatch("Property picklist value semantics differ");
+  }
+}
+
+function normalizePropertyRows(rows: CfihosWorksheetRow[]) {
+  return rows.map((row) => ({
+    id: text(row["CFIHOS unique code"]),
+    name: text(row["property name"]),
+    definition: nullableText(row["property definition"]),
+    dataType: nullableText(row["property data type"]),
+    dataTypeLength: nullableText(row["property data type length"]),
+    dimensionId: nullableText(row["unit of measure dimension code CFIHOS unique code"]),
+    dimensionCode: nullableText(row["unit of measure dimension code"]),
+    picklistId: nullableText(row["property picklist name CFIHOS unique code"]),
+    picklistName: nullableText(row["property picklist name"]),
+    existenceReason: nullableText(row["property existence reason description"]),
+    synonyms: normalizeDelimited(row["property synonym name"]),
+  })).filter((row) => row.id && row.name);
+}
+
+function normalizeTagClassRows(rows: CfihosWorksheetRow[]) {
+  return rows.map((row) => ({
+    id: text(row["CFIHOS unique code"]),
+    name: text(row["tag class name"]),
+    definition: nullableText(row["tag class definition"]),
+    parentName: nullableText(row["parent tag class name"]),
+    abstract: normalizeIndicator(row["abstract class indicator"]),
+    tagNumberFormat: nullableText(row["tag number format"]),
+    equipmentExpected: normalizeIndicator(row["equipment expected to be installed indicator"]),
+    existenceReason: nullableText(row["tag class existence reason description"]),
+    synonyms: normalizeDelimited(row["tag class synonym"]),
+  })).filter((row) => row.id && row.name);
+}
+
+function normalizeTagClassPropertyRows(rows: CfihosWorksheetRow[]) {
+  return rows.map((row) => ({
+    tagClassId: text(row["tag class CFIHOS unique code"]),
+    tagClassName: text(row["tag class name"]),
+    propertyId: text(row["property CFIHOS unique code"]),
+    propertyName: text(row["property name"]),
+    siUnitId: nullableText(row["SI unit of measure CFIHOS unique code"]),
+    siUnitName: nullableText(row["SI unit of measure name"]),
+    imperialUnitId: nullableText(row["imperial unit of measure CFIHOS unique code"]),
+    imperialUnitName: nullableText(row["imperial unit of measure name"]),
+  })).filter((row) => row.tagClassId && row.propertyId);
+}
+
+function normalizePicklistValueRows(rows: CfihosWorksheetRow[]) {
+  return rows.map((row) => ({
+    picklistId: text(row["property picklist CFIHOS unique code"]),
+    picklistName: text(row["property picklist name"]),
+    id: text(row["property picklist value CFIHOS unique code"]),
+    code: text(row["property picklist value code"]),
+    description: nullableText(row["property picklist value description"]),
+    sourceStandardId: nullableText(row["Source standard CFIHOS unique code"]),
+    sourceStandardCode: nullableText(row["source standard code"]),
+  })).filter((row) => row.picklistId && row.id);
+}
+
+function normalizeIndicator(value: unknown): boolean {
+  if (typeof value === "boolean") return value;
+  const normalized = text(value).toLowerCase();
+  return normalized === "yes" || normalized === "true" || normalized === "1" || normalized === "y";
 }
 
 async function loadUnitOfMeasureSnapshotReference(): Promise<CfihosUnitOfMeasureSource> {
@@ -708,6 +1023,31 @@ function stableJson(value: unknown): string {
     return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableJson(record[key])}`).join(",")}}`;
   }
   return JSON.stringify(value) ?? "null";
+}
+
+
+function propertyDualMismatch(detail: string) {
+  const error = new RdlBrowserDualReadError(
+    `CFIHOS Property dual-read mismatch: ${detail}`,
+  );
+  console.error(error.message);
+  return error;
+}
+
+function propertyDualFailure(detail: string) {
+  const error = new RdlBrowserDualReadError(
+    `CFIHOS Property dual-read could not confirm PostgreSQL parity: ${detail}`,
+  );
+  console.error(error.message);
+  return error;
+}
+
+function propertyRuntimeFailure(detail: string) {
+  const error = new RdlBrowserRuntimeReadError(
+    `CFIHOS Property runtime API read failed: ${detail}`,
+  );
+  console.error(error.message);
+  return error;
 }
 
 function unitOfMeasureDualMismatch(detail: string) {
