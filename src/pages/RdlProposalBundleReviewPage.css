@@ -1,0 +1,10 @@
+.rdl-proposal-bundle-review-page { display: grid; gap: 1.5rem; padding: 1.5rem; }
+.rdl-proposal-bundle-review-page__header { max-width: 72rem; }
+.rdl-proposal-bundle-review-page__eyebrow { margin: 0 0 .25rem; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.rdl-proposal-bundle-review-page__summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; }
+.rdl-proposal-bundle-review-page__summary article { border: 1px solid currentColor; border-radius: .75rem; padding: 1rem; }
+.rdl-proposal-bundle-review-page__summary strong { display: block; font-size: 1.75rem; }
+.rdl-proposal-bundle-review-page__queue { overflow-x: auto; }
+.rdl-proposal-bundle-review-page__queue table { width: 100%; border-collapse: collapse; }
+.rdl-proposal-bundle-review-page__queue th, .rdl-proposal-bundle-review-page__queue td { border-bottom: 1px solid currentColor; padding: .75rem; text-align: left; }
+.rdl-proposal-bundle-review-page__empty, .rdl-proposal-bundle-review-page__boundary { border: 1px dashed currentColor; border-radius: .75rem; padding: 1rem; }
