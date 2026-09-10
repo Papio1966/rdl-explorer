@@ -4,7 +4,8 @@ import type { ExternalStandardsProposalBundleRepository } from "./ExternalStanda
 
 const LEVELS = new Set(["project", "asset", "company", "industry", "unknown"]);
 const TARGET_LEVELS = new Set(["project", "asset", "company", "industry"]);
-const REVIEW_ACTIONS = new Set(["start_review", "accept", "reject", "withdraw", "link_publication"]);
+import { PROPOSAL_BUNDLE_GOVERNANCE_ACTIONS, validateProposalBundleDecisionCommand } from "./ProposalBundleGovernanceDecisionPolicy.ts";
+const REVIEW_ACTIONS = PROPOSAL_BUNDLE_GOVERNANCE_ACTIONS;
 
 export class ExternalStandardsProposalBundleService {
   constructor(private readonly repository: ExternalStandardsProposalBundleRepository) {}
@@ -34,6 +35,7 @@ export class ExternalStandardsProposalBundleService {
     const action = enumText(body.action, REVIEW_ACTIONS, "action") as "start_review" | "accept" | "reject" | "withdraw" | "link_publication";
     const rationale = requiredText(body.rationale, "rationale");
     const expectedVersion = nonNegativeInteger(body.expectedVersion, "expectedVersion");
+    validateProposalBundleDecisionCommand({ action, rationale, expectedVersion, evidence: body.evidence ?? {}, publicationResult: body.publicationResult ?? {} });
     return this.repository.review({ proposalBundleId, action, actorKey: identity.reviewer, rationale, expectedVersion, evidence: objectValue(body.evidence ?? {}, "evidence"), publicationResult: objectValue(body.publicationResult ?? {}, "publicationResult") });
   }
 
