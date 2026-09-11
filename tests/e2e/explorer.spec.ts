@@ -30,14 +30,10 @@ test("legacy document requirement traceability converges to canonical generic de
   await expect(page.locator("#rdl-required-by-classes .rdl-detail-relationship-card").first()).toBeVisible();
 });
 
-test("CIS Builder exposes the authoring workflow", async ({ page }) => {
+test("legacy CIS route explains the DataGate project-CIS boundary", async ({ page }) => {
   await page.goto("/cis");
-  await expect(page.getByRole("heading", { name: "Contract Information Specification Builder" })).toBeVisible();
-  await expect(page.getByLabel("Working CIS controls")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Project & contract" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /2 Baseline review/i })).toBeVisible();
-  await expect(page.getByRole("button", { name: /3 Overrides/i })).toBeVisible();
-  await expect(page.getByRole("button", { name: /4 Export/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "RDL Explorer and DataGate responsibilities" })).toBeVisible();
+  await expect(page.getByText("Project CIS authoring, CIS preview, project tailoring, EPC validation, findings and resubmission workflows belong to DataGate.")).toBeVisible();
 });
 
 test("pilot status, provenance and feedback route are visible", async ({ page }) => {
@@ -80,7 +76,7 @@ test("mapping governance queue keeps review writes server-governed", async ({ pa
   await page.goto("/governance");
   await expect(page.getByRole("heading", { name: "Mapping review queue" })).toBeVisible();
   await expect(page.getByText("Authenticated governance service boundary")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Approve" }).first()).toBeDisabled();
+  await expect(page.getByRole("button", { name: /Confirm same concept/ }).first()).toBeDisabled();
   await expect(page.getByText("Read-only mode")).toBeVisible();
 });
 
@@ -103,11 +99,11 @@ test("authenticated mapping reviewer can submit a governed decision through the 
 
   await page.goto("/governance");
   await expect(page.getByText("Authenticated reviewer")).toBeVisible();
-  const approve = page.getByRole("button", { name: "Approve" }).first();
+  const approve = page.getByRole("button", { name: /Confirm same concept/ }).first();
   await expect(approve).toBeEnabled();
   await approve.click();
   await page.getByLabel("Rationale").fill("Reviewed against the engineering definition and accepted as the governed mapping.");
-  await page.getByRole("button", { name: "Record governed decision" }).click();
+  await page.getByRole("button", { name: "Review consequences and record decision" }).click();
   await expect.poll(() => reviewBody).toBeTruthy();
   expect(reviewBody).toMatchObject({ mappingId: 42, action: "approve", expectedVersion: 3 });
   expect(reviewBody).not.toHaveProperty("reviewer");

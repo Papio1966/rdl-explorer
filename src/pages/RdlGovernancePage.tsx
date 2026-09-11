@@ -109,16 +109,16 @@ export function RdlGovernancePage() {
       <div className="rdl-mapping-entities"><Link to={rdlEntityRoute(item.left.sourceKey, item.left.entityType, item.left.nativeIdentifier)}><small>{getRdlSource(item.left.sourceKey)?.shortName} · {entityTypeLabel(item.left.entityType)}</small><strong>{item.left.name}</strong><code>{item.left.nativeIdentifier}</code></Link><span aria-hidden="true">↔</span><Link to={rdlEntityRoute(item.right.sourceKey, item.right.entityType, item.right.nativeIdentifier)}><small>{getRdlSource(item.right.sourceKey)?.shortName} · {entityTypeLabel(item.right.entityType)}</small><strong>{item.right.name}</strong><code>{item.right.nativeIdentifier}</code></Link></div>
       <div className="rdl-mapping-meta"><span><Database size={13}/>{item.provenanceMethod.replaceAll("_", " ")}</span><span>Confidence {(item.confidence * 100).toFixed(0)}%</span>{item.reviewedBy && <span>Reviewed by {item.reviewedBy}</span>}</div>
       <div className="rdl-review-actions" aria-label={`Review actions for ${item.left.name}`}>
-        <button type="button" disabled={!session || item.status !== "candidate" || !item.mappingId} onClick={() => beginReview(item, "approve")}>Approve</button>
-        <button type="button" disabled={!session || item.status !== "candidate" || !item.mappingId} onClick={() => beginReview(item, "reject")}>Reject</button>
-        <button type="button" disabled={!session || item.status !== "approved" || !item.mappingId} onClick={() => beginReview(item, "supersede")}>Supersede</button>
+        <button type="button" disabled={!session || item.status !== "candidate" || !item.mappingId} onClick={() => beginReview(item, "approve")}>Confirm same concept</button>
+        <button type="button" disabled={!session || item.status !== "candidate" || !item.mappingId} onClick={() => beginReview(item, "reject")}>Reject match</button>
+        <button type="button" disabled={!session || item.status !== "approved" || !item.mappingId} onClick={() => beginReview(item, "supersede")}>Retire / supersede</button>
         <span>{session && item.mappingId ? "Governed service available" : "Read-only projection"}</span>
       </div>
       {activeMappingId === item.mappingId && <div className="rdl-review-editor" aria-label={`Governed ${action} review`}>
-        <strong>{action === "approve" ? "Approve mapping" : action === "reject" ? "Reject mapping" : "Supersede mapping"}</strong>
-        <label>Rationale<textarea value={rationale} onChange={(event) => setRationale(event.target.value)} minLength={10} maxLength={2000} rows={3} placeholder="Explain the engineering or standards rationale for this decision."/></label>
+        <strong>{action === "approve" ? "Confirm same concept / merge candidate" : action === "reject" ? "Reject mapping" : "Supersede mapping"}</strong>
+        <label>Rationale<textarea value={rationale} onChange={(event) => setRationale(event.target.value)} minLength={10} maxLength={2000} rows={3} placeholder="Explain the evidence, property / relationship / document / unit comparison, downstream impact and governance rationale for this decision."/></label>
         {action === "supersede" && <label>Successor mapping ID<input type="number" min="1" value={successorMappingId} onChange={(event) => setSuccessorMappingId(event.target.value)}/></label>}
-        <div><button type="button" onClick={submitReview} disabled={submitState.kind === "saving" || rationale.trim().length < 10 || (action === "supersede" && Number(successorMappingId) <= 0)}>{submitState.kind === "saving" ? "Saving…" : "Record governed decision"}</button><button type="button" onClick={() => setActiveMappingId(undefined)}>Cancel</button></div>
+        <div><button type="button" onClick={submitReview} disabled={submitState.kind === "saving" || rationale.trim().length < 10 || (action === "supersede" && Number(successorMappingId) <= 0)}>{submitState.kind === "saving" ? "Saving…" : "Review consequences and record decision"}</button><button type="button" onClick={() => setActiveMappingId(undefined)}>Cancel</button></div>
       </div>}
     </article>)}</div>
   </div>;

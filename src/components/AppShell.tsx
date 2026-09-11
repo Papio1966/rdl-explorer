@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { GlobalRdlSearch } from "./GlobalRdlSearch";
 import { RdlScopeSelector } from "./RdlScopeSelector";
+import { RouteWorkflowGuide } from "./RouteWorkflowGuide";
 
 const PILOT_FEEDBACK_EMAIL = "alessandro@papioconsulting.eu";
 const NAV_STORAGE_KEY = "rdl-explorer:nav-sections";
@@ -15,18 +16,16 @@ type NavItem = { label: string; to: string; icon: typeof CircleGauge };
 type NavSection = { label: string; icon: typeof CircleGauge; alwaysOpen?: boolean; items: NavItem[] };
 
 const navigation: NavSection[] = [
-  { label: "Explore", icon: CircleGauge, alwaysOpen: true, items: [{ label: "Overview", to: "/", icon: CircleGauge }, { label: "RDL Catalogue", to: "/rdls", icon: LibraryBig }] },
+  { label: "Explore", icon: CircleGauge, alwaysOpen: true, items: [{ label: "Overview", to: "/", icon: CircleGauge }, { label: "Standards Catalogue", to: "/rdls", icon: LibraryBig }] },
   { label: "Classes", icon: Tags, items: [{ label: "Tag Classes", to: "/classes/tag", icon: Tags }, { label: "Equipment Classes", to: "/classes/equipment", icon: Boxes }] },
   { label: "Information", icon: FileText, items: [{ label: "Document Types", to: "/documents", icon: FileText }, { label: "Disciplines", to: "/disciplines", icon: Shapes }, { label: "Lifecycle Requirements", to: "/lifecycle", icon: CalendarRange }] },
   { label: "Reference", icon: BookOpen, items: [{ label: "Data Dictionary", to: "/dictionary", icon: BookOpen }, { label: "Source Standards", to: "/standards", icon: Database }, { label: "Units of Measure", to: "/units", icon: Ruler }] },
   { label: "Model", icon: GitBranch, items: [{ label: "Data Model", to: "/model", icon: GitBranch }] },
-  { label: "Operate", icon: CircleGauge, items: [{ label: "Standards Control Tower", to: "/control-tower", icon: CircleGauge }, { label: "My Work Queue", to: "/work-queue", icon: Inbox }] },
+  { label: "Operate", icon: CircleGauge, items: [{ label: "Standards Control Tower", to: "/control-tower", icon: CircleGauge }, { label: "Governance Work Queue", to: "/work-queue", icon: Inbox }] },
   { label: "Govern", icon: Workflow, items: [{ label: "Cross-RDL Intelligence", to: "/intelligence", icon: GitBranch }, { label: "Mapping Governance", to: "/governance", icon: ShieldCheck }, { label: "Enterprise RDL Hierarchy", to: "/hierarchy", icon: LibraryBig }, { label: "Extension Governance", to: "/extensions", icon: ShieldCheck }, { label: "Effective Publication", to: "/publication", icon: LibraryBig }, { label: "Package Distribution", to: "/distribution", icon: LibraryBig }, { label: "Consumer Integration", to: "/integration", icon: LibraryBig }, { label: "Release Impact", to: "/impact", icon: GitBranch }, { label: "Migration Planning", to: "/migration", icon: ClipboardList }] },
   { label: "AI", icon: BrainCircuit, items: [{ label: "AI Standards Intelligence", to: "/ai-intelligence", icon: Sparkles }, { label: "AI Trust & Evaluation", to: "/ai-trust", icon: ShieldCheck }, { label: "AI Assistant", to: "/assistant", icon: Sparkles }] },
   { label: "Administration", icon: Settings2, items: [{ label: "Identity & Access", to: "/identity-admin", icon: UserRoundCheck }, { label: "Organizations & Tenancy", to: "/tenant-admin", icon: LibraryBig }] },
-  { label: "Contract", icon: ClipboardList, items: [{ label: "CIS Builder", to: "/cis", icon: ClipboardList }] },
-  { label: "Quality", icon: ShieldCheck, items: [{ label: "Validation", to: "/validation", icon: ShieldCheck }] },
-  { label: "Help", icon: CircleHelp, items: [{ label: "About RDL Explorer", to: "/about", icon: Info }, { label: "User Guide", to: "/help", icon: CircleHelp }] },
+  { label: "Help", icon: CircleHelp, items: [{ label: "About RDL Explorer", to: "/about", icon: Info }, { label: "User Guide", to: "/help", icon: CircleHelp }, { label: "RDL / DataGate Boundary", to: "/boundary", icon: Info }] },
 ];
 
 const ADMIN_ROUTES = ["/identity-admin", "/tenant-admin"];
@@ -116,7 +115,7 @@ export function AppShell() {
           {scopeMode !== "hidden" && <RdlScopeSelector mode={scopeMode} />}
           {scopeMode === "hidden" && <span className="topbar-context-label"><Settings2 size={15}/> Administration</span>}
         </header>
-        <main className="main-content" tabIndex={0} style={{ height: "calc(100vh - var(--topbar-height))", minHeight: 0, overflowX: "hidden", overflowY: "auto", overscrollBehavior: "contain" }}><Outlet /></main>
+        <main className="main-content" tabIndex={0} style={{ height: "calc(100vh - var(--topbar-height))", minHeight: 0, overflowX: "hidden", overflowY: "auto", overscrollBehavior: "contain" }}><RouteWorkflowGuide /><Outlet /></main>
       </div>
     </div>
   );

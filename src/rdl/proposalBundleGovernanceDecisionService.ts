@@ -16,10 +16,10 @@ export type ProposalBundleDecisionResult = {
 
 export const PROPOSAL_BUNDLE_DECISION_LABELS: Record<ProposalBundleDecisionAction, string> = {
   start_review: "Start review",
-  accept: "Accept",
-  reject: "Reject",
-  withdraw: "Withdraw",
-  link_publication: "Link publication",
+  accept: "Accept candidate for governance processing",
+  reject: "Reject proposal bundle",
+  withdraw: "Withdraw / return for revision",
+  link_publication: "Link to publication evidence",
 };
 
 export function proposalBundleDecisionIsTerminal(status: string): boolean {

@@ -23,7 +23,7 @@ assert.ok(apiShared.includes("WORK_QUEUE_COORDINATOR_ROLE") && apiShared.include
 assert.ok(browser.includes("validSession") && browser.includes("validPayload") && browser.includes("content-type"), "RDL-024 browser client must fail closed on invalid session/data and SPA fallback responses");
 assert.ok(page.includes("Enterprise notifications & work queue") && page.includes("Read-only work queue demonstration") && page.includes("Personal inbox, not an approval engine"), "RDL-024 UX must expose honest fail-closed orchestration semantics");
 assert.ok(page.includes('tabIndex={0}') && page.includes('aria-label="Enterprise standards reviewer work queue"'), "RDL-024 work table must be keyboard focusable and labelled");
-assert.ok(app.includes('path="/work-queue"') && shell.includes("My Work Queue"), "RDL-024 work queue must be routed and discoverable");
+assert.ok(app.includes('path="/work-queue"') && shell.includes("Governance Work Queue"), "RDL-024 work queue must be routed and discoverable");
 assert.ok(workflow.includes("npm run test:rdl-024"), "RDL-024 contract must run in CI");
 assert.ok(dbTest.includes("RDL-024 enterprise notifications and work queue") && dbTest.includes("ROLLBACK"), "RDL-024 database acceptance test must be self-contained and rollback fixtures");
 
