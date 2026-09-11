@@ -36,11 +36,10 @@ const LifecycleRequirementsPage = lazyNamed(
 );
 const DataModelPage = lazyNamed(() => import("./pages/DataModelPage"), "DataModelPage");
 const ValidationPage = lazyNamed(() => import("./pages/ValidationPage"), "ValidationPage");
-const CisPreviewPage = lazyNamed(() => import("./pages/CisPreviewPage"), "CisPreviewPage");
-const CisBuilderPage = lazyNamed(() => import("./pages/CisBuilderPage"), "CisBuilderPage");
 const AssistantPage = lazyNamed(() => import("./pages/AssistantPage"), "AssistantPage");
 const AboutPage = lazyNamed(() => import("./pages/AboutPage"), "AboutPage");
 const HelpPage = lazyNamed(() => import("./pages/HelpPage"), "HelpPage");
+const RdlProductBoundaryPage = lazyNamed(() => import("./pages/RdlProductBoundaryPage"), "RdlProductBoundaryPage");
 const RdlCataloguePage = lazyNamed(() => import("./pages/RdlCataloguePage"), "RdlCataloguePage");
 const RdlSearchPage = lazyNamed(() => import("./pages/RdlSearchPage"), "RdlSearchPage");
 const RdlEntityPage = lazyNamed(() => import("./pages/RdlEntityPage"), "RdlEntityPage");
@@ -123,10 +122,11 @@ export default function App() {
             <Route path="/model" element={<RdlScopedLegacyGuard title="Data Model" specialized><DataModelPage /></RdlScopedLegacyGuard>} />
             <Route path="/validation" element={<ValidationPage />} />
             <Route path="/assistant" element={<AssistantPage />} />
-            <Route path="/cis" element={<CisBuilderPage />} />
+            <Route path="/cis" element={<RdlProductBoundaryPage />} />
+            <Route path="/boundary" element={<RdlProductBoundaryPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/help" element={<HelpPage />} />
-            <Route path="/cis-preview" element={<CisPreviewPage />} />
+            <Route path="/cis-preview" element={<RdlProductBoundaryPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

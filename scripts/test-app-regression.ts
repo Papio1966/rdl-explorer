@@ -187,11 +187,10 @@ for (const label of [
   "Document Types",
   "Lifecycle Requirements",
   "AI Assistant",
-  "CIS Builder",
-  "Validation",
+  "RDL / DataGate Boundary",
   "About RDL Explorer",
   "User Guide",
-  "RDL Catalogue",
+  "Standards Catalogue",
   "Cross-RDL Intelligence",
   "Mapping Governance",
   "Enterprise RDL Hierarchy",
@@ -199,7 +198,7 @@ for (const label of [
   "Package Distribution",
   "Consumer Integration",
   "Migration Planning",
-  "My Work Queue",
+  "Governance Work Queue",
   "Identity & Access",
 ]) {
   assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
@@ -384,7 +383,7 @@ assert.ok(controlTowerPage.includes("Enterprise standards dashboard & control to
 assert.ok(controlTowerBrowserService.includes("validDashboard") && controlTowerBrowserService.includes("content-type") && controlTowerBrowserService.includes("rdl-enterprise-control-tower/v1"), "RDL-023 browser client must validate response shape and reject SPA fallback responses");
 assert.ok(controlTowerRepository.includes("enterprise_standards_control_tower_kpi") && controlTowerMigration.includes("read-only") && controlTowerMigration.includes("enterprise_standards_governance_queue"), "RDL-023 must aggregate existing governed lifecycle state without creating a second system of record");
 assert.ok(rdl023Test.includes("enterprise standards dashboard and control tower contract"), "RDL-023 must provide a deterministic contract test");
-assert.ok(app.includes('path="/work-queue"') && shell.includes("My Work Queue"), "RDL-024 work queue route must be discoverable");
+assert.ok(app.includes('path="/work-queue"') && shell.includes("Governance Work Queue"), "RDL-024 work queue route must be discoverable");
 assert.ok(app.includes('path="/ai-trust"') && shell.includes("AI Trust & Evaluation"), "RDL-026 AI trust route must be discoverable");
 
 assert.ok(workQueuePage.includes("Enterprise notifications & work queue") && workQueuePage.includes("Read-only work queue demonstration") && workQueuePage.includes("Personal inbox, not an approval engine"), "RDL-024 UX must expose fail-closed operational orchestration semantics");

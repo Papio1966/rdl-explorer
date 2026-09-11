@@ -1,0 +1,61 @@
+.route-workflow-guide {
+  margin: 0 0 1rem;
+  border: 1px solid var(--border-subtle, #d9e3df);
+  border-radius: 14px;
+  background: var(--surface-muted, #f7faf8);
+  color: var(--text, #10231d);
+}
+
+.route-workflow-guide summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.85rem 1rem;
+  font-weight: 700;
+}
+
+.route-workflow-guide-body {
+  padding: 0 1rem 1rem;
+}
+
+.route-workflow-guide-summary {
+  margin-top: 0;
+  color: var(--text-muted, #53645d);
+}
+
+.route-workflow-guide dl {
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0 0 1rem;
+}
+
+.route-workflow-guide dt {
+  font-weight: 700;
+}
+
+.route-workflow-guide dd {
+  margin: 0;
+}
+
+.route-workflow-guide-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.route-workflow-guide h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.route-workflow-guide ol,
+.route-workflow-guide ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.route-workflow-guide li + li {
+  margin-top: 0.35rem;
+}
