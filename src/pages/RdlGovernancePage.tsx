@@ -11,6 +11,13 @@ import {
   type GovernanceSession,
   type LiveGovernanceQueueItem,
 } from "../rdl/governanceService";
+import {
+  MAPPING_GOVERNANCE_AUDIT_READBACK_FIELDS,
+  MAPPING_GOVERNANCE_CONSEQUENCE_PREVIEW,
+  MAPPING_GOVERNANCE_DECISION_OPTIONS,
+  MAPPING_GOVERNANCE_EVIDENCE_DIMENSIONS,
+  RDL_EXPLORER_DATAGATE_MAPPING_BOUNDARY,
+} from "../rdl/mappingGovernanceDecisionModel";
 
 type DisplayItem = {
   key: string;
@@ -25,6 +32,59 @@ type DisplayItem = {
   left: { sourceKey: string; entityType: string; nativeIdentifier: string; name: string };
   right: { sourceKey: string; entityType: string; nativeIdentifier: string; name: string };
 };
+
+
+function Rdl050MappingGovernanceWorkflowGuide() {
+  return (
+    <section className="panel-card" aria-labelledby="rdl-050-mapping-governance-workflow">
+      <p className="eyebrow">RDL-050 guided governance workflow</p>
+      <h2 id="rdl-050-mapping-governance-workflow">Review evidence, consequences and audit before recording a mapping decision</h2>
+      <p>{RDL_EXPLORER_DATAGATE_MAPPING_BOUNDARY}</p>
+      <div className="panel-grid two-column">
+        <section>
+          <h3>Governed decision options</h3>
+          <ul>
+            {MAPPING_GOVERNANCE_DECISION_OPTIONS.map((decision) => (
+              <li key={decision.id}>
+                <strong>{decision.label}</strong>: {decision.meaning} {decision.reviewerPrompt}
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section>
+          <h3>Evidence comparison panel</h3>
+          <ul>
+            {MAPPING_GOVERNANCE_EVIDENCE_DIMENSIONS.map((dimension) => (
+              <li key={dimension.id}>
+                <strong>{dimension.label}</strong>: {dimension.question}
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section>
+          <h3>Pre-confirmation consequence preview</h3>
+          <ul>
+            {MAPPING_GOVERNANCE_CONSEQUENCE_PREVIEW.map((item) => (
+              <li key={item.topic}>
+                <strong>{item.topic}</strong>: {item.preview}
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section>
+          <h3>Audit / readback fields</h3>
+          <ul>
+            {MAPPING_GOVERNANCE_AUDIT_READBACK_FIELDS.map((item) => (
+              <li key={item.field}>
+                <strong>{item.field}</strong>: {item.purpose}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </section>
+  );
+}
 
 export function RdlGovernancePage() {
   const [projection, setProjection] = useState<GovernanceProjection>();
@@ -85,6 +145,7 @@ export function RdlGovernancePage() {
   }
 
   return <div className="content-page rdl-governance-page">
+    <Rdl050MappingGovernanceWorkflowGuide />
     <div className="page-heading"><div><div className="eyebrow">Cross-RDL governance</div><h1>Mapping review queue</h1></div><p>Review state, evidence and auditability are explicit. Candidate generation never grants approval.</p></div>
 
     <div className="rdl-intelligence-warning"><ShieldCheck size={19}/><div><strong>Authenticated governance service boundary</strong><p>Review writes run through the server-side governance service. Reviewer identity comes from a signed upstream identity assertion; the browser never receives the signing secret or PostgreSQL credentials.</p></div></div>
