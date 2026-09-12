@@ -49,14 +49,14 @@ assert.match(projection, /OFFSET \${offset}/);
 
 assert.match(legacyPostgres, /RDL-036\.1 compatibility boundary/);
 assert.match(legacyPostgres, /const wantedAsset = entityType === "tag_class" \? "tag" : "equipment"/);
-assert.match(legacyPostgres, /rel\.attributes->>\'assetType\'/);
+assert.match(legacyPostgres, /rel\.attributes->>'assetType'/);
 assert.match(legacyPostgres, /legacySnapshotMetadata/);
 assert.match(legacyPostgres, /case "tag_class"/);
 assert.match(legacyPostgres, /case "controlled_value"/);
 assert.match(legacyPostgres, /measurementSystemCode: text\("measurementSystemCode"\)/);
 assert.match(legacyPostgres, /Jip33 info required spec/);
 assert.match(legacyPostgres, /sourceSheet\?: string/);
-assert.match(legacyPostgres, /rel\.source_locator->>\'sheet\'/);
+assert.match(legacyPostgres, /rel\.source_locator->>'sheet'/);
 assert.doesNotMatch(legacyPostgres.match(/function legacySnapshotMetadata[\s\S]*?function mapEntity/)?.[0] ?? "", /existenceReason|measurementSystemName/);
 
 assert.match(backfill, /rdl0361_entity_identity_before/);

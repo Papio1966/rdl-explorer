@@ -187,7 +187,7 @@ export function LifecycleRequirementsPage() {
     }, [lifecyclePhase, state]);
 
   useEffect(() => {
-    if (!activePhase) return;
+    if (!activePhase?.key) return;
     setSearchQuery("");
     setSelectedDiscipline("all");
     setSelectedStatus("all");

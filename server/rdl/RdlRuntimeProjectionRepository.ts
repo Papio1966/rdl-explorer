@@ -363,7 +363,10 @@ export class RdlRuntimeProjectionRepository {
     const addRequirementRefs = (requirement: Entity) => {
       const m = requirement.metadata;
       const classId = text(m.classId);
-      if (classId) add("tag_class", classId) || add("equipment_class", classId);
+      if (classId) {
+        const addedTagClass = add("tag_class", classId);
+        if (!addedTagClass) add("equipment_class", classId);
+      }
       add("property", m.propertyId);
       add("document_type", m.documentId);
       add("source_standard", m.sourceStandardId);

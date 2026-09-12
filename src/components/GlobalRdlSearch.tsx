@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRdlScope } from "../rdl/RdlScopeContext";
+import { useRdlScope } from "../rdl/rdlScopeContextValue";
 
 export function GlobalRdlSearch() {
   const navigate = useNavigate();

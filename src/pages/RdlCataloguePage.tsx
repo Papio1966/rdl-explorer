@@ -1,7 +1,7 @@
 import { ArrowRight, Database, GitCompareArrows, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { RDL_SOURCES } from "../rdl/catalog";
-import { useRdlScope } from "../rdl/RdlScopeContext";
+import { useRdlScope } from "../rdl/rdlScopeContextValue";
 
 export function RdlCataloguePage() {
   const { setScope } = useRdlScope();

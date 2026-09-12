@@ -126,7 +126,7 @@ export class SnapshotRdlReadRepository implements RdlCutoverRepository {
     const listId = text(property?.metadata.controlledListId);
     if (!listId) return [];
     const rows = this.rows("property picklist values").filter((r) => text(r["property picklist CFIHOS unique code"]) === listId);
-    return rows.map((r, i) => this.rawEntity("controlled_value", text(r["property picklist value CFIHOS unique code"]), text(r["property picklist value code"]) || text(r["property picklist value CFIHOS unique code"]), text(r["property picklist value description"]) || null, { controlledListId: listId, controlledListName: text(r["property picklist name"]), sourceStandardId: text(r["Source standard CFIHOS unique code"]), sourceStandardCode: text(r["source standard code"]) }, "property picklist values", this.rows("property picklist values").indexOf(r))).sort(byId);
+    return rows.map((r) => this.rawEntity("controlled_value", text(r["property picklist value CFIHOS unique code"]), text(r["property picklist value code"]) || text(r["property picklist value CFIHOS unique code"]), text(r["property picklist value description"]) || null, { controlledListId: listId, controlledListName: text(r["property picklist name"]), sourceStandardId: text(r["Source standard CFIHOS unique code"]), sourceStandardCode: text(r["source standard code"]) }, "property picklist values", this.rows("property picklist values").indexOf(r))).sort(byId);
   }
 
   async getJip33RequirementsForTagClass(nativeIdentifier: string) {

@@ -1,19 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, useCallback, type ReactNode } from "react";
 import { getDefaultReleaseKey, getRdlRelease, type RdlScopeKey, type RdlSourceKey } from "./catalog";
 
+import { RdlScopeContext } from "./rdlScopeContextValue";
 const SCOPE_STORAGE_KEY = "rdl-explorer:scope";
 const RELEASE_STORAGE_KEY = "rdl-explorer:release-by-source";
 const VALID_SCOPES = new Set<RdlScopeKey>(["all", "cfihos", "ccus", "water-desalination"]);
 
 type ReleaseMap = Partial<Record<RdlSourceKey, string>>;
-type RdlScopeContextValue = {
-  scope: RdlScopeKey;
-  setScope: (scope: RdlScopeKey) => void;
-  releaseKey: string | null;
-  setReleaseKey: (releaseKey: string) => void;
-};
-
-const RdlScopeContext = createContext<RdlScopeContextValue | null>(null);
 
 function initialReleaseMap(): ReleaseMap {
   if (typeof window === "undefined") return {};
@@ -40,17 +33,11 @@ export function RdlScopeProvider({ children }: { children: ReactNode }) {
     ? null
     : getRdlRelease(scope, releaseBySource[scope])?.key ?? getDefaultReleaseKey(scope) ?? null;
 
-  const setReleaseKey = (next: string) => {
+  const setReleaseKey = useCallback((next: string) => {
     if (scope === "all" || !getRdlRelease(scope, next)) return;
     setReleaseBySource((current) => ({ ...current, [scope]: next }));
-  };
+  }, [scope]);
 
-  const value = useMemo(() => ({ scope, setScope: setScopeState, releaseKey, setReleaseKey }), [scope, releaseKey]);
+  const value = useMemo(() => ({ scope, setScope: setScopeState, releaseKey, setReleaseKey }), [scope, releaseKey, setReleaseKey]);
   return <RdlScopeContext.Provider value={value}>{children}</RdlScopeContext.Provider>;
-}
-
-export function useRdlScope() {
-  const value = useContext(RdlScopeContext);
-  if (!value) throw new Error("useRdlScope must be used inside RdlScopeProvider");
-  return value;
 }

@@ -76,11 +76,7 @@ function rows(workbook: WorkbookData, sheet: string): Record<string, unknown>[] 
   if (!ws) throw new Error(`Worksheet not found: ${sheet}`);
   return worksheetRows<Record<string, unknown>>(ws);
 }
-function countDuplicates(values: string[]): number {
-  const counts = new Map<string, number>();
-  for (const value of values.filter(Boolean)) counts.set(value, (counts.get(value) ?? 0) + 1);
-  return [...counts.values()].reduce((n, c) => n + (c > 1 ? c - 1 : 0), 0);
-}
+
 function numericId(value: string): number | null {
   const match = value.match(/(\d+)$/); return match ? Number(match[1]) : null;
 }

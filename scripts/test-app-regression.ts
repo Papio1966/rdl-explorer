@@ -178,7 +178,7 @@ const routes = [
 ];
 
 for (const route of routes) {
-  assert.ok(app.includes(`path=\"${route}\"`) || app.includes(`to=\"${route}`), `Missing application route ${route}`);
+  assert.ok(app.includes(`path="${route}"`) || app.includes(`to="${route}`), `Missing application route ${route}`);
 }
 
 for (const label of [
@@ -201,7 +201,7 @@ for (const label of [
   "Governance Work Queue",
   "Identity & Access",
 ]) {
-  assert.ok(shell.includes(`label: \"${label}\"`), `Missing navigation item ${label}`);
+  assert.ok(shell.includes(`label: "${label}"`), `Missing navigation item ${label}`);
 }
 
 assert.ok(app.includes("lazyNamed"), "Routes are no longer lazy loaded");

@@ -1,6 +1,6 @@
 import { Layers3 } from "lucide-react";
 import { getRdlSource, RDL_SOURCES, type RdlScopeKey } from "../rdl/catalog";
-import { useRdlScope } from "../rdl/RdlScopeContext";
+import { useRdlScope } from "../rdl/rdlScopeContextValue";
 
 export function RdlScopeSelector({ mode = "scope" }: { mode?: "scope" | "filter" }) {
   const { scope, setScope, releaseKey, setReleaseKey } = useRdlScope();

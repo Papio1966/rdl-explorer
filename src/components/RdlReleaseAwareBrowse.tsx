@@ -218,9 +218,7 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
     () => state.status === "success" ? buildFacetDefinitions(state.records) : [],
     [state],
   );
-  const searchParamKey = searchParams.toString();
-
-  const facetFilteredRecords = useMemo(() => {
+const facetFilteredRecords = useMemo(() => {
     if (state.status !== "success") return [];
     if (!facetDefinitions.length) return state.records;
     return state.records.filter((record) =>
@@ -230,7 +228,7 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
         return record.facets?.[facet.key]?.value === requested;
       }),
     );
-  }, [state, facetDefinitions, searchParamKey]);
+  }, [state, facetDefinitions, searchParams]);
 
   const hierarchy = useMemo(() => {
     if (state.status !== "success") return { roots: [], hierarchyRelationshipCount: 0 };

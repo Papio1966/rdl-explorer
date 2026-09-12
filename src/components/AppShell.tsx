@@ -63,7 +63,15 @@ export function AppShell() {
   const scopeMode = useMemo(() => ADMIN_ROUTES.some((route) => location.pathname.startsWith(route)) ? "hidden" : MULTI_RDL_ROUTES.some((route) => location.pathname.startsWith(route)) ? "filter" : "scope", [location.pathname]);
 
   function toggleSection(label: string) {
-    setExpanded((current) => { const next = new Set(current); next.has(label) ? next.delete(label) : next.add(label); return next; });
+    setExpanded((current) => {
+      const next = new Set(current);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
   }
 
   return (
