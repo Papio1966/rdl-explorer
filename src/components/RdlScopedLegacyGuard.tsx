@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { getRdlRelease, getRdlSource, rdlEntityRoute } from "../rdl/catalog";
-import { useRdlScope } from "../rdl/RdlScopeContext";
+import { useRdlScope } from "../rdl/rdlScopeContextValue";
 import { loadRdlSearchIndex, type RdlSearchRecord } from "../rdl/search";
 import { RdlReleaseAwareBrowse } from "./RdlReleaseAwareBrowse";
 

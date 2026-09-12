@@ -52,7 +52,6 @@ for (const [label, type, expected] of expectedEntities) {
 const q = async (sql: string) => (await client.query<Record<string, unknown>>(sql))[0];
 const qCount = async (sql: string) => Number((await q(sql))?.count ?? 0);
 const ccusPkg = `(SELECT p.package_id FROM rdl.rdl_package p JOIN rdl.rdl_release r ON r.release_id=p.release_id JOIN rdl.rdl_source s ON s.source_id=r.source_id WHERE s.source_key='ccus' AND r.release_key='ccus-0.1-draft' ORDER BY p.package_id DESC LIMIT 1)`;
-const cfihosPkg = `(SELECT p.package_id FROM rdl.rdl_package p JOIN rdl.rdl_release r ON r.release_id=p.release_id JOIN rdl.rdl_source s ON s.source_id=r.source_id WHERE s.source_key='cfihos' AND r.release_key='cfihos-2.0' ORDER BY p.package_id DESC LIMIT 1)`;
 
 const tagIds = new Set(rows("tagClass").map(r => t(r, "tagClassId")).filter(Boolean));
 const equipmentIds = new Set(rows("equipmentClass").map(r => t(r, "equipmentClassId")).filter(Boolean));

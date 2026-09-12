@@ -2,7 +2,7 @@ import { Database, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { entityTypeLabel, getDefaultReleaseKey, getRdlRelease, getRdlSource, rdlEntityRoute, RDL_SOURCES, type RdlScopeKey } from "../rdl/catalog";
-import { useRdlScope } from "../rdl/RdlScopeContext";
+import { useRdlScope } from "../rdl/rdlScopeContextValue";
 import { loadRdlGlobalSearchRuntime } from "../rdl/runtimeSearch";
 import type { RdlSearchRecord } from "../rdl/search";
 

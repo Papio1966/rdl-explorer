@@ -106,10 +106,13 @@ export function CisBuilderPage() {
     }
   }, []);
 
-  useEffect(() => {
+    const createWorkingDocumentRef = useRef(createWorkingDocument);
+  createWorkingDocumentRef.current = createWorkingDocument;
+
+useEffect(() => {
     if (!draftHydrated) return;
     const savedAt = new Date().toISOString();
-    const document = createWorkingDocument(savedAt);
+    const document = createWorkingDocumentRef.current(savedAt);
     try {
       window.localStorage.setItem(CIS_DRAFT_STORAGE_KEY, JSON.stringify(document));
       setLastSavedAt(savedAt);
