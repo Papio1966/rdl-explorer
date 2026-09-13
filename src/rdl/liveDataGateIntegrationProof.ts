@@ -28,6 +28,29 @@ export type Rdl055ScenarioEvidence = {
   detail?: string;
 };
 
+export type LiveMultiSourceContributorEvidence = {
+  sourceKey: string;
+  releaseKey: string;
+  packageKey: string;
+  entityType: string;
+  nativeIdentifier: string;
+  evidenceRef: string;
+};
+
+export type LiveMultiSourceProvenanceEvidence = {
+  targetEntityType: string;
+  targetNativeIdentifier: string;
+  contributorCount: number;
+  contributors: readonly LiveMultiSourceContributorEvidence[];
+  manifestEvidenceRef: string;
+  packageEvidenceRef: string;
+};
+
+export type LiveRelationshipClosureEvidence = {
+  relationshipCount: number;
+  packageEvidenceRef: string;
+};
+
 export type LiveDataGateRdlIntegrationEvidence = {
   schemaVersion: typeof RDL_LIVE_DATAGATE_INTEGRATION_PROOF_SCHEMA_VERSION;
   rdlBaselineSha: string;
@@ -56,6 +79,8 @@ export type LiveDataGateRdlIntegrationEvidence = {
   safeToUseForValidation: true;
   idempotentReplaySameBundleId: true;
   multiSourceProvenancePreserved: true;
+  multiSourceProvenance: LiveMultiSourceProvenanceEvidence;
+  relationshipClosure: LiveRelationshipClosureEvidence;
   sameNameAutomaticEquivalence: false;
   historicalProjectBaselineUnchanged: true;
   dataGateToRdlDatabaseAccess: false;
@@ -94,6 +119,34 @@ function sha256(value: string | undefined, field: string, issues: string[]) {
   if (!SHA256.test(value)) issues.push(`${field} must be a SHA-256 hexadecimal value`);
 }
 
+function validateMultiSourceProvenance(input: LiveMultiSourceProvenanceEvidence, issues: string[]) {
+  requiredText(input.targetEntityType, "multiSourceProvenance.targetEntityType", issues);
+  requiredText(input.targetNativeIdentifier, "multiSourceProvenance.targetNativeIdentifier", issues);
+  requiredText(input.manifestEvidenceRef, "multiSourceProvenance.manifestEvidenceRef", issues);
+  requiredText(input.packageEvidenceRef, "multiSourceProvenance.packageEvidenceRef", issues);
+  if (!Number.isSafeInteger(input.contributorCount) || input.contributorCount < 2) {
+    issues.push("multiSourceProvenance.contributorCount must be at least 2");
+  }
+  if (input.contributors.length !== input.contributorCount) {
+    issues.push("multiSourceProvenance contributorCount must equal contributors length");
+  }
+  const exactKeys = new Set<string>();
+  const sourceKeys = new Set<string>();
+  input.contributors.forEach((contributor, index) => {
+    const prefix = `multiSourceProvenance.contributors[${index}]`;
+    requiredText(contributor.sourceKey, `${prefix}.sourceKey`, issues);
+    requiredText(contributor.releaseKey, `${prefix}.releaseKey`, issues);
+    requiredText(contributor.packageKey, `${prefix}.packageKey`, issues);
+    requiredText(contributor.entityType, `${prefix}.entityType`, issues);
+    requiredText(contributor.nativeIdentifier, `${prefix}.nativeIdentifier`, issues);
+    requiredText(contributor.evidenceRef, `${prefix}.evidenceRef`, issues);
+    exactKeys.add([contributor.sourceKey, contributor.releaseKey, contributor.packageKey, contributor.entityType, contributor.nativeIdentifier].join("\u0000"));
+    sourceKeys.add(contributor.sourceKey);
+  });
+  if (exactKeys.size < 2) issues.push("RDL-054 provenance must contain at least two distinct exact contributor identities");
+  if (sourceKeys.size < 2) issues.push("RDL-054 multi-RDL provenance must contain contributors from at least two distinct sources");
+}
+
 export function verifyLiveDataGateRdlIntegrationEvidence(input: LiveDataGateRdlIntegrationEvidence): LiveDataGateRdlIntegrationProofResult {
   const issues: string[] = [];
 
@@ -125,6 +178,9 @@ export function verifyLiveDataGateRdlIntegrationEvidence(input: LiveDataGateRdlI
   if (input.consumerReceiptStatus !== "verified" || !input.safeToUseForValidation) issues.push("consumer receipt must be verified and safe for validation");
   if (!input.idempotentReplaySameBundleId) issues.push("proposal retry/idempotency proof is missing");
   if (!input.multiSourceProvenancePreserved) issues.push("RDL-054 multi-source provenance must survive the published/consumer boundary");
+  validateMultiSourceProvenance(input.multiSourceProvenance, issues);
+  if (!Number.isSafeInteger(input.relationshipClosure.relationshipCount) || input.relationshipClosure.relationshipCount <= 0) issues.push("published package must contain authoritative effectiveRelationships closure");
+  requiredText(input.relationshipClosure.packageEvidenceRef, "relationshipClosure.packageEvidenceRef", issues);
   if (input.sameNameAutomaticEquivalence) issues.push("same-name source entities must not be automatically equated");
   if (!input.historicalProjectBaselineUnchanged) issues.push("historical project baseline preservation must be proven");
   if (input.dataGateToRdlDatabaseAccess) issues.push("DataGate-to-RDL database access is prohibited");
