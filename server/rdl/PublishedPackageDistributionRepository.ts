@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type { SqlJsonClient } from "../db/PsqlJsonClient.ts";
 import { sqlLiteral } from "../db/PsqlJsonClient.ts";
+import type { EffectiveStandardDerivation, EffectiveStandardRelationship } from "./EffectiveStandardPublicationRepository.ts";
 
 export type DistributionLifecycle = "active" | "deprecated" | "superseded";
 export type DistributedRelease = {
@@ -12,7 +13,9 @@ export type DistributedEntity = {
   entityType:string; nativeIdentifier:string; name:string; definition?:string;
   lifecycleStatus:string; sourcePackageId?:number; sourcePackageKey?:string;
   changeKind:"inherited"|"add"|"override"; sourceLayer?:string; sourceContextKey?:string; rationale?:string;
+  derivation?:EffectiveStandardDerivation;
 };
+export type DistributedRelationship = EffectiveStandardRelationship;
 
 export class PublishedPackageDistributionRepository {
   constructor(private readonly client:SqlJsonClient) {}
@@ -51,16 +54,33 @@ export class PublishedPackageDistributionRepository {
     }
     baseRows.sort((a,b)=>(precedenceById.get(Number(a.package_id))??0)-(precedenceById.get(Number(b.package_id))??0));
     const effective=new Map<string,DistributedEntity>();
+    const baseKeyByEntityId=new Map<number,string>();
+    const baseKeysByTypeNative=new Map<string,string[]>();
     for(const e of baseRows){
-      const key=`${e.entity_type_code}\u0000${e.native_identifier}`;
+      const publicIdentity=`${e.entity_type_code}\u0000${e.native_identifier}`;
+      const key=`package:${Number(e.package_id)}\u0000${publicIdentity}`;
       effective.set(key,{entityType:e.entity_type_code,nativeIdentifier:e.native_identifier,name:e.name,definition:e.definition??undefined,lifecycleStatus:e.lifecycle_status,sourcePackageId:Number(e.package_id),sourcePackageKey:packageKeyById.get(Number(e.package_id)),changeKind:"inherited"});
+      baseKeyByEntityId.set(Number(e.entity_id),key);
+      const keys=baseKeysByTypeNative.get(publicIdentity)??[];
+      keys.push(key);
+      baseKeysByTypeNative.set(publicIdentity,keys);
     }
     const changes=Array.isArray(payload.changes)?payload.changes:[];
     for(const c of changes){
-      const key=`${c.entityType}\u0000${c.nativeIdentifier}`;
-      if(c.changeKind==="retire"){effective.delete(key);continue;}
+      const publicIdentity=`${c.entityType}\u0000${c.nativeIdentifier}`;
+      const baseEntityId=c.baseEntityId==null?undefined:Number(c.baseEntityId);
+      let key=baseEntityId==null?undefined:baseKeyByEntityId.get(baseEntityId);
+      if(!key && c.changeKind!=="add") {
+        const candidates=baseKeysByTypeNative.get(publicIdentity)??[];
+        if(candidates.length===1) key=candidates[0];
+        else if(candidates.length>1) throw new Error(`Ambiguous multi-RDL ${c.changeKind} for ${c.entityType}/${c.nativeIdentifier}; exact baseEntityId is required`);
+      }
+      if(c.changeKind==="retire"){ if(key) effective.delete(key); continue; }
+      if(!key) key=`extension:${c.extensionChangeId??publicIdentity}`;
       const prior=effective.get(key);
-      effective.set(key,{entityType:String(c.entityType),nativeIdentifier:String(c.nativeIdentifier),name:String(c.effectiveName??prior?.name??c.nativeIdentifier),definition:prior?.definition,lifecycleStatus:"active",sourcePackageId:prior?.sourcePackageId,sourcePackageKey:prior?.sourcePackageKey,changeKind:c.changeKind==="add"?"add":"override",sourceLayer:c.sourceLayer,sourceContextKey:c.sourceContextKey,rationale:c.rationale});
+      const next:DistributedEntity={entityType:String(c.entityType),nativeIdentifier:String(c.nativeIdentifier),name:String(c.effectiveName??prior?.name??c.nativeIdentifier),definition:prior?.definition,lifecycleStatus:"active",sourcePackageId:prior?.sourcePackageId,sourcePackageKey:prior?.sourcePackageKey,changeKind:c.changeKind==="add"?"add":"override",sourceLayer:c.sourceLayer,sourceContextKey:c.sourceContextKey,rationale:c.rationale};
+      if(c.derivation && typeof c.derivation==="object") next.derivation=c.derivation as EffectiveStandardDerivation;
+      effective.set(key,next);
     }
     const q=query.trim().toLowerCase();
     return [...effective.values()].filter(e=>(!entityType||e.entityType===entityType)&&(!q||e.nativeIdentifier.toLowerCase().includes(q)||e.name.toLowerCase().includes(q))).sort((a,b)=>a.entityType.localeCompare(b.entityType)||a.name.localeCompare(b.name));
@@ -70,7 +90,9 @@ export class PublishedPackageDistributionRepository {
     const row=await this.release(releaseId); if(!row)return undefined;
     const entities=await this.entities(releaseId);
     const release=mapRelease(row);
-    const packageBody={schemaVersion:"rdl-distribution-package/v1",release,integrity:{algorithm:"sha256",compositionSha256:row.composition_sha256},manifest:row.package_manifest,effectiveEntities:entities};
+    const packageBody:Record<string,unknown>={schemaVersion:"rdl-distribution-package/v1",release,integrity:{algorithm:"sha256",compositionSha256:row.composition_sha256},manifest:row.package_manifest,effectiveEntities:entities};
+    const relationships=row.package_payload?.effectiveRelationships;
+    if(Array.isArray(relationships)) packageBody.effectiveRelationships=relationships as DistributedRelationship[];
     const distributionSha256=createHash("sha256").update(JSON.stringify(packageBody)).digest("hex");
     return {...packageBody,distributionSha256};
   }

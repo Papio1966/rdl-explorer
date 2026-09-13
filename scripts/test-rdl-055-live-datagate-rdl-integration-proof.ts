@@ -34,8 +34,8 @@ assert.equal(composition.boundary.dataGateOwnsComposition,false);
 
 const receipt = createDistributionPullReceipt({
   consumerKey:"datagate-live-proof",
-  pulledAt:"2026-09-12T18:00:00.000Z",
-  releaseIdentity:{ releaseId:155, releaseKey:"company-effective", releaseVersion:"5.0.0", publicationStatus:"active" },
+  pulledAt:"2026-09-13T12:00:00.000Z",
+  releaseIdentity:{ releaseId:155, releaseKey:"project-effective", releaseVersion:"1.0.0", publicationStatus:"active" },
   packageIdentity:{ manifestChecksum:A, distributionChecksum:B, packageChecksum:C, etag:`sha256-${B}` },
   verification:{ contractCompatible:true, schemaCompatible:true, releaseIdentityVerified:true, integrityVerified:true, contentCurrent:true, issues:[] },
 });
@@ -43,10 +43,10 @@ assert.equal(receipt.status,"verified");
 assert.equal(receipt.safeToUseForValidation,true);
 assert.equal(receipt.boundary.rdlWriteBackRequired,false);
 
-const scenarios = RDL055_REQUIRED_SCENARIOS.map((scenarioId) => ({scenarioId,passed:true,evidenceRef:`evidence:${scenarioId.toLowerCase()}`}));
+const scenarios = RDL055_REQUIRED_SCENARIOS.map((scenarioId) => ({scenarioId,passed:true,evidenceRef:`evidence/${scenarioId.toLowerCase()}.json`}));
 const evidence: LiveDataGateRdlIntegrationEvidence = {
   schemaVersion:RDL_LIVE_DATAGATE_INTEGRATION_PROOF_SCHEMA_VERSION,
-  rdlBaselineSha:"e135042561d986e44ea179f6b4f5441d923a1db0",
+  rdlBaselineSha:"a9d03d8c67de40960c23fcaf2c0c42918b0a6118",
   consumerSystem:"DataGate",
   consumerContractId:receipt.consumerContract.consumerContractId,
   consumerContractVersion:receipt.consumerContract.consumerContractVersion,
@@ -71,7 +71,19 @@ const evidence: LiveDataGateRdlIntegrationEvidence = {
   consumerReceiptStatus:receipt.status,
   safeToUseForValidation:receipt.safeToUseForValidation,
   idempotentReplaySameBundleId:true,
-  multiSourceProvenancePreserved:composition.contributors.length===2,
+  multiSourceProvenancePreserved:true,
+  multiSourceProvenance:{
+    targetEntityType:"tag_class",
+    targetNativeIdentifier:"COMPANY-TC-00421",
+    contributorCount:2,
+    contributors:[
+      {sourceKey:"cfihos",releaseKey:"cfihos-2.0",packageKey:"cfihos-2.0-a",entityType:"tag_class",nativeIdentifier:"CF-CP",evidenceRef:"evidence/package.json"},
+      {sourceKey:"ccus",releaseKey:"ccus-2.0",packageKey:"ccus-2.0-b",entityType:"tag_class",nativeIdentifier:"CC-CP",evidenceRef:"evidence/package.json"},
+    ],
+    manifestEvidenceRef:"evidence/manifest.json",
+    packageEvidenceRef:"evidence/package.json",
+  },
+  relationshipClosure:{relationshipCount:42,packageEvidenceRef:"evidence/package.json"},
   sameNameAutomaticEquivalence:false,
   historicalProjectBaselineUnchanged:true,
   dataGateToRdlDatabaseAccess:false,
@@ -96,6 +108,9 @@ for (const [name,changed] of [
   ["same-name collapse",{...evidence,sameNameAutomaticEquivalence:true as never}],
   ["history rewrite",{...evidence,historicalProjectBaselineUnchanged:false as never}],
   ["missing negative path",{...evidence,scenarios:scenarios.filter((item)=>item.scenarioId!=="NEGATIVE-07")}],
+  ["provenance boolean only",{...evidence,multiSourceProvenance:{...evidence.multiSourceProvenance,contributorCount:0,contributors:[]}}],
+  ["single source provenance",{...evidence,multiSourceProvenance:{...evidence.multiSourceProvenance,contributors:[evidence.multiSourceProvenance.contributors[0],{...evidence.multiSourceProvenance.contributors[1],sourceKey:"cfihos"}]}}],
+  ["missing relationship closure",{...evidence,relationshipClosure:{relationshipCount:0,packageEvidenceRef:"evidence/package.json"}}],
 ] as const) {
   const result = verifyLiveDataGateRdlIntegrationEvidence(changed as LiveDataGateRdlIntegrationEvidence);
   assert.equal(result.passed,false,`${name} must fail closed`);
@@ -123,6 +138,9 @@ for (const source of [manifestApi,packageApi]) {
 
 const source = readFileSync("src/rdl/liveDataGateIntegrationProof.ts","utf8");
 assert.doesNotMatch(source,/from\s+["']pg["']|INSERT\s+INTO|UPDATE\s+rdl\.|DELETE\s+FROM\s+rdl\.|fetch\s*\(/i);
+assert.match(source,/multiSourceProvenance: LiveMultiSourceProvenanceEvidence/);
+assert.match(source,/relationshipClosure: LiveRelationshipClosureEvidence/);
+assert.match(source,/at least two distinct sources/);
 const docs = readFileSync("docs/development/RDL_055_LIVE_DATAGATE_RDL_INTEGRATION_PROOF.md","utf8");
 for (const phrase of [
   "public contracts only",
@@ -133,4 +151,4 @@ for (const phrase of [
   "historical project baseline",
 ]) assert.ok(docs.includes(phrase),`missing RDL-055 architecture statement: ${phrase}`);
 
-console.log("PASS - RDL-055 RDL-side integration-proof harness: public-contract correlation, RDL-054 provenance, consumer receipt safety, mandatory negative paths and cross-database boundaries fail closed");
+console.log("PASS - RDL-055 live-integration verifier now requires structured multi-source contributor evidence and non-empty effectiveRelationships closure in addition to the 14 governed scenarios");
