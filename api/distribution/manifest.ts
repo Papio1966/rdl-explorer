@@ -1,6 +1,6 @@
-import { beginApiRequest, completeApiRequest, queryValue } from "../_shared/request.ts";
+import { beginApiRequest, completeApiRequest } from "../_runtime.ts";
+import { queryValue } from "../governance/_shared.ts";
 import { authenticatedDistributionContext, handleApiError, type ApiRequest, type ApiResponse } from "./_shared.ts";
-
 const RDL_DISTRIBUTION_CONTRACT_ID = "rdl-distribution-consumer";
 const RDL_DISTRIBUTION_CONTRACT_VERSION = "v1";
 const RDL_DISTRIBUTION_MANIFEST_SCHEMA_VERSION = "rdl-distribution-manifest/v1";
@@ -9,7 +9,6 @@ const DATAGATE_CONSUMER_BOUNDARY = "DataGate is a read-only API/contract consume
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
-
 function text(value: unknown, fallback = ""): string {
   const rendered = typeof value === "string" || typeof value === "number" ? String(value).trim() : "";
   return rendered || fallback;
@@ -22,7 +21,6 @@ function checksumFrom(record: Record<string, unknown>, keys: string[]): string {
   }
   return "";
 }
-
 export default async function handler(request: ApiRequest, response: ApiResponse) {
   const context = beginApiRequest(request, response, "distribution.manifest");
   if (request.method !== "GET") {
@@ -38,10 +36,8 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       response.status(400).json({ error: "A valid releaseId is required.", contractId: RDL_DISTRIBUTION_CONTRACT_ID, contractVersion: RDL_DISTRIBUTION_CONTRACT_VERSION });
       return;
     }
-
     const rawManifest = await service.manifest(releaseId);
     if (!rawManifest) throw new Error("A valid releaseId is required.");
-
     const manifest = asRecord(rawManifest);
     const release = asRecord(manifest.release);
     const integrity = asRecord(manifest.integrity);
@@ -52,7 +48,6 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     const releaseVersion = text(release.releaseVersion, text(manifest.releaseVersion, "unknown"));
     const publicationStatus = text(release.lifecycleStatus, text(release.publicationStatus, text(manifest.publicationStatus, "published")));
     const etagValue = `sha256-${manifestChecksum || distributionChecksum || releaseId}`;
-
     response.setHeader?.("ETag", `"${etagValue}"`);
     response.setHeader?.("X-RDL-Distribution-Contract", `${RDL_DISTRIBUTION_CONTRACT_ID}/${RDL_DISTRIBUTION_CONTRACT_VERSION}`);
     response.setHeader?.("X-RDL-Read-Only-Consumer", "true");
