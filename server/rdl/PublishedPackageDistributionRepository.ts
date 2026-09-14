@@ -2,7 +2,6 @@ import { createHash } from "node:crypto";
 import type { SqlJsonClient } from "../db/PsqlJsonClient.ts";
 import { sqlLiteral } from "../db/PsqlJsonClient.ts";
 import type { EffectiveStandardDerivation, EffectiveStandardRelationship } from "./EffectiveStandardPublicationRepository.ts";
-
 export type DistributionLifecycle = "active" | "deprecated" | "superseded";
 export type DistributedRelease = {
   releaseId:number; contextKey:string; contextType:string; contextName:string;
@@ -16,17 +15,14 @@ export type DistributedEntity = {
   derivation?:EffectiveStandardDerivation;
 };
 export type DistributedRelationship = EffectiveStandardRelationship;
-
 export class PublishedPackageDistributionRepository {
   constructor(private readonly client:SqlJsonClient) {}
-
   async catalogue(contextKey="",limit=100):Promise<DistributedRelease[]> {
     const safeLimit=Math.max(1,Math.min(limit,250));
     const where=contextKey?`WHERE context_key=${sqlLiteral(contextKey)}`:"";
     const rows=await this.client.query<any>(`SELECT * FROM rdl.distributed_effective_standard_release ${where} ORDER BY published_at DESC LIMIT ${safeLimit}`);
     return rows.map(mapRelease);
   }
-
   async release(releaseId:number){
     const rows=await this.client.query<any>(`SELECT r.*,d.lifecycle_status,d.superseded_by_release_id,d.compatibility,d.deprecation_message,c.context_key,c.context_type,c.name AS context_name
       FROM rdl.effective_standard_release r
@@ -35,12 +31,10 @@ export class PublishedPackageDistributionRepository {
       WHERE r.effective_standard_release_id=${Number(releaseId)} LIMIT 1`);
     return rows[0];
   }
-
   async manifest(releaseId:number){
     const row=await this.release(releaseId); if(!row)return undefined;
     return {schemaVersion:"rdl-distribution-manifest/v1",release:mapRelease(row),packageManifest:row.package_manifest,integrity:{algorithm:"sha256",compositionSha256:row.composition_sha256}};
   }
-
   async entities(releaseId:number,entityType="",query=""):Promise<DistributedEntity[]> {
     const row=await this.release(releaseId); if(!row)return [];
     const manifest=row.package_manifest??{}; const payload=row.package_payload??{};
@@ -85,7 +79,6 @@ export class PublishedPackageDistributionRepository {
     const q=query.trim().toLowerCase();
     return [...effective.values()].filter(e=>(!entityType||e.entityType===entityType)&&(!q||e.nativeIdentifier.toLowerCase().includes(q)||e.name.toLowerCase().includes(q))).sort((a,b)=>a.entityType.localeCompare(b.entityType)||a.name.localeCompare(b.name));
   }
-
   async consumerPackage(releaseId:number){
     const row=await this.release(releaseId); if(!row)return undefined;
     const entities=await this.entities(releaseId);
@@ -93,8 +86,9 @@ export class PublishedPackageDistributionRepository {
     const packageBody:Record<string,unknown>={schemaVersion:"rdl-distribution-package/v1",release,integrity:{algorithm:"sha256",compositionSha256:row.composition_sha256},manifest:row.package_manifest,effectiveEntities:entities};
     const relationships=row.package_payload?.effectiveRelationships;
     if(Array.isArray(relationships)) packageBody.effectiveRelationships=relationships as DistributedRelationship[];
-    const distributionSha256=createHash("sha256").update(JSON.stringify(packageBody)).digest("hex");
-    return {...packageBody,distributionSha256};
+    const packageChecksum=createHash("sha256").update(JSON.stringify(packageBody)).digest("hex");
+    const distributionSha256=packageChecksum;
+    return {...packageBody,packageChecksum,distributionSha256};
   }
 }
 function mapRelease(row:any):DistributedRelease{return {releaseId:Number(row.release_id??row.effective_standard_release_id),contextKey:row.context_key,contextType:row.context_type,contextName:row.context_name,releaseKey:row.release_key,releaseVersion:row.release_version,compositionSha256:row.composition_sha256,publishedBy:row.published_by,publishedAt:row.published_at,lifecycleStatus:(row.lifecycle_status??"active") as DistributionLifecycle,supersededByReleaseId:row.superseded_by_release_id==null?undefined:Number(row.superseded_by_release_id),compatibility:row.compatibility??{contract:"rdl-distribution/v1",minimumConsumerVersion:"1.0"},deprecationMessage:row.deprecation_message??undefined};}

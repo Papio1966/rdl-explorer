@@ -1,6 +1,6 @@
-import { beginApiRequest, completeApiRequest, queryValue } from "../_shared/request.ts";
+import { beginApiRequest, completeApiRequest } from "../_runtime.ts";
+import { queryValue } from "../governance/_shared.ts";
 import { authenticatedDistributionContext, handleApiError, type ApiRequest, type ApiResponse } from "./_shared.ts";
-
 const RDL_DISTRIBUTION_CONTRACT_ID = "rdl-distribution-consumer";
 const RDL_DISTRIBUTION_CONTRACT_VERSION = "v1";
 const RDL_DISTRIBUTION_PACKAGE_SCHEMA_VERSION = "rdl-distribution-package/v1";
@@ -9,7 +9,6 @@ const DATAGATE_CONSUMER_BOUNDARY = "DataGate is a read-only API/contract consume
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
-
 function text(value: unknown, fallback = ""): string {
   const rendered = typeof value === "string" || typeof value === "number" ? String(value).trim() : "";
   return rendered || fallback;
@@ -22,11 +21,9 @@ function checksumFrom(record: Record<string, unknown>, keys: string[]): string {
   }
   return "";
 }
-
 function safeToken(value: string, fallback: string): string {
   return (value || fallback).replace(/[^A-Za-z0-9_.-]+/g, "-");
 }
-
 export default async function handler(request: ApiRequest, response: ApiResponse) {
   const context = beginApiRequest(request, response, "distribution.package");
   if (request.method !== "GET") {
@@ -42,10 +39,8 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       response.status(400).json({ error: "A valid releaseId is required.", contractId: RDL_DISTRIBUTION_CONTRACT_ID, contractVersion: RDL_DISTRIBUTION_CONTRACT_VERSION });
       return;
     }
-
     const rawPackage = await service.package(releaseId);
     if (!rawPackage) throw new Error("A valid releaseId is required.");
-
     const pkg = asRecord(rawPackage);
     const release = asRecord(pkg.release);
     const integrity = asRecord(pkg.integrity);
@@ -58,7 +53,6 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     const distributionChecksum = checksumFrom(pkg, ["distributionChecksum", "distributionSha256"]) || checksumFrom(integrity, ["distributionChecksum", "distributionSha256"]) || packageChecksum || manifestChecksum;
     const etagValue = `sha256-${distributionChecksum || releaseId}`;
     const effectiveEntities = Array.isArray(pkg.effectiveEntities) ? pkg.effectiveEntities : [];
-
     response.setHeader?.("Content-Disposition", `attachment; filename=rdl-distribution-${safeToken(releaseKey, "release")}-${safeToken(releaseVersion, "version")}.json`);
     response.setHeader?.("ETag", `"${etagValue}"`);
     response.setHeader?.("X-RDL-Distribution-Contract", `${RDL_DISTRIBUTION_CONTRACT_ID}/${RDL_DISTRIBUTION_CONTRACT_VERSION}`);
