@@ -15,8 +15,15 @@ export type ExternalProposalBundleRecord = {
   sourceLevel: string;
   targetLevel: string;
   targetContextKey: string;
-  parentPackageId: number;
-  parentPackageKey: string;
+  parentMode: "package" | "effective_release";
+  parentPackageId?: number;
+  parentPackageKey?: string;
+  parentEffectiveReleaseId?: number;
+  parentEffectiveContextKey?: string;
+  parentEffectiveContextType?: string;
+  parentEffectiveReleaseKey?: string;
+  parentEffectiveReleaseVersion?: string;
+  parentEffectiveCompositionSha256?: string;
   bundleSha256: string;
   validationStatus: string;
   completenessStatus: "complete" | "incomplete_candidate";
@@ -43,7 +50,8 @@ export class ExternalStandardsProposalBundleRepository {
     sourceLevel: string;
     targetLevel: string;
     targetContextKey: string;
-    parentPackageId: number;
+    parentPackageId?: number;
+    parentEffectiveReleaseId?: number;
     bundlePayload: unknown;
     sourceEvidence: unknown;
     rationale: string;
@@ -61,7 +69,8 @@ export class ExternalStandardsProposalBundleRepository {
         ${sqlLiteral(input.sourceLevel)},
         ${sqlLiteral(input.targetLevel)},
         ${sqlLiteral(input.targetContextKey)},
-        ${Number(input.parentPackageId)},
+        ${nullableInteger(input.parentPackageId)},
+        ${nullableInteger(input.parentEffectiveReleaseId)},
         ${sqlLiteral(JSON.stringify(input.bundlePayload ?? {}))}::jsonb,
         ${sqlLiteral(JSON.stringify(input.sourceEvidence ?? {}))}::jsonb,
         ${sqlLiteral(input.rationale)},
@@ -147,8 +156,15 @@ type BundleQueueRow = {
   source_level: string;
   target_level: string;
   target_context_key: string;
-  parent_package_id: number | string;
-  parent_package_key: string;
+  parent_package_id?: number | string | null;
+  parent_package_key?: string | null;
+  parent_mode: "package" | "effective_release";
+  parent_effective_release_id?: number | string | null;
+  parent_effective_context_key?: string | null;
+  parent_effective_context_type?: string | null;
+  parent_effective_release_key?: string | null;
+  parent_effective_release_version?: string | null;
+  parent_effective_composition_sha256?: string | null;
   bundle_sha256: string;
   validation_status: string;
   completeness_status: "complete" | "incomplete_candidate";
@@ -177,8 +193,15 @@ function mapRow(row: BundleQueueRow): ExternalProposalBundleRecord {
     sourceLevel: row.source_level,
     targetLevel: row.target_level,
     targetContextKey: row.target_context_key,
-    parentPackageId: Number(row.parent_package_id),
-    parentPackageKey: row.parent_package_key,
+    parentMode: row.parent_mode,
+    parentPackageId: row.parent_package_id == null ? undefined : Number(row.parent_package_id),
+    parentPackageKey: row.parent_package_key ?? undefined,
+    parentEffectiveReleaseId: row.parent_effective_release_id == null ? undefined : Number(row.parent_effective_release_id),
+    parentEffectiveContextKey: row.parent_effective_context_key ?? undefined,
+    parentEffectiveContextType: row.parent_effective_context_type ?? undefined,
+    parentEffectiveReleaseKey: row.parent_effective_release_key ?? undefined,
+    parentEffectiveReleaseVersion: row.parent_effective_release_version ?? undefined,
+    parentEffectiveCompositionSha256: row.parent_effective_composition_sha256 ?? undefined,
     bundleSha256: row.bundle_sha256,
     validationStatus: row.validation_status,
     completenessStatus: row.completeness_status,
@@ -201,4 +224,7 @@ function sqlLiteral(value: string): string {
 function nullableText(value: string | undefined): string {
   const trimmed = value?.trim();
   return trimmed ? sqlLiteral(trimmed) : "NULL";
+}
+function nullableInteger(value: number | undefined): string {
+  return value == null ? "NULL" : String(Number(value));
 }

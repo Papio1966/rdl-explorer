@@ -18,7 +18,9 @@ export class ExternalStandardsProposalService {
     const sourceLevel = enumText(body.sourceLevel, LEVELS, "sourceLevel");
     const targetLevel = enumText(body.targetLevel, TARGET_LEVELS, "targetLevel");
     const targetContextKey = requiredText(body.targetContextKey, "targetContextKey");
-    const parentPackageId = positiveInteger(body.parentPackageId, "parentPackageId");
+    const parentPackageId = optionalPositiveInteger(body.parentPackageId, "parentPackageId");
+    const parentEffectiveReleaseId = optionalPositiveInteger(body.parentEffectiveReleaseId, "parentEffectiveReleaseId");
+    requireExactlyOneParent(parentPackageId, parentEffectiveReleaseId);
     const changeKind = enumText(body.changeKind, CHANGE_KINDS, "changeKind");
     const entityTypeCode = requiredText(body.entityTypeCode, "entityTypeCode");
     const nativeIdentifier = requiredText(body.nativeIdentifier, "nativeIdentifier");
@@ -37,6 +39,7 @@ export class ExternalStandardsProposalService {
       targetLevel,
       targetContextKey,
       parentPackageId,
+      parentEffectiveReleaseId,
       changeKind,
       entityTypeCode,
       nativeIdentifier,
@@ -56,6 +59,7 @@ export class ExternalStandardsProposalService {
       targetLevel,
       targetContextKey,
       parentPackageId,
+      parentEffectiveReleaseId,
       changeKind,
       entityTypeCode,
       nativeIdentifier,
@@ -121,6 +125,15 @@ function positiveInteger(value: unknown, label: string) {
   const n = Number(value);
   if (!Number.isSafeInteger(n) || n <= 0) throw new Error(`${label} must be a positive integer.`);
   return n;
+}
+function optionalPositiveInteger(value: unknown, label: string): number | undefined {
+  if (value == null || value === "") return undefined;
+  return positiveInteger(value, label);
+}
+function requireExactlyOneParent(parentPackageId: number | undefined, parentEffectiveReleaseId: number | undefined) {
+  if ((parentPackageId == null) === (parentEffectiveReleaseId == null)) {
+    throw new Error("Exactly one parent identity is required: parentPackageId XOR parentEffectiveReleaseId.");
+  }
 }
 
 function nonNegativeInteger(value: unknown, label: string) {
