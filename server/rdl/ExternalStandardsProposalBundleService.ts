@@ -17,7 +17,9 @@ export class ExternalStandardsProposalBundleService {
     const sourceLevel = enumText(body.sourceLevel, LEVELS, "sourceLevel");
     const targetLevel = enumText(body.targetLevel, TARGET_LEVELS, "targetLevel");
     const targetContextKey = requiredText(body.targetContextKey, "targetContextKey");
-    const parentPackageId = positiveInteger(body.parentPackageId, "parentPackageId");
+    const parentPackageId = optionalPositiveInteger(body.parentPackageId, "parentPackageId");
+    const parentEffectiveReleaseId = optionalPositiveInteger(body.parentEffectiveReleaseId, "parentEffectiveReleaseId");
+    requireExactlyOneParent(parentPackageId, parentEffectiveReleaseId);
     const bundlePayload = objectValue(body.bundlePayload, "bundlePayload");
     const sourceEvidence = objectValue(body.sourceEvidence ?? {}, "sourceEvidence");
     const rationale = requiredText(body.rationale, "rationale");
@@ -27,7 +29,7 @@ export class ExternalStandardsProposalBundleService {
     const bundleSha256 = explicitHash ? sha256Text(explicitHash, "bundleSha256") : sha256(stableJson({ requestKey, bundlePayload, sourceEvidence }));
     requireArray(bundlePayload.components, "bundlePayload.components");
     requireArray(bundlePayload.dependencies ?? [], "bundlePayload.dependencies");
-    return this.repository.submit({ consumerKey, requestKey, bundleSha256, proposerKey: identity.reviewer, sourceSystem, sourceLevel, targetLevel, targetContextKey, parentPackageId, bundlePayload, sourceEvidence, rationale, promotionTargetLevel, promotionTargetContextKey });
+    return this.repository.submit({ consumerKey, requestKey, bundleSha256, proposerKey: identity.reviewer, sourceSystem, sourceLevel, targetLevel, targetContextKey, parentPackageId, parentEffectiveReleaseId, bundlePayload, sourceEvidence, rationale, promotionTargetLevel, promotionTargetContextKey });
   }
 
   review(identity: GovernanceIdentity, body: Record<string, unknown>) {
@@ -53,6 +55,8 @@ function optionalText(value: unknown): string | undefined { if (typeof value !==
 function enumText(value: unknown, allowed: Set<string>, name: string): string { const text = requiredText(value, name); if (!allowed.has(text)) throw new Error(`${name} is not supported.`); return text; }
 function optionalEnumText(value: unknown, allowed: Set<string>, name: string): string | undefined { const text = optionalText(value); if (!text) return undefined; if (!allowed.has(text)) throw new Error(`${name} is not supported.`); return text; }
 function positiveInteger(value: unknown, name: string): number { const number = Number(value); if (!Number.isSafeInteger(number) || number <= 0) throw new Error(`${name} must be a positive integer.`); return number; }
+function optionalPositiveInteger(value: unknown, name: string): number | undefined { if (value == null || value === "") return undefined; return positiveInteger(value, name); }
+function requireExactlyOneParent(parentPackageId: number | undefined, parentEffectiveReleaseId: number | undefined): void { if ((parentPackageId == null) === (parentEffectiveReleaseId == null)) throw new Error("Exactly one parent identity is required: parentPackageId XOR parentEffectiveReleaseId."); }
 function nonNegativeInteger(value: unknown, name: string): number { const number = Number(value); if (!Number.isSafeInteger(number) || number < 0) throw new Error(`${name} must be a non-negative integer.`); return number; }
 function objectValue(value: unknown, name: string): Record<string, unknown> { if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${name} must be an object.`); return value as Record<string, unknown>; }
 function requireArray(value: unknown, name: string): void { if (!Array.isArray(value)) throw new Error(`${name} must be an array.`); }

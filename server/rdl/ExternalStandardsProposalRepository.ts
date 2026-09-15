@@ -14,7 +14,15 @@ export type ExternalProposalRecord = {
   sourceLevel: string;
   targetLevel: string;
   targetContextKey: string;
-  parentPackageId: number;
+  parentMode: "package" | "effective_release";
+  parentPackageId?: number;
+  parentPackageKey?: string;
+  parentEffectiveReleaseId?: number;
+  parentEffectiveContextKey?: string;
+  parentEffectiveContextType?: string;
+  parentEffectiveReleaseKey?: string;
+  parentEffectiveReleaseVersion?: string;
+  parentEffectiveCompositionSha256?: string;
   changeKind: string;
   entityTypeCode: string;
   nativeIdentifier: string;
@@ -45,7 +53,8 @@ export class ExternalStandardsProposalRepository {
     sourceLevel: string;
     targetLevel: string;
     targetContextKey: string;
-    parentPackageId: number;
+    parentPackageId?: number;
+    parentEffectiveReleaseId?: number;
     changeKind: string;
     entityTypeCode: string;
     nativeIdentifier: string;
@@ -66,7 +75,8 @@ export class ExternalStandardsProposalRepository {
         ${sqlLiteral(input.sourceLevel)},
         ${sqlLiteral(input.targetLevel)},
         ${sqlLiteral(input.targetContextKey)},
-        ${Number(input.parentPackageId)},
+        ${nullableInteger(input.parentPackageId)},
+        ${nullableInteger(input.parentEffectiveReleaseId)},
         ${sqlLiteral(input.changeKind)},
         ${sqlLiteral(input.entityTypeCode)},
         ${sqlLiteral(input.nativeIdentifier)},
@@ -77,7 +87,8 @@ export class ExternalStandardsProposalRepository {
         ${nullableText(input.promotionTargetContextKey)}
       )
     `);
-    return mapProposal(rows[0]);
+    const proposalId = Number(rows[0].external_proposal_id);
+    return (await this.byId(proposalId)) ?? mapProposal(rows[0]);
   }
 
   async review(input: {
@@ -101,13 +112,14 @@ export class ExternalStandardsProposalRepository {
         ${sqlLiteral(JSON.stringify(input.publicationResult ?? {}))}::jsonb
       )
     `);
-    return mapProposal(rows[0]);
+    const proposalId = Number(rows[0].external_proposal_id);
+    return (await this.byId(proposalId)) ?? mapProposal(rows[0]);
   }
 
   async byRequest(consumerKey: string, requestKey: string): Promise<ExternalProposalRecord | undefined> {
     const rows = await this.client.query<any>(`
       SELECT *
-      FROM rdl.external_standards_proposal
+      FROM rdl.external_standards_proposal_queue
       WHERE consumer_key = ${sqlLiteral(consumerKey)}
         AND request_key = ${sqlLiteral(requestKey)}
       LIMIT 1
@@ -118,7 +130,7 @@ export class ExternalStandardsProposalRepository {
   async byId(proposalId: number): Promise<ExternalProposalRecord | undefined> {
     const rows = await this.client.query<any>(`
       SELECT *
-      FROM rdl.external_standards_proposal
+      FROM rdl.external_standards_proposal_queue
       WHERE external_proposal_id = ${Number(proposalId)}
       LIMIT 1
     `);
@@ -129,7 +141,7 @@ export class ExternalStandardsProposalRepository {
     const safeLimit = Math.max(1, Math.min(500, Math.trunc(limit)));
     const rows = await this.client.query<any>(`
       SELECT *
-      FROM rdl.external_standards_proposal
+      FROM rdl.external_standards_proposal_queue
       WHERE consumer_key = ${sqlLiteral(consumerKey)}
       ORDER BY created_at DESC, external_proposal_id DESC
       LIMIT ${safeLimit}
@@ -140,6 +152,9 @@ export class ExternalStandardsProposalRepository {
 
 function nullableText(value: string | undefined) {
   return value && value.trim() ? sqlLiteral(value.trim()) : "NULL";
+}
+function nullableInteger(value: number | undefined) {
+  return value == null ? "NULL" : String(Number(value));
 }
 
 function mapProposal(row: any): ExternalProposalRecord {
@@ -154,7 +169,15 @@ function mapProposal(row: any): ExternalProposalRecord {
     sourceLevel: String(row.source_level),
     targetLevel: String(row.target_level),
     targetContextKey: String(row.target_context_key),
-    parentPackageId: Number(row.parent_package_id),
+    parentMode: row.parent_mode ?? (row.parent_package_id == null ? "effective_release" : "package"),
+    parentPackageId: row.parent_package_id == null ? undefined : Number(row.parent_package_id),
+    parentPackageKey: row.parent_package_key ?? undefined,
+    parentEffectiveReleaseId: row.parent_effective_release_id == null ? undefined : Number(row.parent_effective_release_id),
+    parentEffectiveContextKey: row.parent_effective_context_key ?? undefined,
+    parentEffectiveContextType: row.parent_effective_context_type ?? undefined,
+    parentEffectiveReleaseKey: row.parent_effective_release_key ?? undefined,
+    parentEffectiveReleaseVersion: row.parent_effective_release_version ?? undefined,
+    parentEffectiveCompositionSha256: row.parent_effective_composition_sha256 ?? undefined,
     changeKind: String(row.change_kind),
     entityTypeCode: String(row.entity_type_code),
     nativeIdentifier: String(row.native_identifier),
