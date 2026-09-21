@@ -43,11 +43,11 @@ export function SchemaDictionaryPage() {
 
   const selected = items.find((item) => item.schemaDefinitionId === selectedId) ?? items[0] ?? null;
 
-  if (state.status === "loading") return <main className="schema-dictionary-page"><p>Loading governed schema dictionary…</p></main>;
-  if (state.status === "error") return <main className="schema-dictionary-page"><h1>Schema Dictionary</h1><p>{state.message}</p></main>;
+  if (state.status === "loading") return <div className="schema-dictionary-page"><p>Loading governed schema dictionary…</p></div>;
+  if (state.status === "error") return <div className="schema-dictionary-page"><h1>Schema Dictionary</h1><p>{state.message}</p></div>;
 
   return (
-    <main className="schema-dictionary-page">
+    <div className="schema-dictionary-page">
       <header className="schema-dictionary-header">
         <div>
           <div className="schema-dictionary-eyebrow"><ShieldCheck size={15}/> Governed information model</div>
@@ -86,7 +86,7 @@ export function SchemaDictionaryPage() {
           {selected ? <SchemaDetail item={selected} /> : <p>No schema concept matches the current filters.</p>}
         </section>
       </div>
-    </main>
+    </div>
   );
 }
 
