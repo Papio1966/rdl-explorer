@@ -28,7 +28,10 @@ export class PsqlJsonClient implements SqlJsonClient {
         "-c",
         wrapped,
       ],
-      { maxBuffer: 16 * 1024 * 1024 },
+      // Governed effective-standard packages can exceed 16 MiB once
+      // authoritative relationship closure is included. Keep the
+      // subprocess transport bounded while allowing operational RDL packages.
+      { maxBuffer: 128 * 1024 * 1024 },
     );
 
     const payload = stdout.trim();

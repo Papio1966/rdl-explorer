@@ -15,6 +15,11 @@ export type DistributedEntity = {
   derivation?:EffectiveStandardDerivation;
 };
 export type DistributedRelationship = EffectiveStandardRelationship;
+export type DistributedEntityDetail = DistributedEntity & {
+  normalizedMetadata:Record<string,unknown>;
+  sourceLocator:Record<string,unknown>;
+};
+
 export class PublishedPackageDistributionRepository {
   constructor(private readonly client:SqlJsonClient) {}
   async catalogue(contextKey="",limit=100):Promise<DistributedRelease[]> {
@@ -79,6 +84,104 @@ export class PublishedPackageDistributionRepository {
     const q=query.trim().toLowerCase();
     return [...effective.values()].filter(e=>(!entityType||e.entityType===entityType)&&(!q||e.nativeIdentifier.toLowerCase().includes(q)||e.name.toLowerCase().includes(q))).sort((a,b)=>a.entityType.localeCompare(b.entityType)||a.name.localeCompare(b.name));
   }
+  async entityDetails(
+    releaseId:number,
+    entityType="",
+    query=""
+  ):Promise<DistributedEntityDetail[]> {
+    const row=await this.release(releaseId);
+
+    if(!row)
+      return [];
+
+    const entities=
+      await this.entities(
+        releaseId,
+        entityType,
+        query
+      );
+
+    const pins=
+      Array.isArray(
+        row.package_manifest?.packagePins
+      )
+        ?row.package_manifest.packagePins
+        :[];
+
+    const packageIds=
+      pins
+        .map((pin:any)=>Number(pin.packageId))
+        .filter(
+          (id:number)=>
+            Number.isSafeInteger(id)
+            &&id>0
+        );
+
+    let canonicalRows:any[]=[];
+
+    if(packageIds.length){
+      canonicalRows=
+        await this.client.query<any>(`
+          SELECT
+            package_id,
+            entity_type_code,
+            native_identifier,
+            normalized_metadata,
+            source_locator
+          FROM rdl.rdl_entity
+          WHERE package_id IN (
+            ${packageIds.join(",")}
+          )
+          ORDER BY package_id,entity_id
+        `);
+    }
+
+    const canonical=
+      new Map<string,any>();
+
+    for(const item of canonicalRows){
+      canonical.set(
+        [
+          Number(item.package_id),
+          item.entity_type_code,
+          item.native_identifier,
+        ].join("\u0000"),
+        item
+      );
+    }
+
+    return entities.map(
+      entity=>{
+        const source=
+          entity.sourcePackageId==null
+            ?undefined
+            :canonical.get(
+                [
+                  entity.sourcePackageId,
+                  entity.entityType,
+                  entity.nativeIdentifier,
+                ].join("\u0000")
+              );
+
+        return {
+          ...entity,
+
+          normalizedMetadata:
+            source?.normalized_metadata
+            &&typeof source.normalized_metadata==="object"
+              ?source.normalized_metadata
+              :{},
+
+          sourceLocator:
+            source?.source_locator
+            &&typeof source.source_locator==="object"
+              ?source.source_locator
+              :{},
+        };
+      }
+    );
+  }
+
   async consumerPackage(releaseId:number){
     const row=await this.release(releaseId); if(!row)return undefined;
     const entities=await this.entities(releaseId);
