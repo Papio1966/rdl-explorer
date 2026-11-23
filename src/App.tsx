@@ -50,6 +50,8 @@ const RdlGovernancePage = lazyNamed(() => import("./pages/RdlGovernancePage"), "
 const RdlHierarchyPage = lazyNamed(() => import("./pages/RdlHierarchyPage"), "RdlHierarchyPage");
 const RdlExtensionsPage = lazyNamed(() => import("./pages/RdlExtensionsPage"), "RdlExtensionsPage");
 const RdlPublicationPage = lazyNamed(() => import("./pages/RdlPublicationPage"), "RdlPublicationPage");
+const RdlCompanyAdoptionPage = lazyNamed(() => import("./pages/RdlCompanyAdoptionPage"), "RdlCompanyAdoptionPage");
+const RdlCompanyMergeWorkbenchPage = lazyNamed(() => import("./pages/RdlCompanyMergeWorkbenchPage"), "RdlCompanyMergeWorkbenchPage");
 const RdlDistributionPage = lazyNamed(() => import("./pages/RdlDistributionPage"), "RdlDistributionPage");
 const RdlConsumerIntegrationPage = lazyNamed(() => import("./pages/RdlConsumerIntegrationPage"), "RdlConsumerIntegrationPage");
 const RdlReleaseImpactPage = lazyNamed(() => import("./pages/RdlReleaseImpactPage"), "RdlReleaseImpactPage");
@@ -92,6 +94,8 @@ export default function App() {
             <Route path="/hierarchy" element={<RdlHierarchyPage />} />
             <Route path="/extensions" element={<RdlExtensionsPage />} />
             <Route path="/publication" element={<RdlPublicationPage />} />
+            <Route path="/company-adoption" element={<RdlCompanyAdoptionPage />} />
+            <Route path="/company-adoption/merge" element={<RdlCompanyMergeWorkbenchPage />} />
             <Route path="/distribution" element={<RdlDistributionPage />} />
             <Route path="/integration" element={<RdlConsumerIntegrationPage />} />
             <Route path="/impact" element={<RdlReleaseImpactPage />} />

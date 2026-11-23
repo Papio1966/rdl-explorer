@@ -8,4 +8,16 @@ assert.ok(api.includes("Content-Disposition")&&api.includes("ETag"),"RDL-019 pac
 assert.ok(auth.includes('PACKAGE_CONSUMER_ROLE = "rdl-package-consumer"'),"RDL-019 must use a dedicated package consumer role");
 assert.ok(e2e.includes("published package distribution remains fail-closed")&&a11y.includes('"/distribution"'),"RDL-019 must have browser E2E and accessibility coverage");
 assert.ok(workflow.includes("test:rdl-019"),"RDL-019 contract must run in CI");
+const psqlJsonClient=readFileSync(
+  "server/db/PsqlJsonClient.ts",
+  "utf8"
+);
+
+assert.ok(
+  psqlJsonClient.includes(
+    "maxBuffer: 128 * 1024 * 1024"
+  ),
+  "RDL-019 operational distribution must support governed packages larger than the historical 16 MiB SQL subprocess buffer."
+);
+
 console.log("PASS RDL-019 published package distribution and consumption contract");

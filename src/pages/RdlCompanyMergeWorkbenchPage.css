@@ -1,0 +1,361 @@
+.merge-workbench {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.merge-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(280px, .75fr);
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.merge-hero h1 {
+  display: flex;
+  gap: .7rem;
+  align-items: center;
+  margin: .4rem 0 .65rem;
+}
+
+.merge-hero p {
+  max-width: 900px;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.merge-eyebrow {
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .7;
+}
+
+.merge-boundary,
+.merge-execution-note {
+  display: flex;
+  gap: .8rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid var(--border-color, #d9dde4);
+  border-radius: 12px;
+  background: var(--surface-subtle, rgba(127,127,127,.05));
+}
+
+.merge-boundary div,
+.merge-execution-note {
+  line-height: 1.45;
+}
+
+.merge-boundary span,
+.merge-execution-note span {
+  display: block;
+  margin-top: .25rem;
+  opacity: .78;
+}
+
+.merge-panel {
+  padding: 1.2rem;
+  border: 1px solid var(--border-color, #d9dde4);
+  border-radius: 14px;
+  background: var(--surface, inherit);
+}
+
+.merge-section-heading {
+  display: flex;
+  gap: .65rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.merge-section-heading h2 {
+  margin: 0 0 .2rem;
+  font-size: 1.1rem;
+}
+
+.merge-section-heading p {
+  margin: 0;
+  opacity: .72;
+}
+
+.merge-start-grid,
+.merge-target-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: .9rem;
+  align-items: end;
+}
+
+.merge-target-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.merge-target-wide {
+  grid-column: 1 / -1;
+}
+
+.merge-start-grid label,
+.merge-target-grid label,
+.merge-custom-definition {
+  display: grid;
+  gap: .35rem;
+  font-size: .86rem;
+  font-weight: 650;
+}
+
+.merge-start-grid input,
+.merge-target-grid input,
+.merge-target-grid textarea,
+.merge-custom-definition textarea,
+.merge-component select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: .7rem .75rem;
+  border: 1px solid var(--border-color, #cfd5dd);
+  border-radius: 8px;
+  font: inherit;
+  background: var(--surface, #fff);
+  color: inherit;
+}
+
+.merge-start-grid button,
+.merge-primary {
+  min-height: 42px;
+  padding: .65rem 1rem;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.merge-start-grid button:disabled,
+.merge-primary:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
+.merge-helper {
+  margin: .85rem 0 0;
+  font-size: .9rem;
+}
+
+.merge-contributors {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 48px minmax(0,1fr);
+  gap: .75rem;
+  align-items: stretch;
+}
+
+.merge-arrow {
+  display: grid;
+  place-items: center;
+  opacity: .55;
+}
+
+.merge-contributor {
+  padding: 1rem;
+  border: 1px solid var(--border-color, #d9dde4);
+  border-radius: 12px;
+}
+
+.merge-contributor small {
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  opacity: .65;
+}
+
+.merge-contributor h3 {
+  margin: .35rem 0;
+}
+
+.merge-contributor code {
+  font-size: .82rem;
+}
+
+.merge-contributor dl {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: .65rem 1rem;
+  margin: 1rem 0 0;
+}
+
+.merge-contributor dl div {
+  min-width: 0;
+}
+
+.merge-contributor dt {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  opacity: .6;
+}
+
+.merge-contributor dd {
+  margin: .15rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.merge-status-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: .75rem;
+  margin-top: .9rem;
+}
+
+.merge-status {
+  display: flex;
+  gap: .6rem;
+  padding: .75rem;
+  border: 1px solid var(--border-color, #d9dde4);
+  border-radius: 10px;
+}
+
+.merge-status strong,
+.merge-status span {
+  display: block;
+}
+
+.merge-status span {
+  margin-top: .15rem;
+  font-size: .78rem;
+  opacity: .7;
+}
+
+.merge-component-list {
+  display: grid;
+  gap: .8rem;
+}
+
+.merge-component {
+  padding: 1rem;
+  border: 1px solid var(--border-color, #d9dde4);
+  border-radius: 12px;
+}
+
+.merge-component.different {
+  border-width: 2px;
+}
+
+.merge-component header {
+  display: grid;
+  grid-template-columns: 1fr minmax(190px,260px);
+  gap: 1rem;
+  align-items: center;
+}
+
+.merge-component h3 {
+  margin: 0;
+}
+
+.merge-component header span {
+  display: block;
+  margin-top: .2rem;
+  font-size: .8rem;
+  opacity: .68;
+}
+
+.merge-diff-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: .7rem;
+  margin-top: .9rem;
+}
+
+.merge-diff-column {
+  min-width: 0;
+  padding: .75rem;
+  border-radius: 8px;
+  background: var(--surface-subtle, rgba(127,127,127,.05));
+}
+
+.merge-diff-column > strong {
+  display: block;
+  margin-bottom: .45rem;
+  font-size: .78rem;
+}
+
+.merge-diff-column ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  max-height: 190px;
+  overflow: auto;
+}
+
+.merge-diff-column li {
+  margin: .2rem 0;
+  font-size: .78rem;
+  overflow-wrap: anywhere;
+}
+
+.merge-empty {
+  font-size: .78rem;
+  opacity: .55;
+}
+
+.merge-custom-definition {
+  margin-top: .8rem;
+}
+
+.merge-warning,
+.merge-feedback {
+  display: flex;
+  gap: .65rem;
+  align-items: flex-start;
+  margin-top: .9rem;
+  padding: .85rem;
+  border: 1px solid var(--border-color, #d9dde4);
+  border-radius: 10px;
+}
+
+.merge-execution-note {
+  margin: 1rem 0;
+}
+
+.merge-primary {
+  min-width: 260px;
+}
+
+.merge-feedback {
+  margin-top: 0;
+}
+
+.merge-feedback strong {
+  display: block;
+  margin-bottom: .2rem;
+}
+
+.merge-feedback p {
+  margin: .2rem 0;
+}
+
+.merge-feedback code {
+  display: block;
+  margin-top: .5rem;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 980px) {
+  .merge-hero,
+  .merge-contributors,
+  .merge-status-grid,
+  .merge-diff-grid,
+  .merge-start-grid,
+  .merge-target-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .merge-arrow {
+    transform: rotate(90deg);
+  }
+
+  .merge-component header {
+    grid-template-columns: 1fr;
+  }
+
+  .merge-target-wide {
+    grid-column: auto;
+  }
+}

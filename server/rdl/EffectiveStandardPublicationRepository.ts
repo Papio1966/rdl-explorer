@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type { SqlJsonClient } from "../db/PsqlJsonClient.ts";
 import { sqlLiteral } from "../db/PsqlJsonClient.ts";
+import { materializeCompanyMergeRelationships } from "./CompanyMergePublication.ts";
 
 export type EffectiveStandardChangeKind = "inherited" | "add" | "override" | "retire";
 
@@ -279,7 +280,46 @@ export class EffectiveStandardPublicationRepository {
   async publish(contextKey:string,releaseKey:string,releaseVersion:string,publishedBy:string):Promise<EffectiveStandardRelease> {
     const comparison=await this.compare(contextKey);
     if(!comparison.publishable) throw new Error("Pending extension changes must be resolved before publication.");
-    const effectiveRelationships=await this.snapshotRelationships(comparison.packagePins,comparison.items);
+
+    const inheritedEntityRows=await this.client.query<any>(`
+      SELECT count(DISTINCT e.entity_id)::integer AS count
+      FROM rdl.context_package_pin pin
+      JOIN rdl.rdl_entity e ON e.package_id=pin.package_id
+      WHERE pin.context_id IN (
+        SELECT context_id FROM rdl.context_lineage(${comparison.contextId})
+      )`);
+    const inheritedEntityCount=Number(inheritedEntityRows[0]?.count??0);
+    const retiredBaseEntityIds=new Set(
+      comparison.items
+        .filter((item)=>item.changeKind==="retire" && item.baseEntityId!=null)
+        .map((item)=>item.baseEntityId as number)
+    );
+    const addedEntityCount=comparison.items.filter((item)=>item.changeKind==="add").length;
+    const effectiveEntityCount=Math.max(0,inheritedEntityCount-retiredBaseEntityIds.size)+addedEntityCount;
+
+    if(effectiveEntityCount<=0)
+      throw new Error("An effective standard must contain at least one governed entity before publication.");
+
+    const deferredCollisionRows=await this.client.query<any>(`
+      SELECT count(*)::integer AS count
+      FROM rdl.company_adoption_collision_decision
+      WHERE context_id=${comparison.contextId}
+        AND decision_type='defer'`);
+
+    if(Number(deferredCollisionRows[0]?.count??0)>0)
+      throw new Error("Deferred Company adoption collisions must be resolved before publication.");
+
+    const sourceRelationships=await this.snapshotRelationships(
+      comparison.packagePins,
+      comparison.items
+    );
+
+    const effectiveRelationships=
+      materializeCompanyMergeRelationships(
+        sourceRelationships,
+        comparison.items,
+        comparison.packagePins
+      ) as EffectiveStandardRelationship[];
     const manifest={
       schemaVersion:"rdl-effective-standard-package/v1",
       context:{key:comparison.contextKey,type:comparison.contextType,name:comparison.contextName},
