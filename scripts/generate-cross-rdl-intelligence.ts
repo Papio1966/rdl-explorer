@@ -5,7 +5,7 @@ type RecordRow={sourceKey:string;sourceName:string;releaseKey:string;releaseStat
 type Mapping={mappingType:"possible_match";provenanceMethod:"exact_name_rule";confidence:number;status:"candidate";normalizedName:string;left:RecordRow;right:RecordRow};
 const root=process.cwd();
 const allIndex=JSON.parse(fs.readFileSync(path.join(root,"public/rdl-search-index.json"),"utf8")) as RecordRow[];
-const defaults:Record<string,string>={cfihos:"cfihos-2.0",ccus:"ccus-2.0-candidate","water-desalination":"water-desalination-2.0-candidate"};
+const defaults:Record<string,string>={cfihos:"cfihos-2.0",ccus:"ccus-2.0-candidate","water-desalination":"water-desalination-2.0-candidate",hydrogen:"hydrogen-0.2-candidate"};
 const index=allIndex.filter(row=>row.releaseKey===defaults[row.sourceKey]);
 const groups=new Map<string,RecordRow[]>();
 for(const row of index){const n=row.name.trim().toLowerCase();if(!n)continue;const k=`${row.entityType}|${n}`;const a=groups.get(k)??[];a.push(row);groups.set(k,a);}
@@ -15,7 +15,7 @@ for(const [key,rows] of groups){const [,normalizedName]=key.split("|",2); for(le
  mappings.push({mappingType:"possible_match",provenanceMethod:"exact_name_rule",confidence:0.85,status:"candidate",normalizedName,left:pair[0],right:pair[1]});
 }}
 mappings.sort((a,b)=>`${a.normalizedName}:${a.left.sourceKey}:${a.right.sourceKey}`.localeCompare(`${b.normalizedName}:${b.left.sourceKey}:${b.right.sourceKey}`));
-const sourceSummary=Object.fromEntries(["cfihos","ccus","water-desalination"].map(source=>[source,index.filter(x=>x.sourceKey===source).length]));
+const sourceSummary=Object.fromEntries(["cfihos","ccus","water-desalination","hydrogen"].map(source=>[source,index.filter(x=>x.sourceKey===source).length]));
 const byType:Record<string,Record<string,number>>={}; for(const row of index){byType[row.sourceKey]??={};byType[row.sourceKey][row.entityType]=(byType[row.sourceKey][row.entityType]??0)+1;}
 const payload={generatedBy:"RDL-010",method:"exact-name candidate mapping",warning:"Exact-name matches are derived candidate possible matches, not authoritative equivalence.",sourceSummary,byType,mappings};
 fs.writeFileSync(path.join(root,"public/rdl-cross-intelligence.json"),JSON.stringify(payload,null,2)+"\n");
