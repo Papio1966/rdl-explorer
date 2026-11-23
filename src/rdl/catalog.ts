@@ -1,4 +1,4 @@
-export type RdlSourceKey = "cfihos" | "ccus" | "water-desalination";
+export type RdlSourceKey = "cfihos" | "ccus" | "water-desalination" | "hydrogen";
 export type RdlScopeKey = "all" | RdlSourceKey;
 export type RdlReleaseStatus = "reviewed" | "candidate" | "superseded";
 
@@ -58,6 +58,19 @@ export const RDL_SOURCES: readonly RdlSourceDefinition[] = [
     releases: [
       { key: "water-desalination-2.0-candidate", versionLabel: "2.0 candidate", status: "candidate", description: "Release-safe candidate with normalized names, provenance and richer requirements." },
       { key: "water-desalination-0.1-draft", versionLabel: "0.1 draft", status: "superseded", description: "Historical draft retained for release comparison and pinned consumers." },
+    ],
+  },
+  {
+    key: "hydrogen",
+    name: "Hydrogen RDL Extension",
+    shortName: "Hydrogen",
+    defaultReleaseKey: "hydrogen-0.3-candidate",
+    versionLabel: "0.3 candidate",
+    status: "candidate",
+    description: "Candidate Hydrogen RDL extension v0.3 with lifecycle status requirements; identifiers and requirements remain subject to governance approval.",
+    releases: [
+      { key: "hydrogen-0.3-candidate", versionLabel: "0.3 candidate", status: "candidate", description: "Hydrogen RDL Extension v0.3 lifecycle candidate; source workbook retained with row-level provenance." },
+      { key: "hydrogen-0.2-candidate", versionLabel: "0.2 candidate", status: "candidate", description: "Hydrogen RDL Extension v0.2 candidate retained for comparison and existing pinned selections." },
     ],
   },
 ] as const;

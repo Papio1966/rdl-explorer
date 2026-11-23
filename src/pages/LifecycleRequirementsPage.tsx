@@ -16,67 +16,142 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import type {
-  CfihosDisciplineDocumentType,
-} from "../cfihos/model/document";
-import type {
-  CfihosHandoverEvent,
-  CfihosLifecyclePhaseKey,
-} from "../cfihos/model/handoverEvent";
-import {
-  cfihosDocumentRepository,
-} from "../cfihos/repository/CfihosDocumentRepository";
-import {
-  cfihosHandoverEventRepository,
-} from "../cfihos/repository/CfihosHandoverEventRepository";
+import { useRdlScope } from "../rdl/rdlScopeContextValue";
+import { loadRdlRelationshipIndex, type RdlRelationshipIndexRecord } from "../rdl/entityDetail";
+import { loadRdlSearchIndex, type RdlSearchRecord } from "../rdl/search";
 import "./LifecycleRequirementsPage.css";
 
-type LifecyclePhaseKey = CfihosLifecyclePhaseKey;
+type LifecyclePhaseKey =
+  | "detailed-engineering"
+  | "construction"
+  | "commissioning"
+  | "startup"
+  | "operations";
+
+type LifecycleRequirement = {
+  id: string;
+  disciplineId: string;
+  disciplineCode: string;
+  disciplineName: string;
+  documentTypeId: string;
+  documentTypeShortCode: string;
+  documentTypeName: string;
+  documentTypeDescription: string | null;
+  disciplineDocumentTypeShortCode: string | null;
+  assetTypeReference: string | null;
+  representationType: string | null;
+  nativeFileDeliveryTiming: string | null;
+  reviewType: string | null;
+  comment: string | null;
+  requiredStatusDetailedEngineering: string | null;
+  requiredStatusConstruction: string | null;
+  requiredStatusCommissioning: string | null;
+  requiredStatusStartup: string | null;
+  requiredStatusOperations: string | null;
+};
 
 type LifecyclePhase = {
   key: LifecyclePhaseKey;
   label: string;
   shortLabel: string;
-  handoverEvent: CfihosHandoverEvent;
+  handoverEvent: { description: string };
   statusSelector: (
-    relationship: CfihosDisciplineDocumentType,
+    relationship: LifecycleRequirement,
   ) => string | null;
 };
 
-function createLifecyclePhase(event: CfihosHandoverEvent): LifecyclePhase {
-  const selectors: Record<
-    LifecyclePhaseKey,
-    (relationship: CfihosDisciplineDocumentType) => string | null
-  > = {
-    "detailed-engineering": (relationship) =>
-      relationship.requiredStatusDetailedEngineering,
-    construction: (relationship) =>
-      relationship.requiredStatusConstruction,
-    commissioning: (relationship) =>
-      relationship.requiredStatusCommissioning,
-    startup: (relationship) =>
-      relationship.requiredStatusStartup,
-    operations: (relationship) =>
-      relationship.requiredStatusOperations,
-  };
+const LIFECYCLE_PHASES: LifecyclePhase[] = [
+  {
+    key: "detailed-engineering",
+    label: "Detailed Engineering",
+    shortLabel: "Detailed Engineering",
+    handoverEvent: { description: "Required issue status for detailed engineering deliverables." },
+    statusSelector: (relationship) => relationship.requiredStatusDetailedEngineering,
+  },
+  {
+    key: "construction",
+    label: "Construction",
+    shortLabel: "Construction",
+    handoverEvent: { description: "Required issue status for construction deliverables." },
+    statusSelector: (relationship) => relationship.requiredStatusConstruction,
+  },
+  {
+    key: "commissioning",
+    label: "Commissioning",
+    shortLabel: "Commissioning",
+    handoverEvent: { description: "Required issue status for commissioning deliverables." },
+    statusSelector: (relationship) => relationship.requiredStatusCommissioning,
+  },
+  {
+    key: "startup",
+    label: "Start-up",
+    shortLabel: "Start-up",
+    handoverEvent: { description: "Required issue status for start-up deliverables." },
+    statusSelector: (relationship) => relationship.requiredStatusStartup,
+  },
+  {
+    key: "operations",
+    label: "Operations",
+    shortLabel: "Operations",
+    handoverEvent: { description: "Required issue status for operations and handover deliverables." },
+    statusSelector: (relationship) => relationship.requiredStatusOperations,
+  },
+];
 
-  return {
-    key: event.lifecyclePhaseKey,
-    label: displayHandoverEventName(event.name),
-    shortLabel: displayHandoverEventName(event.name),
-    handoverEvent: event,
-    statusSelector: selectors[event.lifecyclePhaseKey],
-  };
-}
+function projectLifecycleRequirements(
+  records: RdlSearchRecord[],
+  relationships: RdlRelationshipIndexRecord[],
+  sourceKey: string,
+  releaseKey: string,
+): LifecycleRequirement[] {
+  const scopedRecords = records.filter((record) =>
+    record.sourceKey === sourceKey && record.releaseKey === releaseKey,
+  );
+  const recordByIdentity = new Map<string, RdlSearchRecord>(
+    scopedRecords.map((record) => [`${record.entityType}|${record.nativeIdentifier}|${record.packageKey}`, record] as const),
+  );
 
-function displayHandoverEventName(name: string): string {
-  const prefix = "handover for ";
-  const normalized = name.trim();
-  const phaseName = normalized.toLowerCase().startsWith(prefix)
-    ? normalized.slice(prefix.length)
-    : normalized;
+  return relationships
+    .filter((relationship) =>
+      relationship.sourceKey === sourceKey
+      && relationship.releaseKey === releaseKey
+      && relationship.relationshipType === "document_discipline"
+      && relationship.sourceEntityType === "document_type"
+      && relationship.targetEntityType === "discipline",
+    )
+    .flatMap((relationship) => {
+      const document = recordByIdentity.get(
+        `document_type|${relationship.sourceNativeIdentifier}|${relationship.packageKey}`,
+      );
+      const discipline = recordByIdentity.get(
+        `discipline|${relationship.targetNativeIdentifier}|${relationship.packageKey}`,
+      );
+      if (!document || !discipline) return [];
 
-  return phaseName.replace(/(^|[\s-])\S/g, (match) => match.toUpperCase());
+      const attributes = relationship.attributes ?? {};
+      const attribute = (name: string) => attributes[name]?.trim() || null;
+      return [{
+        id: attribute("relationshipId") || `${sourceKey}:${releaseKey}:${relationship.sourceNativeIdentifier}:${relationship.targetNativeIdentifier}`,
+        disciplineId: discipline.nativeIdentifier,
+        disciplineCode: discipline.secondaryLabel || discipline.nativeIdentifier,
+        disciplineName: discipline.name || discipline.nativeIdentifier,
+        documentTypeId: document.nativeIdentifier,
+        documentTypeShortCode: document.secondaryLabel || document.nativeIdentifier,
+        documentTypeName: document.name || document.nativeIdentifier,
+        documentTypeDescription: document.definition || null,
+        disciplineDocumentTypeShortCode: attribute("contextCode"),
+        assetTypeReference: attribute("assetType"),
+        representationType: attribute("representationType"),
+        nativeFileDeliveryTiming: attribute("nativeFileDeliveryTiming"),
+        reviewType: attribute("reviewType"),
+        comment: attribute("comment"),
+        requiredStatusDetailedEngineering: attribute("detailedEngineeringStatus"),
+        requiredStatusConstruction: attribute("constructionStatus"),
+        requiredStatusCommissioning: attribute("commissioningStatus"),
+        requiredStatusStartup: attribute("startupStatus"),
+        requiredStatusOperations: attribute("operationsStatus"),
+      }];
+    });
 }
 
 type LoadState =
@@ -85,8 +160,7 @@ type LoadState =
     }
   | {
       status: "success";
-      relationships:
-        CfihosDisciplineDocumentType[];
+      relationships: LifecycleRequirement[];
       phases: LifecyclePhase[];
     }
   | {
@@ -96,6 +170,7 @@ type LoadState =
 
 export function LifecycleRequirementsPage() {
   const navigate = useNavigate();
+  const { scope, releaseKey } = useRdlScope();
 
   const { lifecyclePhase } =
     useParams<{
@@ -134,14 +209,26 @@ export function LifecycleRequirementsPage() {
     let active = true;
 
     async function load() {
-      try {
-        const [relationships, handoverEvents] =
-          await Promise.all([
-            cfihosDocumentRepository.getRelationships(),
-            cfihosHandoverEventRepository.getHandoverEvents(),
-          ]);
+      if (scope === "all" || !releaseKey) {
+        setState({
+          status: "error",
+          message: "Select an RDL source and release in the scope selector to view lifecycle requirements.",
+        });
+        return;
+      }
 
-        const phases = handoverEvents.map(createLifecyclePhase);
+      setState({ status: "loading" });
+      try {
+        const [allRelationships, allRecords] = await Promise.all([
+          loadRdlRelationshipIndex(),
+          loadRdlSearchIndex(),
+        ]);
+        const relationships = projectLifecycleRequirements(
+          allRecords,
+          allRelationships,
+          scope,
+          releaseKey,
+        );
 
         if (!active) {
           return;
@@ -150,7 +237,7 @@ export function LifecycleRequirementsPage() {
         setState({
           status: "success",
           relationships,
-          phases,
+          phases: LIFECYCLE_PHASES,
         });
       } catch (error) {
         if (!active) {
@@ -172,7 +259,7 @@ export function LifecycleRequirementsPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [scope, releaseKey]);
 
   const activePhase =
     useMemo(() => {
@@ -520,7 +607,7 @@ export function LifecycleRequirementsPage() {
           />
         }
         title="Loading Lifecycle Requirements"
-        message="Reading the CFIHOS Discipline–Document Type lifecycle requirements…"
+        message="Reading lifecycle requirements for the selected RDL release…"
       />
     );
   }
@@ -542,7 +629,7 @@ export function LifecycleRequirementsPage() {
       <LifecycleStatus
         icon={<CircleAlert size={26} />}
         title="Lifecycle phases not available"
-        message="The CFIHOS handover event master did not provide a usable lifecycle phase."
+        message="Lifecycle phase definitions are unavailable."
       />
     );
   }
@@ -558,10 +645,7 @@ export function LifecycleRequirementsPage() {
           <h1>Lifecycle Requirements</h1>
 
           <p>
-            Explore the CFIHOS document
-            requirements for each project lifecycle
-            phase, organised by Discipline and
-            Document Type.
+            Explore document status requirements for each lifecycle phase in the selected RDL release, organised by Discipline and Document Type.
           </p>
         </header>
 
@@ -624,10 +708,7 @@ export function LifecycleRequirementsPage() {
               </h2>
 
               <p>
-                {activePhase.handoverEvent.description ??
-                  "Relationships with an explicit CFIHOS required document status for this lifecycle phase."}
-                {" "}
-                ({activePhase.handoverEvent.id})
+                {activePhase.handoverEvent.description}
               </p>
             </div>
 
@@ -676,8 +757,7 @@ export function LifecycleRequirementsPage() {
               </h2>
 
               <p>
-                The status shown is the CFIHOS
-                requirement for{" "}
+                The status shown is the required issue status for{" "}
                 {activePhase.label}, not the actual
                 status of a project document.
               </p>
@@ -891,8 +971,7 @@ export function LifecycleRequirementsPage() {
 }
 
 type LifecycleRequirementsTableProps = {
-  relationships:
-    CfihosDisciplineDocumentType[];
+  relationships: LifecycleRequirement[];
   activePhase: LifecyclePhase;
   onOpenDiscipline: (
     disciplineId: string,

@@ -74,6 +74,7 @@
     "db:finalize:rdl-030": "bash scripts/db-finalize-rdl-030.sh",
     "db:test:rdl-030": "bash scripts/db-test-rdl-030.sh",
     "db:ingest:ccus:v2": "bash scripts/db-ingest-ccus-v2.sh",
+    "db:ingest:hydrogen:v3": "bash scripts/db-ingest-hydrogen-v03.sh",
     "db:ingest:water-desalination:v2": "bash scripts/db-ingest-water-desalination-v2.sh",
     "test:rdl-031": "tsx scripts/test-rdl-031-rich-navigation.ts",
     "test:rdl-032": "tsx scripts/test-rdl-032-unified-detail-parity.ts && tsx scripts/test-rdl-032-legacy-route-convergence.ts",

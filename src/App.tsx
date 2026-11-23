@@ -113,7 +113,7 @@ export default function App() {
             <Route path="/disciplines" element={<RdlScopedLegacyGuard entityType="discipline" title="Disciplines" />} />
             <Route path="/disciplines/:disciplineId" element={<RdlLegacyEntityRedirect entityType="discipline" paramName="disciplineId" />} />
             <Route path="/lifecycle" element={<Navigate to="/lifecycle/detailed-engineering" replace />} />
-            <Route path="/lifecycle/:lifecyclePhase" element={<RdlScopedLegacyGuard title="Lifecycle Requirements" specialized><LifecycleRequirementsPage /></RdlScopedLegacyGuard>} />
+            <Route path="/lifecycle/:lifecyclePhase" element={<LifecycleRequirementsPage />} />
             <Route path="/dictionary" element={<RdlScopedLegacyGuard entityType="property" title="Data Dictionary" />} />
             <Route path="/dictionary/:propertyId" element={<RdlLegacyEntityRedirect entityType="property" paramName="propertyId" />} />
             <Route path="/schema" element={<SchemaDictionaryPage />} />

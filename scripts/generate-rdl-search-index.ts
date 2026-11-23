@@ -5,6 +5,8 @@ import { CCUS_CFIHOS_FORMAT_PROFILE } from "./rdl-ingestion/CcusCfihosFormatProf
 import { CCUS_V2_CFIHOS_FORMAT_PROFILE } from "./rdl-ingestion/CcusV2CfihosFormatProfile.ts";
 import { WATER_DESALINATION_PROFILE } from "./rdl-ingestion/WaterDesalinationProfile.ts";
 import { WATER_DESALINATION_V2_CFIHOS_FORMAT_PROFILE } from "./rdl-ingestion/WaterDesalinationV2CfihosFormatProfile.ts";
+import { HYDROGEN_V02_CFIHOS_FORMAT_PROFILE } from "./rdl-ingestion/HydrogenV02CfihosFormatProfile.ts";
+import { HYDROGEN_V03_CFIHOS_FORMAT_PROFILE } from "./rdl-ingestion/HydrogenV03CfihosFormatProfile.ts";
 import type { RdlWorkbookMappingProfile } from "./rdl-ingestion/RdlWorkbookMappingProfile.ts";
 import { mappedText } from "./rdl-ingestion/RdlWorkbookMappingProfile.ts";
 
@@ -340,6 +342,8 @@ await addProfile(CCUS_CFIHOS_FORMAT_PROFILE);
 await addProfile(CCUS_V2_CFIHOS_FORMAT_PROFILE);
 await addProfile(WATER_DESALINATION_PROFILE);
 await addProfile(WATER_DESALINATION_V2_CFIHOS_FORMAT_PROFILE);
+await addProfile(HYDROGEN_V02_CFIHOS_FORMAT_PROFILE);
+await addProfile(HYDROGEN_V03_CFIHOS_FORMAT_PROFILE);
 
 const records = [...output.values()].sort(
   (a, b) =>

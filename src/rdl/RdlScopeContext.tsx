@@ -4,7 +4,7 @@ import { getDefaultReleaseKey, getRdlRelease, type RdlScopeKey, type RdlSourceKe
 import { RdlScopeContext } from "./rdlScopeContextValue";
 const SCOPE_STORAGE_KEY = "rdl-explorer:scope";
 const RELEASE_STORAGE_KEY = "rdl-explorer:release-by-source";
-const VALID_SCOPES = new Set<RdlScopeKey>(["all", "cfihos", "ccus", "water-desalination"]);
+const VALID_SCOPES = new Set<RdlScopeKey>(["all", "cfihos", "ccus", "water-desalination", "hydrogen"]);
 
 type ReleaseMap = Partial<Record<RdlSourceKey, string>>;
 
