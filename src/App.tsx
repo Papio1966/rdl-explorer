@@ -34,7 +34,7 @@ const LifecycleRequirementsPage = lazyNamed(
   () => import("./pages/LifecycleRequirementsPage"),
   "LifecycleRequirementsPage",
 );
-const DataModelPage = lazyNamed(() => import("./pages/DataModelPage"), "DataModelPage");
+const DataModelPage = lazyNamed(() => import("./pages/RdlSelectedDataModelPage"), "RdlSelectedDataModelPage");
 const SchemaDictionaryPage = lazyNamed(() => import("./pages/SchemaDictionaryPage"), "SchemaDictionaryPage");
 const ValidationPage = lazyNamed(() => import("./pages/ValidationPage"), "ValidationPage");
 const AssistantPage = lazyNamed(() => import("./pages/AssistantPage"), "AssistantPage");
@@ -125,7 +125,7 @@ export default function App() {
             <Route path="/standards/:sourceStandardId" element={<RdlLegacyEntityRedirect entityType="source_standard" paramName="sourceStandardId" />} />
             <Route path="/units" element={<RdlScopedLegacyGuard entityType="unit_of_measure" title="Units of Measure" />} />
             <Route path="/units/:unitId" element={<RdlLegacyEntityRedirect entityType="unit_of_measure" paramName="unitId" />} />
-            <Route path="/model" element={<RdlScopedLegacyGuard title="Data Model" specialized><DataModelPage /></RdlScopedLegacyGuard>} />
+            <Route path="/model" element={<DataModelPage />} />
             <Route path="/validation" element={<ValidationPage />} />
             <Route path="/assistant" element={<AssistantPage />} />
             <Route path="/cis" element={<RdlProductBoundaryPage />} />
