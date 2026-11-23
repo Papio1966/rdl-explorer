@@ -13,7 +13,7 @@ import {
   Tags,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getRdlRelease, getRdlSource, rdlEntityRoute } from "../rdl/catalog";
 import { loadRdlBrowseRuntime, type RdlBrowserReadMode } from "../rdl/runtimeDualRead";
@@ -30,6 +30,7 @@ type Props = {
   releaseKey: string;
   entityType: string;
   title: string;
+  detailContent?: ReactNode;
 };
 
 type BrowseNode = {
@@ -185,11 +186,69 @@ function buildFacetDefinitions(records: RdlSearchRecord[]): FacetDefinition[] {
     .sort((a, b) => a.label.localeCompare(b.label));
 }
 
-export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title }: Props) {
+type PersistedBrowseState = {
+  initialized: boolean;
+  expandedNodeIds: string[];
+  scrollTop: number;
+};
+
+function readPersistedBrowseState(storageKey: string): PersistedBrowseState {
+  const empty: PersistedBrowseState = { initialized: false, expandedNodeIds: [], scrollTop: 0 };
+  if (typeof window === "undefined") return empty;
+  try {
+    const parsed = JSON.parse(window.sessionStorage.getItem(storageKey) ?? "null") as Partial<PersistedBrowseState> | null;
+    return {
+      initialized: parsed?.initialized === true,
+      expandedNodeIds: Array.isArray(parsed?.expandedNodeIds)
+        ? parsed.expandedNodeIds.filter((id): id is string => typeof id === "string")
+        : [],
+      scrollTop: typeof parsed?.scrollTop === "number" ? parsed.scrollTop : 0,
+    };
+  } catch {
+    return empty;
+  }
+}
+
+function writePersistedBrowseState(storageKey: string, state: PersistedBrowseState) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(storageKey, JSON.stringify(state));
+  } catch {
+    // Browsing remains usable when session storage is unavailable.
+  }
+}
+
+function persistBrowseScroll(storageKey: string, scrollTop: number) {
+  const state = readPersistedBrowseState(storageKey);
+  writePersistedBrowseState(storageKey, { ...state, scrollTop });
+}
+
+function persistExpandedNode(
+  storageKey: string,
+  nodeId: string,
+  expanded: boolean,
+  defaultExpandedNodeIds: string[],
+) {
+  const state = readPersistedBrowseState(storageKey);
+  const expandedNodeIds = new Set(
+    state.initialized ? state.expandedNodeIds : defaultExpandedNodeIds,
+  );
+  if (expanded) expandedNodeIds.add(nodeId);
+  else expandedNodeIds.delete(nodeId);
+  writePersistedBrowseState(storageKey, {
+    ...state,
+    initialized: true,
+    expandedNodeIds: [...expandedNodeIds],
+  });
+}
+
+export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title, detailContent }: Props) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [searchQuery, setSearchQuery] = useState("");
+  const navigationRef = useRef<HTMLDivElement>(null);
+  const browseStateKey = `rdl-explorer:browse:${sourceKey}:${releaseKey}:${entityType}`;
 
   useEffect(() => {
     let active = true;
@@ -213,6 +272,14 @@ export function RdlReleaseAwareBrowse({ sourceKey, releaseKey, entityType, title
       active = false;
     };
   }, [sourceKey, releaseKey, entityType]);
+
+  useEffect(() => {
+    if (state.status !== "success") return;
+    const navigation = navigationRef.current;
+    if (navigation) {
+      navigation.scrollTop = readPersistedBrowseState(browseStateKey).scrollTop;
+    }
+  }, [state.status, browseStateKey]);
 
   const facetDefinitions = useMemo(
     () => state.status === "success" ? buildFacetDefinitions(state.records) : [],
@@ -301,6 +368,7 @@ const facetFilteredRecords = useMemo(() => {
       : `${title} vocabulary`;
   const flatRecords = [...facetFilteredRecords].sort(compareRecords);
   const activeFacetCount = facetDefinitions.filter((facet) => selectedFacetValue(facet) !== "all").length;
+  const defaultExpandedNodeIds = hierarchy.roots.map((root) => root.record.nativeIdentifier);
 
   return (
     <div
@@ -363,6 +431,8 @@ const facetFilteredRecords = useMemo(() => {
         )}
 
         <div
+          ref={navigationRef}
+          onScroll={(event) => persistBrowseScroll(browseStateKey, event.currentTarget.scrollTop)}
           className="rdl-release-browse-navigation"
           role={navigationRole}
           aria-label={navigationLabel}
@@ -376,6 +446,8 @@ const facetFilteredRecords = useMemo(() => {
                   key={node.record.nativeIdentifier}
                   node={node}
                   onSelect={openRecord}
+                  storageKey={browseStateKey}
+                  defaultExpandedNodeIds={defaultExpandedNodeIds}
                 />
               ))
             ) : (
@@ -390,6 +462,7 @@ const facetFilteredRecords = useMemo(() => {
       </aside>
 
       <section className="rdl-release-browse-detail-panel">
+        {detailContent ?? (
         <div className="rdl-release-browse-empty-selection">
           <div className="rdl-release-browse-empty-icon">{presentation.icon}</div>
           <h2>Select a {presentation.singularTitle}</h2>
@@ -405,6 +478,7 @@ const facetFilteredRecords = useMemo(() => {
             {activeFacetCount ? ` · ${activeFacetCount} active filter${activeFacetCount === 1 ? "" : "s"}` : ""}
           </small>
         </div>
+        )}
       </section>
     </div>
   );
@@ -413,11 +487,24 @@ const facetFilteredRecords = useMemo(() => {
 type BrowseTreeNodeProps = {
   node: BrowseNode;
   onSelect: (record: RdlSearchRecord) => void;
+  storageKey: string;
+  defaultExpandedNodeIds: string[];
   depth?: number;
 };
 
-function BrowseTreeNode({ node, onSelect, depth = 0 }: BrowseTreeNodeProps) {
-  const [expanded, setExpanded] = useState(depth === 0);
+function BrowseTreeNode({
+  node,
+  onSelect,
+  storageKey,
+  defaultExpandedNodeIds,
+  depth = 0,
+}: BrowseTreeNodeProps) {
+  const [expanded, setExpanded] = useState(() => {
+    const saved = readPersistedBrowseState(storageKey);
+    return saved.initialized
+      ? saved.expandedNodeIds.includes(node.record.nativeIdentifier)
+      : depth === 0;
+  });
   const hasChildren = node.children.length > 0;
 
   return (
@@ -427,7 +514,16 @@ function BrowseTreeNode({ node, onSelect, depth = 0 }: BrowseTreeNodeProps) {
           <button
             type="button"
             className="rdl-release-browse-tree-toggle"
-            onClick={() => setExpanded((current) => !current)}
+            onClick={() => {
+              const nextExpanded = !expanded;
+              setExpanded(nextExpanded);
+              persistExpandedNode(
+                storageKey,
+                node.record.nativeIdentifier,
+                nextExpanded,
+                defaultExpandedNodeIds,
+              );
+            }}
             aria-label={`${expanded ? "Collapse" : "Expand"} ${node.record.name}`}
           >
             {expanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
@@ -456,6 +552,8 @@ function BrowseTreeNode({ node, onSelect, depth = 0 }: BrowseTreeNodeProps) {
               key={child.record.nativeIdentifier}
               node={child}
               onSelect={onSelect}
+              storageKey={storageKey}
+              defaultExpandedNodeIds={defaultExpandedNodeIds}
               depth={depth + 1}
             />
           ))}

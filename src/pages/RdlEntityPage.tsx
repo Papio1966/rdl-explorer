@@ -1,7 +1,8 @@
 import { ArrowLeft, Database, FileSearch } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { RdlRelationshipSection } from "../components/RdlRelationshipSection";
+import { RdlReleaseAwareBrowse } from "../components/RdlReleaseAwareBrowse";
 import { entityTypeLabel, getDefaultReleaseKey, getRdlRelease, getRdlSource } from "../rdl/catalog";
 import { type RdlDetailLinkedEntity, type RdlEntityDetailProjection } from "../rdl/entityDetail";
 import { loadRdlEntityDetailRuntime } from "../rdl/runtimeDetail";
@@ -29,6 +30,16 @@ function detailLabels(entityType: string) {
   };
 }
 
+const BROWSE_TITLES: Record<string, string> = {
+  tag_class: "Tag Classes",
+  equipment_class: "Equipment Classes",
+  document_type: "Document Types",
+  discipline: "Disciplines",
+  property: "Data Dictionary",
+  source_standard: "Source Standards",
+  unit_of_measure: "Units of Measure",
+};
+
 export function RdlEntityPage() {
   const { sourceKey = "", releaseKey: routeReleaseKey, entityType = "", nativeIdentifier = "" } = useParams();
   const releaseKey = routeReleaseKey ?? getDefaultReleaseKey(sourceKey) ?? "";
@@ -51,6 +62,20 @@ export function RdlEntityPage() {
 
   const source = getRdlSource(sourceKey);
   const release = getRdlRelease(sourceKey, releaseKey);
+  const browseTitle = BROWSE_TITLES[entityType];
+  const renderInBrowse = (content: ReactNode) => {
+    if (!browseTitle || !source || !release) return content;
+    return (
+      <RdlReleaseAwareBrowse
+        key={`${sourceKey}:${releaseKey}:${entityType}`}
+        sourceKey={sourceKey}
+        releaseKey={releaseKey}
+        entityType={entityType}
+        title={browseTitle}
+        detailContent={content}
+      />
+    );
+  };
   const detail = state.status === "ready" ? state.detail : null;
   const labels = detailLabels(detail?.record.entityType ?? entityType);
 
@@ -78,14 +103,14 @@ export function RdlEntityPage() {
     return items.filter((item) => item.show);
   }, [detail, labels.relatedClasses, labels.usedByClasses]);
 
-  if (state.status === "loading") return <div className="content-page"><div role="status" className="rdl-search-state">Loading release-aware RDL entity detail…</div></div>;
-  if (state.status === "error") return <div className="content-page"><div role="alert" className="rdl-search-state"><strong>RDL entity detail could not be loaded</strong><span>{state.message}</span><Link to="/search">Return to global search</Link></div></div>;
-  if (state.status === "missing" || !detail || !source || !release) return <div className="content-page"><div className="rdl-search-state"><strong>RDL entity not found in this release</strong><Link to="/search">Return to global search</Link></div></div>;
+  if (state.status === "loading") return renderInBrowse(<div className="content-page"><div role="status" className="rdl-search-state">Loading release-aware RDL entity detail…</div></div>);
+  if (state.status === "error") return renderInBrowse(<div className="content-page"><div role="alert" className="rdl-search-state"><strong>RDL entity detail could not be loaded</strong><span>{state.message}</span><Link to="/search">Go to free text search</Link></div></div>);
+  if (state.status === "missing" || !detail || !source || !release) return renderInBrowse(<div className="content-page"><div className="rdl-search-state"><strong>RDL entity not found in this release</strong><Link to="/search">Go to free text search</Link></div></div>);
 
   const record = detail.record;
   const sectionKey = `${record.sourceKey}:${record.releaseKey}:${record.entityType}:${record.nativeIdentifier}`;
-  return <div className="content-page rdl-entity-page rdl-rich-entity-page">
-    <Link className="rdl-back-link" to={`/search?source=${encodeURIComponent(record.sourceKey)}&release=${encodeURIComponent(record.releaseKey)}&q=${encodeURIComponent(record.nativeIdentifier)}`}><ArrowLeft size={16} />Back to search</Link>
+  return renderInBrowse(<div className="content-page rdl-entity-page rdl-rich-entity-page">
+    <Link className="rdl-back-link" to={`/search?source=${encodeURIComponent(record.sourceKey)}&release=${encodeURIComponent(record.releaseKey)}&q=${encodeURIComponent(record.nativeIdentifier)}`}><ArrowLeft size={16} />Go to free text search</Link>
 
     <header className="rdl-entity-hero">
       <div><div className="eyebrow">{entityTypeLabel(record.entityType)}</div><h1>{record.name || record.nativeIdentifier}</h1><code>{record.nativeIdentifier}</code></div>
@@ -139,5 +164,5 @@ export function RdlEntityPage() {
     </section>
 
     <div className="rdl-provenance-note"><FileSearch size={19} /><div><strong>Release-isolated rich detail</strong><p>Every entity and relationship on this page is resolved inside <code>{record.releaseKey}</code> and <code>{record.packageKey}</code>. Historical and successor packages cannot silently leak into this view.</p></div></div>
-  </div>;
+  </div>);
 }

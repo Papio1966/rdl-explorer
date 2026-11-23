@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Search, ShieldCheck } from "lucide-react";
+import { getDefaultReleaseKey } from "../rdl/catalog";
+import { useRdlScope } from "../rdl/rdlScopeContextValue";
 import {
   loadRdlSchemaDictionary,
   type RdlSchemaDictionaryItem,
@@ -13,6 +15,9 @@ type State =
   | { status: "success"; payload: RdlSchemaDictionaryPayload };
 
 export function SchemaDictionaryPage() {
+  const { scope, releaseKey } = useRdlScope();
+  const sourceKey = scope === "all" ? "cfihos" : scope;
+  const selectedReleaseKey = scope !== "all" && releaseKey ? releaseKey : getDefaultReleaseKey(sourceKey);
   const [state, setState] = useState<State>({ status: "loading" });
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState("");
@@ -20,7 +25,8 @@ export function SchemaDictionaryPage() {
 
   useEffect(() => {
     let active = true;
-    loadRdlSchemaDictionary().then((payload) => {
+    setState({ status: "loading" });
+    loadRdlSchemaDictionary({ sourceKey, releaseKey: selectedReleaseKey }).then((payload) => {
       if (!active) return;
       setState({ status: "success", payload });
       setSelectedId(payload.items[0]?.schemaDefinitionId ?? null);
@@ -28,7 +34,7 @@ export function SchemaDictionaryPage() {
       if (active) setState({ status: "error", message: error instanceof Error ? error.message : "Unable to load schema dictionary." });
     });
     return () => { active = false; };
-  }, []);
+  }, [sourceKey, selectedReleaseKey]);
 
   const items = useMemo(() => {
     if (state.status !== "success") return [];
